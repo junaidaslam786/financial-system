@@ -1,0 +1,72 @@
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Param,
+  Patch,
+  Delete,
+  ParseUUIDPipe,
+  UseGuards,
+} from '@nestjs/common';
+import { RolesService } from './roles.service';
+import { CreateRoleDto, UpdateRoleDto } from './dtos';
+import { JwtAuthGuard } from './../../common/guards/jwt-auth.guard';
+import { RolesGuard } from './../../common/guards/roles.guard';
+import { Roles } from './../../common/decorators/roles.decorator';
+
+@Controller('roles')
+@UseGuards(JwtAuthGuard, RolesGuard)
+export class RolesController {
+  constructor(private readonly rolesService: RolesService) {}
+
+  /**
+   * Create a new role
+   * Typically restricted to "admin" or super-admin
+   */
+  @Roles('admin')
+  @Post()
+  async create(@Body() createRoleDto: CreateRoleDto) {
+    return this.rolesService.createRole(createRoleDto);
+  }
+
+  /**
+   * List all roles
+   * Possibly restricted to "admin"
+   */
+  @Roles('admin')
+  @Get()
+  async findAll() {
+    return this.rolesService.findAll();
+  }
+
+  /**
+   * Get role by ID
+   */
+  @Roles('admin')
+  @Get(':id')
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
+    return this.rolesService.findById(id);
+  }
+
+  /**
+   * Update role
+   */
+  @Roles('admin')
+  @Patch(':id')
+  async update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() updateRoleDto: UpdateRoleDto,
+  ) {
+    return this.rolesService.updateRole(id, updateRoleDto);
+  }
+
+  /**
+   * Delete a role
+   */
+  @Roles('admin')
+  @Delete(':id')
+  async remove(@Param('id', ParseUUIDPipe) id: string) {
+    return this.rolesService.remove(id);
+  }
+}

@@ -1,0 +1,75 @@
+import {
+    Controller,
+    Get,
+    Post,
+    Patch,
+    Delete,
+    Body,
+    Param,
+    ParseUUIDPipe,
+    Query,
+    UseGuards,
+    Req,
+    ForbiddenException,
+  } from '@nestjs/common';
+  import { CompaniesService } from './companies.service';
+  import { CreateCompanyDto, UpdateCompanyDto } from './dtos';
+  import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+  // Optional: if you use role-based guard
+  // import { RolesGuard } from '../../roles/guards/roles.guard';
+  // import { Roles } from '../../roles/decorators/roles.decorator';
+  
+  @Controller('companies')
+  @UseGuards(JwtAuthGuard)
+  export class CompaniesController {
+    constructor(private readonly companiesService: CompaniesService) {}
+  
+    /**
+     * Create a new company
+     * Suppose a user can create up to 5 total companies if they are 'admin/owner'
+     */
+    @Post()
+    // @Roles('admin') // or whichever roles you want to allow
+    async createCompany(
+      @Req() req,
+      @Body() createCompanyDto: CreateCompanyDto,
+    ) {
+      // The user object is attached by JWT strategy, e.g. req.user
+      const user = req.user;
+  
+      // Example check: if user already has 5 companies, forbid more
+      const totalCompanies = await this.companiesService.countUserCompanies(user.id);
+      if (totalCompanies >= 5) {
+        throw new ForbiddenException('You have reached the maximum number of companies (5).');
+      }
+  
+      return this.companiesService.createCompany(user.id, createCompanyDto);
+    }
+  
+    @Get()
+    async findAllCompanies(@Query('page') page: number, @Query('limit') limit: number) {
+      // Basic listing
+      return this.companiesService.findAllCompanies();
+    }
+  
+    @Get(':id')
+    async findOneCompany(@Param('id', ParseUUIDPipe) id: string) {
+      return this.companiesService.findOneCompany(id);
+    }
+  
+    @Patch(':id')
+    // @Roles('admin')
+    async updateCompany(
+      @Param('id', ParseUUIDPipe) id: string,
+      @Body() updateCompanyDto: UpdateCompanyDto,
+    ) {
+      return this.companiesService.updateCompany(id, updateCompanyDto);
+    }
+  
+    @Delete(':id')
+    // @Roles('admin')
+    async removeCompany(@Param('id', ParseUUIDPipe) id: string) {
+      return this.companiesService.removeCompany(id);
+    }
+  }
+  
