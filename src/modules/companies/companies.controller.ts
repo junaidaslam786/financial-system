@@ -15,21 +15,21 @@ import {
   import { CompaniesService } from './companies.service';
   import { CreateCompanyDto, UpdateCompanyDto } from './dtos';
   import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/common/guards/roles.guard';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { Role } from '../auth/interfaces/role.enum';
   // Optional: if you use role-based guard
   // import { RolesGuard } from '../../roles/guards/roles.guard';
   // import { Roles } from '../../roles/decorators/roles.decorator';
   
   @Controller('companies')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   export class CompaniesController {
     constructor(private readonly companiesService: CompaniesService) {}
   
-    /**
-     * Create a new company
-     * Suppose a user can create up to 5 total companies if they are 'admin/owner'
-     */
+    
     @Post()
-    // @Roles('admin') // or whichever roles you want to allow
+    @Roles(Role.Admin, Role.Owner) 
     async createCompany(
       @Req() req,
       @Body() createCompanyDto: CreateCompanyDto,

@@ -2,6 +2,7 @@ import {
   Injectable,
   UnauthorizedException,
   BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
@@ -11,11 +12,15 @@ import * as speakeasy from 'speakeasy';
 import * as qrcode from 'qrcode';
 import { UserEntity as User } from '../users/entities/user.entity';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
+import { RolesService } from '../roles/roles.service';
+import { CompaniesService } from '../companies/companies.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly usersService: UsersService,
+    private readonly companiesService: CompaniesService,
+    private readonly rolesService: RolesService,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -58,7 +63,7 @@ export class AuthService {
    * Register a new user
    */
   async register(registerDto: RegisterDto) {
-    // Check if email or username already exist
+    // 1) Check if email or username exist
     const existingByEmail = await this.usersService.findByEmail(registerDto.email);
     if (existingByEmail) {
       throw new BadRequestException('Email already registered');
@@ -68,16 +73,25 @@ export class AuthService {
       throw new BadRequestException('Username already taken');
     }
 
-    // Hash the password
+    // 2) Hash password
     const hashedPassword = await bcrypt.hash(registerDto.password, 10);
 
-    // Create user
+    // 3) Force the role to 'owner' (or find the role from DB)
+    const ownerRole = await this.rolesService.findByName('owner');
+    if (!ownerRole) {
+      throw new ForbiddenException('Cannot register user, "owner" role not found');
+    }
+
+    // 4) Create user
     const createdUser = await this.usersService.createUser({
       username: registerDto.username,
       email: registerDto.email,
       passwordHash: hashedPassword,
-      roleId: registerDto.roleId, // if you allow assigning a role
+      roleId: ownerRole.id, // assign 'owner' role
     });
+
+    // 5) Create a default company for that user
+    await this.companiesService.createDefaultCompanyForUser(createdUser.id);
 
     return {
       message: 'Registration successful',
@@ -174,4 +188,6 @@ export class AuthService {
       token: twoFactorAuthenticationCode,
     });
   }
+
+  
 }

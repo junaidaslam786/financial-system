@@ -1,9 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CompanyEntity } from './entities/company.entity';
 import { CreateCompanyDto, UpdateCompanyDto } from './dtos';
 import { UsersService } from '../users/users.service';
+import { CompanyOwnersService } from '../company-owners/company-owners.service';
 
 @Injectable()
 export class CompaniesService {
@@ -11,21 +12,45 @@ export class CompaniesService {
     @InjectRepository(CompanyEntity)
     private readonly companyRepo: Repository<CompanyEntity>,
     private readonly usersService: UsersService,
+    private readonly companyOwnersService: CompanyOwnersService,
   ) {}
 
   /**
    * Create a new company, linking it to the user as the admin/owner
    */
   async createCompany(userId: string, dto: CreateCompanyDto) {
+    // 1) Make sure user is "owner" or "admin"
     const user = await this.usersService.findById(userId);
-    // Possibly check if user has permission or role to create companies
+    if (!user.role) {
+      throw new ForbiddenException('No role assigned');
+    }
+    const userRoleName = user.role.roleName; // e.g. 'owner', 'admin', 'user'
+    if (userRoleName !== 'owner' && userRoleName !== 'admin') {
+      throw new ForbiddenException('Only owners or admins can create companies.');
+    }
 
+    // 2) Check the 5 companies limit
+    const existingCount = await this.countUserCompanies(userId);
+    if (existingCount >= 5) {
+      throw new ForbiddenException('You already have 5 companies, the maximum allowed.');
+    }
+
+    // 3) Create the company
     const company = this.companyRepo.create({
       ...dto,
       createdByUserId: userId,
     });
+    const savedCompany = await this.companyRepo.save(company);
 
-    return this.companyRepo.save(company);
+    // 4) Also create a record in `company_owners` to reflect that user is an owner
+    await this.companyOwnersService.createOwner({
+      companyId: savedCompany.id,
+      ownerName: user.username,
+      contactInfo: user.email,
+      ownershipPercentage: 100, // If you want to default to full ownership
+    });
+
+    return savedCompany;
   }
 
   /**
@@ -65,10 +90,21 @@ export class CompaniesService {
    * Used internally when a user first registers
    */
   async createDefaultCompanyForUser(userId: string) {
-    const company = this.companyRepo.create({
+    const defaultCompany = this.companyRepo.create({
       name: 'Default Company',
       createdByUserId: userId,
     });
-    return this.companyRepo.save(company);
+    const savedCompany = await this.companyRepo.save(defaultCompany);
+
+    // Also create a `company_owners` record
+    const user = await this.usersService.findById(userId);
+    await this.companyOwnersService.createOwner({
+      companyId: savedCompany.id,
+      ownerName: user.username,
+      contactInfo: user.email,
+      ownershipPercentage: 100,
+    });
+
+    return savedCompany;
   }
 }
