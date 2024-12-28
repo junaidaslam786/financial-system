@@ -9,7 +9,7 @@ import {
   
   @Entity({ name: 'companies' })
   @Index('idx_companies_name', ['name'])
-  export class CompanyEntity {
+  export class Company {
     @PrimaryGeneratedColumn('uuid')
     id: string;
   

@@ -8,19 +8,19 @@ import {
     UpdateDateColumn,
     Index,
   } from 'typeorm';
-  import { CompanyEntity } from '../../companies/entities/company.entity';
+  import { Company } from '../../companies/entities/company.entity';
   
   @Entity({ name: 'partners' })
   export class PartnerEntity {
     @PrimaryGeneratedColumn('uuid')
     id: string;
   
-    @ManyToOne(() => CompanyEntity, (company) => company.id, {
+    @ManyToOne(() => Company, (company) => company.id, {
       onUpdate: 'CASCADE',
       onDelete: 'CASCADE',
     })
     @Index('idx_partners_company_id')
-    company: CompanyEntity;
+    company: Company;
   
     @Column({ length: 255 })
     partnerName: string;

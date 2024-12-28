@@ -1,7 +1,7 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CompanyEntity } from './entities/company.entity';
+import { Company } from './entities/company.entity';
 import { CreateCompanyDto, UpdateCompanyDto } from './dtos';
 import { UsersService } from '../users/users.service';
 import { CompanyOwnersService } from '../company-owners/company-owners.service';
@@ -9,8 +9,8 @@ import { CompanyOwnersService } from '../company-owners/company-owners.service';
 @Injectable()
 export class CompaniesService {
   constructor(
-    @InjectRepository(CompanyEntity)
-    private readonly companyRepo: Repository<CompanyEntity>,
+    @InjectRepository(Company)
+    private readonly companyRepo: Repository<Company>,
     private readonly usersService: UsersService,
     private readonly companyOwnersService: CompanyOwnersService,
   ) {}

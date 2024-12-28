@@ -5,7 +5,7 @@ import {
   OneToMany,
   Index,
 } from 'typeorm';
-import { UserEntity } from '../../users/entities/user.entity';
+import { User } from '../../users/entities/user.entity';
 
 @Entity({ name: 'roles' })
 @Index('idx_roles_rolename', ['roleName'])
@@ -16,6 +16,6 @@ export class RoleEntity {
   @Column({ name: 'role_name', unique: true, length: 100 })
   roleName: string;
 
-  @OneToMany(() => UserEntity, (user) => user.role)
-  users: UserEntity[];
+  @OneToMany(() => User, (user) => user.role)
+  users: User[];
 }

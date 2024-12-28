@@ -10,7 +10,7 @@ import { RegisterDto } from './dtos/register.dto';
 import * as bcrypt from 'bcrypt';
 import * as speakeasy from 'speakeasy';
 import * as qrcode from 'qrcode';
-import { UserEntity as User } from '../users/entities/user.entity';
+import { User as User } from '../users/entities/user.entity';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 import { RolesService } from '../roles/roles.service';
 import { CompaniesService } from '../companies/companies.service';

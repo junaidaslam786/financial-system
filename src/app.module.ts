@@ -13,6 +13,11 @@ import { CompanyOwnersModule } from './modules/company-owners/company-owners.mod
 import { PartnersModule } from './modules/partners/partners.module';
 import { EmployeesModule } from './modules/employees/employees.module';
 import { UomModule } from './modules/units-of-measure/uom.module';
+import { AccountsModule } from './modules/financial/accounts/accounts.module';
+import { CurrenciesModule } from './modules/financial/currencies/currencies.module';
+import { ExchangeRatesModule } from './modules/financial/exchange-rates/exchange-rates.module';
+import { JournalModule } from './modules/financial/journal/journal.module';
+import { PriceListsModule } from './modules/financial/price-lists/price-lists.module';
 
 @Module({
   imports: [
@@ -31,7 +36,6 @@ import { UomModule } from './modules/units-of-measure/uom.module';
         return configService.get('database');
       },
     }),
-
     AuthModule,
     UsersModule,
     RolesModule,
@@ -39,8 +43,12 @@ import { UomModule } from './modules/units-of-measure/uom.module';
     CompanyOwnersModule,
     PartnersModule,
     EmployeesModule,
-    UomModule
-
+    UomModule,
+    AccountsModule,
+    CurrenciesModule,
+    ExchangeRatesModule,
+    JournalModule,
+    PriceListsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

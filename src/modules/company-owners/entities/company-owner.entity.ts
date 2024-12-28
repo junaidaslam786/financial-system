@@ -7,20 +7,20 @@ import {
     UpdateDateColumn,
     Index,
   } from 'typeorm';
-  // If you want a relationship to CompanyEntity:
-  import { CompanyEntity } from '../../companies/entities/company.entity';
+  // If you want a relationship to Company:
+  import { Company } from '../../companies/entities/company.entity';
   
   @Entity({ name: 'company_owners' })
   export class CompanyOwnerEntity {
     @PrimaryGeneratedColumn('uuid')
     id: string;
   
-    @ManyToOne(() => CompanyEntity, (company) => company.id, {
+    @ManyToOne(() => Company, (company) => company.id, {
       onUpdate: 'CASCADE',
       onDelete: 'CASCADE',
     })
     @Index('idx_company_owners_company_id')
-    company: CompanyEntity;
+    company: Company;
   
     @Column({ length: 255 })
     ownerName: string;
