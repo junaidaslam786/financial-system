@@ -2,6 +2,7 @@
 import { Controller, Post, Get, Patch, Delete, Param, Body, ParseUUIDPipe } from '@nestjs/common';
 import { EmployeesService } from './employees.service';
 import { CreateEmployeeDto, UpdateEmployeeDto } from './dtos';
+import { EmployeeEntity } from './entities/employee.entity';
 
 @Controller('employees')
 export class EmployeesController {
@@ -15,6 +16,13 @@ export class EmployeesController {
   @Get(':id')
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.employeesService.findOneEmployee(id);
+  }
+
+  @Get('company/:companyId')
+  async getEmployeesByCompanyId(
+    @Param('companyId') companyId: string,
+  ): Promise<EmployeeEntity[]> {
+    return this.employeesService.findAllEmployeesByCompanyId(companyId);
   }
 
   @Patch(':id')

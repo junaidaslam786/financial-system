@@ -14,6 +14,7 @@ import {
     CreatePartnerDto,
     UpdatePartnerDto,
   } from './dtos';
+import { PartnerEntity } from './entities/partner.entity';
   
   @Controller('partners')
   export class PartnersController {
@@ -27,6 +28,13 @@ import {
     @Get(':id')
     async findOne(@Param('id', ParseUUIDPipe) id: string) {
       return this.partnersService.findOnePartner(id);
+    }
+
+    @Get('company/:companyId')
+    async getPartnersByCompanyId(
+      @Param('companyId') companyId: string,
+    ): Promise<PartnerEntity[]> {
+      return this.partnersService.findAllPartnersOfCompany(companyId);
     }
   
     @Patch(':id')

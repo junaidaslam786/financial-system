@@ -25,6 +25,22 @@ export class EmployeesService {
     return emp;
   }
 
+  async findAllEmployeesByCompanyId(companyId: string): Promise<EmployeeEntity[]> {
+    // (Optional) If you want to verify the company actually exists, you could do:
+    // const companyExists = await this.companyRepo.findOne({ where: { id: companyId } });
+    // if (!companyExists) {
+    //   throw new NotFoundException(`Company with ID "${companyId}" not found`);
+    // }
+    return this.employeeRepo.find({
+      where: {
+        company: {
+          id: companyId,
+        },
+      },
+    });
+  }
+  
+
   async updateEmployee(id: string, dto: UpdateEmployeeDto) {
     const emp = await this.findOneEmployee(id);
     Object.assign(emp, dto);

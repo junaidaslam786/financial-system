@@ -5,6 +5,7 @@ import { Company } from './entities/company.entity';
 import { CreateCompanyDto, UpdateCompanyDto } from './dtos';
 import { UsersService } from '../users/users.service';
 import { CompanyOwnersService } from '../company-owners/company-owners.service';
+import { Role } from '../auth/interfaces/role.enum';
 
 @Injectable()
 export class CompaniesService {
@@ -53,12 +54,29 @@ export class CompaniesService {
     return savedCompany;
   }
 
-  /**
-   * For listing or pagination
-   */
-  async findAllCompanies() {
-    return this.companyRepo.find();
+  async findAllCompanies(userId: string) {
+    // Optional check: verify user exists
+    const user = await this.usersService.findById(userId);
+    if (!user) {
+      throw new NotFoundException(`User with ID "${userId}" not found`);
+    }
+  
+    // Check role permission (owner or admin) if needed
+    if (user.role.roleName !== 'owner' && user.role.roleName !== 'admin') {
+      throw new ForbiddenException('You do not have permission to view companies.');
+    }
+  
+    // Return companies created by that user
+    // (Add pagination logic, relations, etc. as desired)
+    return this.companyRepo.find({
+      where: { createdByUserId: userId },
+      relations: [
+        'companyOwners',
+        // ... other relations ...
+      ],
+    });
   }
+  
 
   async findOneCompany(id: string) {
     const company = await this.companyRepo.findOne({ where: { id } });

@@ -25,6 +25,21 @@ export class PartnersService {
     return partner;
   }
 
+  async findAllPartnersOfCompany(companyId: string) {
+    // (Optional) Verify that this company exists before retrieving partners.
+    // e.g., you might do:
+    // const company = await this.companyService.findOneCompany(companyId);
+    // if (!company) {
+    //   throw new NotFoundException(`Company with ID "${companyId}" not found`);
+    // }
+  
+    return this.partnerRepo.find({
+      where: { company: { id: companyId } },
+      // If you need to load other relations, you can do:
+      // relations: ['someRelation'],
+    });
+  }
+
   async updatePartner(id: string, dto: UpdatePartnerDto) {
     const partner = await this.findOnePartner(id);
     Object.assign(partner, dto);
