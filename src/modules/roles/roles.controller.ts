@@ -15,11 +15,13 @@ import { JwtAuthGuard } from './../../common/guards/jwt-auth.guard';
 import { RolesGuard } from './../../common/guards/roles.guard';
 import { Roles } from './../../common/decorators/roles.decorator';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { Role } from '../auth/interfaces/role.enum';
 
 @ApiBearerAuth()
 @ApiTags('Roles')
 @Controller('roles')
 @UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.Owner, Role.Admin)
 export class RolesController {
   constructor(private readonly rolesService: RolesService) {}
 
@@ -27,7 +29,7 @@ export class RolesController {
    * Create a new role
    * Typically restricted to "admin" or super-admin
    */
-  @Roles('admin')
+  
   @Post()
   async create(@Body() createRoleDto: CreateRoleDto) {
     return this.rolesService.createRole(createRoleDto);
@@ -37,7 +39,7 @@ export class RolesController {
    * List all roles
    * Possibly restricted to "admin"
    */
-  @Roles('admin')
+  @Roles(Role.Owner, Role.Admin)
   @Get()
   async findAll() {
     return this.rolesService.findAll();
@@ -46,7 +48,7 @@ export class RolesController {
   /**
    * Get role by ID
    */
-  @Roles('admin')
+  
   @Get(':id')
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.rolesService.findById(id);
@@ -55,7 +57,7 @@ export class RolesController {
   /**
    * Update role
    */
-  @Roles('admin')
+  
   @Patch(':id')
   async update(
     @Param('id', ParseUUIDPipe) id: string,
@@ -67,7 +69,7 @@ export class RolesController {
   /**
    * Delete a role
    */
-  @Roles('admin')
+  
   @Delete(':id')
   async remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.rolesService.remove(id);

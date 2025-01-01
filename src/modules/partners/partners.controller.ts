@@ -8,6 +8,7 @@ import {
     Param,
     ParseUUIDPipe,
     Body,
+    UseGuards,
   } from '@nestjs/common';
   import { PartnersService } from './partners.service';
   import {
@@ -16,10 +17,13 @@ import {
   } from './dtos';
 import { PartnerEntity } from './entities/partner.entity';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { RolesGuard } from 'src/common/guards/roles.guard';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
   
   @ApiBearerAuth()
   @ApiTags('Partners')
   @Controller('partners')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   export class PartnersController {
     constructor(private readonly partnersService: PartnersService) {}
   

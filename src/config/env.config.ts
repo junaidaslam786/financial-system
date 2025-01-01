@@ -28,6 +28,10 @@ class EnvironmentVariables {
   @IsOptional()
   @IsString()
   NODE_ENV?: string;
+
+  @IsOptional()
+  @IsString()
+  JWT_SECRET?: string;
 }
 
 export function validateEnvironment(config: Record<string, unknown>) {

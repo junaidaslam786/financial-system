@@ -53,7 +53,7 @@ export class AuthService {
         id: user.id,
         email: user.email,
         username: user.username,
-        role: user.role?.roleName,   // or just user.role
+        role: user.role?.roleName,   
         twoFactorEnabled: user.twoFactorEnabled,
         defaultCompanyId: user.defaultCompanyId,
       },
@@ -119,7 +119,7 @@ export class AuthService {
    * Generate both access and refresh tokens
    */
   private async generateTokens(user: User): Promise<{ accessToken: string; refreshToken: string }> {
-    const accessToken = await this.signToken(user, '1h');  // e.g. 1 hour
+    const accessToken = await this.signToken(user, '24h');  // e.g. 1 hour
     const refreshToken = await this.signToken(user, '7d'); // e.g. 7 days
     return { accessToken, refreshToken };
   }

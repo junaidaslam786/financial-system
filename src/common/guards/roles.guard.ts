@@ -18,12 +18,13 @@ export class RolesGuard implements CanActivate {
 
     const request = context.switchToHttp().getRequest();
     const user = request.user;
+    console.log('User role from JWT:', user.role);
     if (!user || !user.role) {
       throw new ForbiddenException('No role found');
     }
 
     // If user's role is in the required roles
-    if (requiredRoles.includes(user.role)) {
+    if (requiredRoles.includes(user.role.roleName)) {
       return true;
     }
 
