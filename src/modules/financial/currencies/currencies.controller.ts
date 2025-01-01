@@ -11,7 +11,10 @@ import {
   import { CreateCurrencyDto } from './dtos/create-currency.dto';
   import { UpdateCurrencyDto } from './dtos/update-currency.dto';
   import { Currency } from './entities/currency.entity';
-  
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+
+  @ApiBearerAuth()
+  @ApiTags('Currencies')
   @Controller('currencies')
   export class CurrenciesController {
     constructor(private readonly currenciesService: CurrenciesService) {}

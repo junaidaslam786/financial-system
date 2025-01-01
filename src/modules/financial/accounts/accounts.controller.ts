@@ -12,7 +12,11 @@ import {
   import { CreateAccountDto } from './dtos/create-account.dto';
   import { UpdateAccountDto } from './dtos/update-account.dto';
   import { Account } from './entities/account.entity';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
   
+
+  @ApiBearerAuth()
+  @ApiTags('Accounts')
   @Controller('accounts')
   export class AccountsController {
     constructor(private readonly accountsService: AccountsService) {}

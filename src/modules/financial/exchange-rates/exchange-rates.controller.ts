@@ -11,7 +11,11 @@ import {
   import { CreateExchangeRateDto } from './dtos/create-exchange-rate.dto';
   import { UpdateExchangeRateDto } from './dtos/update-exchange-rate.dto';
   import { ExchangeRate } from './entities/exchange-rate.entity';
-  
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+
+
+  @ApiBearerAuth()
+  @ApiTags('Exchange Rates')
   @Controller('exchange-rates')
   export class ExchangeRatesController {
     constructor(private readonly exchangeRatesService: ExchangeRatesService) {}

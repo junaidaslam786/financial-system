@@ -11,7 +11,10 @@ import {
   } from '@nestjs/common';
   import { UomService } from './uom.service';
   import { CreateUomDto, UpdateUomDto } from './dtos';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
   
+  @ApiBearerAuth()
+  @ApiTags('Units of Measure')
   @Controller('uom')
   export class UomController {
     constructor(private readonly uomService: UomService) {}

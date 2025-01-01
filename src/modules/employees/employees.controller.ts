@@ -3,7 +3,11 @@ import { Controller, Post, Get, Patch, Delete, Param, Body, ParseUUIDPipe } from
 import { EmployeesService } from './employees.service';
 import { CreateEmployeeDto, UpdateEmployeeDto } from './dtos';
 import { EmployeeEntity } from './entities/employee.entity';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+
+@ApiBearerAuth()
+@ApiTags('Employees')
 @Controller('employees')
 export class EmployeesController {
   constructor(private readonly employeesService: EmployeesService) {}

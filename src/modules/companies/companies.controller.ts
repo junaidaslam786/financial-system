@@ -20,10 +20,13 @@ import { Roles } from 'src/common/decorators/roles.decorator';
 import { Role } from '../auth/interfaces/role.enum';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { User } from '../users/entities/user.entity';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 // Optional: if you use role-based guard
 // import { RolesGuard } from '../../roles/guards/roles.guard';
 // import { Roles } from '../../roles/decorators/roles.decorator';
 
+@ApiBearerAuth()
+@ApiTags('Companies')
 @Controller('companies')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class CompaniesController {

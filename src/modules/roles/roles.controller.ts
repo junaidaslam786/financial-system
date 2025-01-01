@@ -14,7 +14,10 @@ import { CreateRoleDto, UpdateRoleDto } from './dtos';
 import { JwtAuthGuard } from './../../common/guards/jwt-auth.guard';
 import { RolesGuard } from './../../common/guards/roles.guard';
 import { Roles } from './../../common/decorators/roles.decorator';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiBearerAuth()
+@ApiTags('Roles')
 @Controller('roles')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class RolesController {

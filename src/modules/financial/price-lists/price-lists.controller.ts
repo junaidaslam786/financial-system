@@ -12,7 +12,10 @@ import {
   import { CreatePriceListDto } from './dtos/create-price-list.dto';
   import { UpdatePriceListDto } from './dtos/update-price-list.dto';
   import { PriceList } from './entities/price-list.entity';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
   
+  @ApiBearerAuth()
+  @ApiTags('Price Lists')
   @Controller('price-lists')
   export class PriceListsController {
     constructor(private readonly priceListsService: PriceListsService) {}

@@ -12,7 +12,10 @@ import {
   import { CreateJournalEntryDto } from './dtos/create-journal-entry.dto';
   import { UpdateJournalEntryDto } from './dtos/update-journal-entry.dto';
   import { JournalEntry } from './entities/journal-entry.entity';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
   
+  @ApiBearerAuth()
+  @ApiTags('Journal')
   @Controller('journal')
   export class JournalController {
     constructor(private readonly journalService: JournalService) {}

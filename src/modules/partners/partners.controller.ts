@@ -15,7 +15,10 @@ import {
     UpdatePartnerDto,
   } from './dtos';
 import { PartnerEntity } from './entities/partner.entity';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
   
+  @ApiBearerAuth()
+  @ApiTags('Partners')
   @Controller('partners')
   export class PartnersController {
     constructor(private readonly partnersService: PartnersService) {}
