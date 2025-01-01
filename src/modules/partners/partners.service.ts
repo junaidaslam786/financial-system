@@ -13,9 +13,17 @@ export class PartnersService {
   ) {}
 
   async createPartner(dto: CreatePartnerDto) {
-    const partner = this.partnerRepo.create(dto);
+    const { companyId, ...rest } = dto;
+    
+    // Map companyId to company: { id: companyId }
+    const partner = this.partnerRepo.create({
+      ...rest,
+      company: { id: companyId } as any, 
+    });
+  
     return this.partnerRepo.save(partner);
   }
+  
 
   async findOnePartner(id: string) {
     const partner = await this.partnerRepo.findOne({ where: { id } });

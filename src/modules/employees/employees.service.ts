@@ -13,9 +13,17 @@ export class EmployeesService {
   ) {}
 
   async createEmployee(dto: CreateEmployeeDto) {
-    const employee = this.employeeRepo.create(dto);
+    const { companyId, ...rest } = dto;
+  
+    // Transform companyId -> company: { id: companyId }
+    const employee = this.employeeRepo.create({
+      ...rest,
+      company: { id: companyId } as any,  // cast if needed
+    });
+  
     return this.employeeRepo.save(employee);
   }
+  
 
   async findOneEmployee(id: string) {
     const emp = await this.employeeRepo.findOne({ where: { id } });
