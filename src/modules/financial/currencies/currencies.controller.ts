@@ -6,16 +6,23 @@ import {
     Delete,
     Param,
     Body,
+    UseGuards,
   } from '@nestjs/common';
   import { CurrenciesService } from './currencies.service';
   import { CreateCurrencyDto } from './dtos/create-currency.dto';
   import { UpdateCurrencyDto } from './dtos/update-currency.dto';
   import { Currency } from './entities/currency.entity';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { RolesGuard } from 'src/common/guards/roles.guard';
+import { Role } from 'src/modules/auth/interfaces/role.enum';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { Roles } from 'src/common/decorators/roles.decorator';
 
   @ApiBearerAuth()
   @ApiTags('Currencies')
   @Controller('currencies')
+  @UseGuards(JwtAuthGuard, RolesGuard) 
+  @Roles(Role.Owner, Role.Admin)
   export class CurrenciesController {
     constructor(private readonly currenciesService: CurrenciesService) {}
   

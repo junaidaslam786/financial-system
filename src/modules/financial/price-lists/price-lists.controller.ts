@@ -7,16 +7,23 @@ import {
     Param,
     Body,
     Query,
+    UseGuards,
   } from '@nestjs/common';
   import { PriceListsService } from './price-lists.service';
   import { CreatePriceListDto } from './dtos/create-price-list.dto';
   import { UpdatePriceListDto } from './dtos/update-price-list.dto';
   import { PriceList } from './entities/price-list.entity';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { RolesGuard } from 'src/common/guards/roles.guard';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { Role } from 'src/modules/auth/interfaces/role.enum';
+import { Roles } from 'src/common/decorators/roles.decorator';
   
   @ApiBearerAuth()
   @ApiTags('Price Lists')
   @Controller('price-lists')
+  @UseGuards(JwtAuthGuard, RolesGuard) 
+  @Roles(Role.Owner, Role.Admin)
   export class PriceListsController {
     constructor(private readonly priceListsService: PriceListsService) {}
   

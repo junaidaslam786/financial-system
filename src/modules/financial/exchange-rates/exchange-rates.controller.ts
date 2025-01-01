@@ -6,17 +6,24 @@ import {
     Delete,
     Param,
     Body,
+    UseGuards,
   } from '@nestjs/common';
   import { ExchangeRatesService } from './exchange-rates.service';
   import { CreateExchangeRateDto } from './dtos/create-exchange-rate.dto';
   import { UpdateExchangeRateDto } from './dtos/update-exchange-rate.dto';
   import { ExchangeRate } from './entities/exchange-rate.entity';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { RolesGuard } from 'src/common/guards/roles.guard';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { Role } from 'src/modules/auth/interfaces/role.enum';
+import { Roles } from 'src/common/decorators/roles.decorator';
 
 
   @ApiBearerAuth()
   @ApiTags('Exchange Rates')
   @Controller('exchange-rates')
+  @UseGuards(JwtAuthGuard, RolesGuard) 
+  @Roles(Role.Owner, Role.Admin)
   export class ExchangeRatesController {
     constructor(private readonly exchangeRatesService: ExchangeRatesService) {}
   

@@ -28,7 +28,8 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 @ApiBearerAuth()
 @ApiTags('Companies')
 @Controller('companies')
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, RolesGuard) 
+@Roles(Role.Owner, Role.Admin)
 export class CompaniesController {
   constructor(private readonly companiesService: CompaniesService) {}
 

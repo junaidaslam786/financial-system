@@ -1,14 +1,20 @@
 // employees.controller.ts
-import { Controller, Post, Get, Patch, Delete, Param, Body, ParseUUIDPipe } from '@nestjs/common';
+import { Controller, Post, Get, Patch, Delete, Param, Body, ParseUUIDPipe, UseGuards } from '@nestjs/common';
 import { EmployeesService } from './employees.service';
 import { CreateEmployeeDto, UpdateEmployeeDto } from './dtos';
 import { EmployeeEntity } from './entities/employee.entity';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { RolesGuard } from 'src/common/guards/roles.guard';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { Role } from '../auth/interfaces/role.enum';
 
 
 @ApiBearerAuth()
 @ApiTags('Employees')
 @Controller('employees')
+@UseGuards(JwtAuthGuard, RolesGuard) 
+@Roles(Role.Owner, Role.Admin)
 export class EmployeesController {
   constructor(private readonly employeesService: EmployeesService) {}
 

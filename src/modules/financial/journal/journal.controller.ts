@@ -7,16 +7,23 @@ import {
     Param,
     Body,
     Query,
+    UseGuards,
   } from '@nestjs/common';
   import { JournalService } from './journal.service';
   import { CreateJournalEntryDto } from './dtos/create-journal-entry.dto';
   import { UpdateJournalEntryDto } from './dtos/update-journal-entry.dto';
   import { JournalEntry } from './entities/journal-entry.entity';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { RolesGuard } from 'src/common/guards/roles.guard';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { Role } from 'src/modules/auth/interfaces/role.enum';
+import { Roles } from 'src/common/decorators/roles.decorator';
   
   @ApiBearerAuth()
   @ApiTags('Journal')
   @Controller('journal')
+  @UseGuards(JwtAuthGuard, RolesGuard) 
+  @Roles(Role.Owner, Role.Admin)
   export class JournalController {
     constructor(private readonly journalService: JournalService) {}
   

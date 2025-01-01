@@ -7,14 +7,21 @@ import {
   Param,
   Body,
   ParseUUIDPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { CompanyOwnersService } from './company-owners.service';
 import { CreateCompanyOwnerDto, UpdateCompanyOwnerDto } from './dtos';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { Role } from '../auth/interfaces/role.enum';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/common/guards/roles.guard';
 
 @ApiBearerAuth()
 @ApiTags('Company Owners')
 @Controller('company-owners')
+@UseGuards(JwtAuthGuard, RolesGuard) 
+@Roles(Role.Owner, Role.Admin)
 export class CompanyOwnersController {
   constructor(private readonly ownersService: CompanyOwnersService) {}
 

@@ -19,11 +19,14 @@ import { PartnerEntity } from './entities/partner.entity';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RolesGuard } from 'src/common/guards/roles.guard';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { Role } from '../auth/interfaces/role.enum';
+import { Roles } from 'src/common/decorators/roles.decorator';
   
   @ApiBearerAuth()
   @ApiTags('Partners')
   @Controller('partners')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard) 
+  @Roles(Role.Owner, Role.Admin)
   export class PartnersController {
     constructor(private readonly partnersService: PartnersService) {}
   
