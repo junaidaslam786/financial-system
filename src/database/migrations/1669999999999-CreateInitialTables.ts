@@ -24,6 +24,7 @@ export class CreateInitialTables1669999999999 implements MigrationInterface {
         username VARCHAR(100) UNIQUE NOT NULL,
         email VARCHAR(150) UNIQUE NOT NULL,
         password_hash TEXT NOT NULL,
+        default_company_id UUID REFERENCES companies(id) ON UPDATE CASCADE ON DELETE SET NULL,
         role_id UUID REFERENCES roles(id) ON UPDATE CASCADE ON DELETE SET NULL,
         two_factor_enabled BOOLEAN DEFAULT FALSE,
         "two_factor_authentication_secret" character varying,
@@ -35,6 +36,10 @@ export class CreateInitialTables1669999999999 implements MigrationInterface {
     // Indexes for users
     await queryRunner.query(`CREATE INDEX idx_users_email ON users(email);`);
     await queryRunner.query(`CREATE INDEX idx_users_role_id ON users(role_id);`);
+
+    await queryRunner.query(`
+      CREATE INDEX idx_users_default_company_id ON users(default_company_id);
+    `);
 
     // Create companies table
     await queryRunner.query(`
@@ -143,6 +148,8 @@ export class CreateInitialTables1669999999999 implements MigrationInterface {
 
     await queryRunner.query(`DROP INDEX IF EXISTS idx_companies_name;`);
     await queryRunner.query(`DROP TABLE IF EXISTS companies;`);
+
+    await queryRunner.query(`DROP INDEX IF EXISTS idx_users_default_company_id;`);
 
     await queryRunner.query(`DROP INDEX IF EXISTS idx_users_role_id;`);
     await queryRunner.query(`DROP INDEX IF EXISTS idx_users_email;`);

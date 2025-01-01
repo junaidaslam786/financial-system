@@ -1,4 +1,8 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Company } from './entities/company.entity';
@@ -27,13 +31,17 @@ export class CompaniesService {
     }
     const userRoleName = user.role.roleName; // e.g. 'owner', 'admin', 'user'
     if (userRoleName !== 'owner' && userRoleName !== 'admin') {
-      throw new ForbiddenException('Only owners or admins can create companies.');
+      throw new ForbiddenException(
+        'Only owners or admins can create companies.',
+      );
     }
 
     // 2) Check the 5 companies limit
     const existingCount = await this.countUserCompanies(userId);
     if (existingCount >= 5) {
-      throw new ForbiddenException('You already have 5 companies, the maximum allowed.');
+      throw new ForbiddenException(
+        'You already have 5 companies, the maximum allowed.',
+      );
     }
 
     // 3) Create the company
@@ -60,12 +68,14 @@ export class CompaniesService {
     if (!user) {
       throw new NotFoundException(`User with ID "${userId}" not found`);
     }
-  
+
     // Check role permission (owner or admin) if needed
     if (user.role.roleName !== 'owner' && user.role.roleName !== 'admin') {
-      throw new ForbiddenException('You do not have permission to view companies.');
+      throw new ForbiddenException(
+        'You do not have permission to view companies.',
+      );
     }
-  
+
     // Return companies created by that user
     // (Add pagination logic, relations, etc. as desired)
     return this.companyRepo.find({
@@ -76,7 +86,6 @@ export class CompaniesService {
       ],
     });
   }
-  
 
   async findOneCompany(id: string) {
     const company = await this.companyRepo.findOne({ where: { id } });
@@ -122,6 +131,9 @@ export class CompaniesService {
       contactInfo: user.email,
       ownershipPercentage: 100,
     });
+
+    user.defaultCompanyId = savedCompany.id;
+    await this.usersService.saveUser(user);
 
     return savedCompany;
   }

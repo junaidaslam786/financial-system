@@ -55,6 +55,7 @@ export class AuthService {
         username: user.username,
         role: user.role?.roleName,   // or just user.role
         twoFactorEnabled: user.twoFactorEnabled,
+        defaultCompanyId: user.defaultCompanyId,
       },
     };
   }
@@ -131,6 +132,7 @@ export class AuthService {
       email: user.email,
       sub: user.id,
       role: user.role?.roleName, 
+      companyId: user.defaultCompanyId,
     };
     return this.jwtService.sign(payload, { expiresIn });
   }

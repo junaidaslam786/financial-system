@@ -22,6 +22,9 @@ export class User {
   @Column({ name: 'password_hash', type: 'text' })
   passwordHash: string;
 
+  @Column({ type: 'uuid', nullable: true })
+  defaultCompanyId?: string;
+
   @ManyToOne(() => RoleEntity, (role) => role.users, {
     onUpdate: 'CASCADE',
     onDelete: 'SET NULL',

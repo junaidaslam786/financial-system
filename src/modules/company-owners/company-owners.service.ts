@@ -6,6 +6,7 @@ import {
   CreateCompanyOwnerDto,
   UpdateCompanyOwnerDto,
 } from './dtos';
+import { Company } from '../companies/entities/company.entity';
 
 @Injectable()
 export class CompanyOwnersService {
@@ -15,7 +16,11 @@ export class CompanyOwnersService {
   ) {}
 
   async createOwner(dto: CreateCompanyOwnerDto) {
-    const owner = this.ownersRepo.create(dto);
+    const { companyId, ...rest } = dto;
+    const owner = this.ownersRepo.create({
+      ...rest,
+      company: { id: companyId } as Company, // This ensures the FK is set
+    });
     return this.ownersRepo.save(owner);
   }
 
