@@ -18,6 +18,13 @@ import { CurrenciesModule } from './modules/financial/currencies/currencies.modu
 import { ExchangeRatesModule } from './modules/financial/exchange-rates/exchange-rates.module';
 import { JournalModule } from './modules/financial/journal/journal.module';
 import { PriceListsModule } from './modules/financial/price-lists/price-lists.module';
+import { SuppliersModule } from './modules/company-contacts/suppliers/suppliers.module';
+import { CustomersModule } from './modules/company-contacts/customers/customers.module';
+import { TradersModule } from './modules/company-contacts/traders/traders.module';
+import { BrokersModule } from './modules/company-contacts/brokers/brokers.module';
+import { BrokerageAgreementsModule } from './modules/company-contacts/brokerage-agreements/brokerage-agreements.module';
+import { BrokerageTransactionsModule } from './modules/company-contacts/brokerage-transactions/brokerage-transactions.module';
+import { ContactsModule } from './modules/company-contacts/contacts/contacts.module';
 
 @Module({
   imports: [
@@ -49,6 +56,13 @@ import { PriceListsModule } from './modules/financial/price-lists/price-lists.mo
     ExchangeRatesModule,
     JournalModule,
     PriceListsModule,
+    SuppliersModule,
+    CustomersModule,
+    TradersModule,
+    BrokersModule,
+    BrokerageAgreementsModule,
+    BrokerageTransactionsModule,
+    ContactsModule
   ],
   controllers: [AppController],
   providers: [AppService],
