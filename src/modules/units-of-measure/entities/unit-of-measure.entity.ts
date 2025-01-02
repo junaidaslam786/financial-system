@@ -10,7 +10,7 @@ import {
   } from 'typeorm';
   
   @Entity({ name: 'units_of_measure' })
-  @Unique('idx_units_of_measure_company_uom_name', ['companyId', 'uomName']) // optional if you want per-company uniqueness
+  @Unique('idx_units_of_measure_company_uom_name', ['companyId', 'uomName']) 
   export class UnitOfMeasureEntity {
     @PrimaryGeneratedColumn('uuid')
     id: string;
