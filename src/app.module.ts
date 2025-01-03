@@ -25,6 +25,18 @@ import { BrokersModule } from './modules/company-contacts/brokers/brokers.module
 import { BrokerageAgreementsModule } from './modules/company-contacts/brokerage-agreements/brokerage-agreements.module';
 import { BrokerageTransactionsModule } from './modules/company-contacts/brokerage-transactions/brokerage-transactions.module';
 import { ContactsModule } from './modules/company-contacts/contacts/contacts.module';
+import { InventoryModule } from './modules/product-and-inventory/inventory/inventory.module';
+import { InventoryMovementsModule } from './modules/product-and-inventory/inventory-movements/inventory-movements.module';
+import { LotRawMaterialsModule } from './modules/product-and-inventory/lot-raw-materials/lot-raw-materials.module';
+import { LotsModule } from './modules/product-and-inventory/lots/lots.module';
+import { PackagingOrdersModule } from './modules/product-and-inventory/packaging-orders/packaging-orders.module';
+import { PriceListItemsModule } from './modules/product-and-inventory/price-list-items/price-list-items.module';
+import { ProcessingStagesModule } from './modules/product-and-inventory/processing-stages/processing-stages.module';
+import { ProductCategoriesModule } from './modules/product-and-inventory/product-categories/product-categories.module';
+import { ProductionOrderStagesModule } from './modules/product-and-inventory/production-order-stages/production-order-stages.module';
+import { ProductionOrdersModule } from './modules/product-and-inventory/production-orders/production-orders.module';
+import { ProductsModule } from './modules/product-and-inventory/products/products.module';
+import { WarehousesModule } from './modules/product-and-inventory/warehouses/warehouses.module';
 
 @Module({
   imports: [
@@ -62,7 +74,19 @@ import { ContactsModule } from './modules/company-contacts/contacts/contacts.mod
     BrokersModule,
     BrokerageAgreementsModule,
     BrokerageTransactionsModule,
-    ContactsModule
+    ContactsModule,
+    InventoryModule,
+    InventoryMovementsModule,
+    LotRawMaterialsModule,
+    LotsModule,
+    PackagingOrdersModule,
+    PriceListItemsModule,
+    ProcessingStagesModule,
+    ProductCategoriesModule,
+    ProductionOrderStagesModule,
+    ProductionOrdersModule,
+    ProductsModule,
+    WarehousesModule
   ],
   controllers: [AppController],
   providers: [AppService],
