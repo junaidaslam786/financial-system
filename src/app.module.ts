@@ -37,6 +37,8 @@ import { ProductionOrderStagesModule } from './modules/product-and-inventory/pro
 import { ProductionOrdersModule } from './modules/product-and-inventory/production-orders/production-orders.module';
 import { ProductsModule } from './modules/product-and-inventory/products/products.module';
 import { WarehousesModule } from './modules/product-and-inventory/warehouses/warehouses.module';
+import { SalesOrdersModule } from './modules/sales-and-invoicing/sales-orders/sales-orders.module';
+import { InvoicesModule } from './modules/sales-and-invoicing/invoices/invoices.module';
 
 @Module({
   imports: [
@@ -86,7 +88,9 @@ import { WarehousesModule } from './modules/product-and-inventory/warehouses/war
     ProductionOrderStagesModule,
     ProductionOrdersModule,
     ProductsModule,
-    WarehousesModule
+    WarehousesModule,
+    SalesOrdersModule,
+    InvoicesModule
   ],
   controllers: [AppController],
   providers: [AppService],
