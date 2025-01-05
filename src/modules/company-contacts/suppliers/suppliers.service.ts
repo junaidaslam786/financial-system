@@ -15,17 +15,54 @@ export class SuppliersService {
     private readonly accountRepo: Repository<Account>,
   ) {}
 
+  // async create(dto: CreateSupplierDto): Promise<SupplierEntity> {
+  //   const supplier = this.supplierRepo.create({
+  //     supplierName: dto.supplierName,
+  //     contactInfo: dto.contactInfo,
+  //     paymentTerms: dto.paymentTerms,
+  //     // Assign relational fields
+  //     company: { id: dto.companyId },
+  //     defaultPriceList: dto.defaultPriceListId
+  //       ? { id: dto.defaultPriceListId }
+  //       : null,
+  //     account: dto.accountId ? { id: dto.accountId } : null,
+  //   });
+
+  //   return this.supplierRepo.save(supplier);
+  // }
+
   async create(dto: CreateSupplierDto): Promise<SupplierEntity> {
+    let account = null;
+
+    if (dto.accountId) {
+      // Check if the provided account ID exists
+      account = await this.accountRepo.findOne({
+        where: { id: dto.accountId },
+      });
+      if (!account) {
+        throw new NotFoundException(
+          `Account with ID "${dto.accountId}" not found`,
+        );
+      }
+    } else {
+      // Create a new account automatically with the supplier name
+      account = this.accountRepo.create({
+        accountName: dto.supplierName,
+        accountType: 'Supplier',
+        company: {id: dto.companyId}
+      });
+      account = await this.accountRepo.save(account);
+    }
+
     const supplier = this.supplierRepo.create({
       supplierName: dto.supplierName,
       contactInfo: dto.contactInfo,
       paymentTerms: dto.paymentTerms,
-      // Assign relational fields
       company: { id: dto.companyId },
       defaultPriceList: dto.defaultPriceListId
         ? { id: dto.defaultPriceListId }
         : null,
-      account: dto.accountId ? { id: dto.accountId } : null,
+      account: account,
     });
 
     return this.supplierRepo.save(supplier);
@@ -62,16 +99,20 @@ export class SuppliersService {
         : null;
     }
     if (dto.accountId !== undefined) {
-        if (dto.accountId) {
-          const account = await this.accountRepo.findOne({ where: { id: dto.accountId } });
-          if (!account) {
-            throw new NotFoundException(`Account with ID "${dto.accountId}" not found`);
-          }
-          supplier.account = account;
-        } else {
-          supplier.account = null;
+      if (dto.accountId) {
+        const account = await this.accountRepo.findOne({
+          where: { id: dto.accountId },
+        });
+        if (!account) {
+          throw new NotFoundException(
+            `Account with ID "${dto.accountId}" not found`,
+          );
         }
+        supplier.account = account;
+      } else {
+        supplier.account = null;
       }
+    }
 
     return this.supplierRepo.save(supplier);
   }

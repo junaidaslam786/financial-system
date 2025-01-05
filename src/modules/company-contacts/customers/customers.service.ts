@@ -15,10 +15,46 @@ export class CustomersService {
     @InjectRepository(PriceList)
     private readonly priceListRepo: Repository<PriceList>,
     @InjectRepository(Account)
-        private readonly accountRepo: Repository<Account>,
+    private readonly accountRepo: Repository<Account>,
   ) {}
 
+  // async create(dto: CreateCustomerDto): Promise<CustomerEntity> {
+  //   const customer = this.customerRepo.create({
+  //     customerName: dto.customerName,
+  //     contactInfo: dto.contactInfo,
+  //     customerType: dto.customerType,
+  //     creditLimit: dto.creditLimit,
+  //     paymentTerms: dto.paymentTerms,
+  //     company: { id: dto.companyId },
+  //     defaultPriceList: dto.defaultPriceListId ? { id: dto.defaultPriceListId } : null,
+  //     account: dto.accountId ? { id: dto.accountId } : null,
+  //   });
+  //   return this.customerRepo.save(customer);
+  // }
+
   async create(dto: CreateCustomerDto): Promise<CustomerEntity> {
+    // Handle account creation or retrieval
+    let account = null;
+    if (dto.accountId) {
+      account = await this.accountRepo.findOne({
+        where: { id: dto.accountId },
+      });
+      if (!account) {
+        throw new NotFoundException(
+          `Account with ID "${dto.accountId}" not found`,
+        );
+      }
+    } else {
+      // Automatically create an account for the customer if not provided
+      account = this.accountRepo.create({
+        accountName: dto.customerName,
+        accountType: 'Customer',
+        company: { id: dto.companyId },
+      });
+      account = await this.accountRepo.save(account);
+    }
+
+    // Create the customer entity
     const customer = this.customerRepo.create({
       customerName: dto.customerName,
       contactInfo: dto.contactInfo,
@@ -26,9 +62,12 @@ export class CustomersService {
       creditLimit: dto.creditLimit,
       paymentTerms: dto.paymentTerms,
       company: { id: dto.companyId },
-      defaultPriceList: dto.defaultPriceListId ? { id: dto.defaultPriceListId } : null,
-      account: dto.accountId ? { id: dto.accountId } : null,
+      defaultPriceList: dto.defaultPriceListId
+        ? { id: dto.defaultPriceListId }
+        : null,
+      account,
     });
+
     return this.customerRepo.save(customer);
   }
 
@@ -63,28 +102,36 @@ export class CustomersService {
       customer.paymentTerms = dto.paymentTerms;
     }
     if (dto.defaultPriceListId !== undefined) {
-        if (dto.defaultPriceListId) {
-          const priceList = await this.priceListRepo.findOne({ where: { id: dto.defaultPriceListId } });
-          if (!priceList) {
-            throw new NotFoundException(`PriceList with ID "${dto.defaultPriceListId}" not found`);
-          }
-          customer.defaultPriceList = priceList;
-        } else {
-          customer.defaultPriceList = null;
+      if (dto.defaultPriceListId) {
+        const priceList = await this.priceListRepo.findOne({
+          where: { id: dto.defaultPriceListId },
+        });
+        if (!priceList) {
+          throw new NotFoundException(
+            `PriceList with ID "${dto.defaultPriceListId}" not found`,
+          );
         }
+        customer.defaultPriceList = priceList;
+      } else {
+        customer.defaultPriceList = null;
       }
-    
-      if (dto.accountId !== undefined) {
-        if (dto.accountId) {
-          const account = await this.accountRepo.findOne({ where: { id: dto.accountId } });
-          if (!account) {
-            throw new NotFoundException(`Account with ID "${dto.accountId}" not found`);
-          }
-          customer.account = account;
-        } else {
-          customer.account = null;
+    }
+
+    if (dto.accountId !== undefined) {
+      if (dto.accountId) {
+        const account = await this.accountRepo.findOne({
+          where: { id: dto.accountId },
+        });
+        if (!account) {
+          throw new NotFoundException(
+            `Account with ID "${dto.accountId}" not found`,
+          );
         }
+        customer.account = account;
+      } else {
+        customer.account = null;
       }
+    }
 
     return this.customerRepo.save(customer);
   }

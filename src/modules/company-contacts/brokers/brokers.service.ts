@@ -12,17 +12,52 @@ export class BrokersService {
     @InjectRepository(BrokerEntity)
     private readonly brokerRepo: Repository<BrokerEntity>,
     @InjectRepository(Account)
-        private readonly accountRepo: Repository<Account>,
+    private readonly accountRepo: Repository<Account>,
   ) {}
 
+  // async create(dto: CreateBrokerDto): Promise<BrokerEntity> {
+  //   const broker = this.brokerRepo.create({
+  //     brokerName: dto.brokerName,
+  //     contactInfo: dto.contactInfo,
+  //     defaultBrokerageRate: dto.defaultBrokerageRate ?? 0,
+  //     company: { id: dto.companyId },
+  //     account: dto.accountId ? { id: dto.accountId } : null,
+  //   });
+  //   return this.brokerRepo.save(broker);
+  // }
+
   async create(dto: CreateBrokerDto): Promise<BrokerEntity> {
+    let account = null;
+
+    // Check if an account ID is provided
+    if (dto.accountId) {
+      account = await this.accountRepo.findOne({
+        where: { id: dto.accountId },
+      });
+      if (!account) {
+        throw new NotFoundException(
+          `Account with ID "${dto.accountId}" not found`,
+        );
+      }
+    } else {
+      // Automatically create an account for the broker if `accountId` is not provided
+      account = this.accountRepo.create({
+        accountName: dto.brokerName,
+        accountType: 'Broker',
+        company: { id: dto.companyId },
+      });
+      account = await this.accountRepo.save(account);
+    }
+
+    // Create the broker entity
     const broker = this.brokerRepo.create({
       brokerName: dto.brokerName,
       contactInfo: dto.contactInfo,
       defaultBrokerageRate: dto.defaultBrokerageRate ?? 0,
       company: { id: dto.companyId },
-      account: dto.accountId ? { id: dto.accountId } : null,
+      account,
     });
+
     return this.brokerRepo.save(broker);
   }
 
@@ -51,16 +86,20 @@ export class BrokersService {
       broker.defaultBrokerageRate = dto.defaultBrokerageRate;
     }
     if (dto.accountId !== undefined) {
-        if (dto.accountId) {
-          const account = await this.accountRepo.findOne({ where: { id: dto.accountId } });
-          if (!account) {
-            throw new NotFoundException(`Account with ID "${dto.accountId}" not found`);
-          }
-          broker.account = account;
-        } else {
-          broker.account = null;
+      if (dto.accountId) {
+        const account = await this.accountRepo.findOne({
+          where: { id: dto.accountId },
+        });
+        if (!account) {
+          throw new NotFoundException(
+            `Account with ID "${dto.accountId}" not found`,
+          );
         }
+        broker.account = account;
+      } else {
+        broker.account = null;
       }
+    }
 
     return this.brokerRepo.save(broker);
   }
