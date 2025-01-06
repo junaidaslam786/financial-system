@@ -39,6 +39,11 @@ import { ProductsModule } from './modules/product-and-inventory/products/product
 import { WarehousesModule } from './modules/product-and-inventory/warehouses/warehouses.module';
 import { SalesOrdersModule } from './modules/sales-and-invoicing/sales-orders/sales-orders.module';
 import { InvoicesModule } from './modules/sales-and-invoicing/invoices/invoices.module';
+import { CreditNotesModule } from './modules/sales-and-invoicing/credit-notes/credit-notes.module';
+import { DebitNotesModule } from './modules/sales-and-invoicing/debit-notes/debit-notes.module';
+import { PaymentsModule } from './modules/sales-and-invoicing/payments/payments.module';
+import { PaymentMethodsModule } from './modules/sales-and-invoicing/payment-methods/payment-methods.module';
+import { TransactionsPaymentsModule } from './modules/sales-and-invoicing/transactions-payments/transactions-payments.module';
 
 @Module({
   imports: [
@@ -48,7 +53,6 @@ import { InvoicesModule } from './modules/sales-and-invoicing/invoices/invoices.
       load: [databaseConfig],
     }),
 
-    
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -90,7 +94,12 @@ import { InvoicesModule } from './modules/sales-and-invoicing/invoices/invoices.
     ProductsModule,
     WarehousesModule,
     SalesOrdersModule,
-    InvoicesModule
+    InvoicesModule,
+    CreditNotesModule,
+    DebitNotesModule,
+    PaymentsModule,
+    PaymentMethodsModule,
+    TransactionsPaymentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

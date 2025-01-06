@@ -7,16 +7,23 @@ import {
     Param,
     Body,
     Query,
+    UseGuards,
   } from '@nestjs/common';
   import { InvoicesService } from './invoices.service';
   import { CreateInvoiceDto } from './dtos/create-invoice.dto';
   import { UpdateInvoiceDto } from './dtos/update-invoice.dto';
   import { InvoiceResponseDto } from './dtos/invoice-response.dto';
   import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/common/guards/roles.guard';
+import { Role } from 'src/modules/auth/interfaces/role.enum';
+import { Roles } from 'src/common/decorators/roles.decorator';
   
   @ApiTags('Invoices')
   @ApiBearerAuth()
   @Controller('invoices')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Owner, Role.Admin)
   export class InvoicesController {
     constructor(private readonly invoicesService: InvoicesService) {}
   
