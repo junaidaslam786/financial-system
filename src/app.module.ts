@@ -44,6 +44,8 @@ import { DebitNotesModule } from './modules/sales-and-invoicing/debit-notes/debi
 import { PaymentsModule } from './modules/sales-and-invoicing/payments/payments.module';
 import { PaymentMethodsModule } from './modules/sales-and-invoicing/payment-methods/payment-methods.module';
 import { TransactionsPaymentsModule } from './modules/sales-and-invoicing/transactions-payments/transactions-payments.module';
+import { SupplierInvoicesModule } from './modules/company-purchases/supplier-invoices/supplier-invoices.module';
+import { PurchaseOrdersModule } from './modules/company-purchases/purchase-orders/purchase-orders.module';
 
 @Module({
   imports: [
@@ -100,6 +102,8 @@ import { TransactionsPaymentsModule } from './modules/sales-and-invoicing/transa
     PaymentsModule,
     PaymentMethodsModule,
     TransactionsPaymentsModule,
+    SupplierInvoicesModule,
+    PurchaseOrdersModule
   ],
   controllers: [AppController],
   providers: [AppService],
