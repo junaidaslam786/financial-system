@@ -29,6 +29,7 @@ export class SalesOrdersService {
       company: { id: dto.companyId },
       customer: dto.customerId ? { id: dto.customerId } : undefined,
       trader: dto.traderId ? { id: dto.traderId } : undefined,
+      brokerage: dto.brokerageId ? { id: dto.brokerageId } : undefined,
       orderNumber: dto.orderNumber,
       orderDate: dto.orderDate ? new Date(dto.orderDate) : undefined,
       status: dto.status || 'Pending',
@@ -49,14 +50,14 @@ export class SalesOrdersService {
   async findAll(companyId: string): Promise<SalesOrderEntity[]> {
     return this.salesOrderRepo.find({
       where: { company: { id: companyId } },
-      relations: ['customer', 'trader', 'brokerage', 'lines'],
+      relations: ['customer', 'trader', 'brokerage', 'lines', 'lines.product'],
     });
   }
 
   async findOne(id: string): Promise<SalesOrderEntity> {
     const order = await this.salesOrderRepo.findOne({
       where: { id },
-      relations: ['customer', 'trader', 'brokerage', 'lines'],
+      relations: ['customer', 'trader', 'brokerage', 'lines', 'lines.product'],
     });
     if (!order) {
       throw new NotFoundException(`Sales order with ID "${id}" not found.`);

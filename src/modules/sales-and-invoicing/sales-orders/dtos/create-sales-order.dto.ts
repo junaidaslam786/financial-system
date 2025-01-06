@@ -29,6 +29,10 @@ export class CreateSalesOrderDto {
   @IsOptional()
   notes?: string;
 
+  @IsString()
+  @IsOptional()
+  brokerageId?: string;
+
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => SalesOrderLineDto)
