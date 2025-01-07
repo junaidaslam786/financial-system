@@ -8,6 +8,7 @@ import {
     UpdateDateColumn,
   } from 'typeorm';
   import { Company } from './../../../companies/entities/company.entity'; 
+import { BalanceType } from 'src/common/enums/balace-type';
     // Adjust path to wherever Company entity is defined
   
   @Entity('accounts')
@@ -30,6 +31,23 @@ import {
   
     @Column({ nullable: true, length: 10 })
     currency?: string;
+
+    @Column({
+      name: 'initial_balance',
+      type: 'numeric',
+      precision: 15,
+      scale: 2,
+      default: 0,
+    })
+    initialBalance: number;
+  
+    @Column({
+      name: 'initial_balance_type',
+      type: 'varchar',
+      length: 10,
+      nullable: true,
+    })
+    initialBalanceType?: BalanceType;
   
     @CreateDateColumn({ type: 'timestamptz' })
     createdAt: Date;

@@ -52,6 +52,8 @@ export class AddFinancialTables1670000000000 implements MigrationInterface {
         account_type VARCHAR(100) NOT NULL,
         parent_account_id UUID REFERENCES accounts(id) ON UPDATE CASCADE ON DELETE SET NULL,
         currency VARCHAR(10),
+        initial_balance numeric(15,2) DEFAULT 0,
+        initial_balance_type varchar(10);
         created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       );

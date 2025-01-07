@@ -14,11 +14,13 @@ export class AccountsService {
 
   async create(dto: CreateAccountDto): Promise<Account> {
     const account = this.accountRepo.create({
-      company: { id: dto.companyId }, 
+      company: { id: dto.companyId },
       accountName: dto.accountName,
       accountType: dto.accountType,
       parentAccountId: dto.parentAccountId,
       currency: dto.currency,
+      initialBalance: dto.initialBalance ?? 0,
+      initialBalanceType: dto.initialBalanceType || null,
     });
     return this.accountRepo.save(account);
   }
@@ -50,6 +52,12 @@ export class AccountsService {
       account.parentAccountId = dto.parentAccountId;
     }
     if (dto.currency) account.currency = dto.currency;
+    if (dto.initialBalance !== undefined) {
+      account.initialBalance = dto.initialBalance;
+    }
+    if (dto.initialBalanceType !== undefined) {
+      account.initialBalanceType = dto.initialBalanceType;
+    }
 
     return this.accountRepo.save(account);
   }
