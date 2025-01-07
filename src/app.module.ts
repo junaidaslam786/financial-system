@@ -46,6 +46,8 @@ import { PaymentMethodsModule } from './modules/sales-and-invoicing/payment-meth
 import { TransactionsPaymentsModule } from './modules/sales-and-invoicing/transactions-payments/transactions-payments.module';
 import { SupplierInvoicesModule } from './modules/company-purchases/supplier-invoices/supplier-invoices.module';
 import { PurchaseOrdersModule } from './modules/company-purchases/purchase-orders/purchase-orders.module';
+import { WeighbridgeTicketsModule } from './modules/weighbridge-and-qualitycontrol/weighbridge-ticket/weighbridge-tickets.module';
+import { GrainQualityTestsModule } from './modules/weighbridge-and-qualitycontrol/grain-quality-test/grain-quality-tests.module';
 
 @Module({
   imports: [
@@ -103,7 +105,9 @@ import { PurchaseOrdersModule } from './modules/company-purchases/purchase-order
     PaymentMethodsModule,
     TransactionsPaymentsModule,
     SupplierInvoicesModule,
-    PurchaseOrdersModule
+    PurchaseOrdersModule,
+    WeighbridgeTicketsModule,
+    GrainQualityTestsModule
   ],
   controllers: [AppController],
   providers: [AppService],
