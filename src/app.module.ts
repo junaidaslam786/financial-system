@@ -48,6 +48,8 @@ import { SupplierInvoicesModule } from './modules/company-purchases/supplier-inv
 import { PurchaseOrdersModule } from './modules/company-purchases/purchase-orders/purchase-orders.module';
 import { WeighbridgeTicketsModule } from './modules/weighbridge-and-qualitycontrol/weighbridge-ticket/weighbridge-tickets.module';
 import { GrainQualityTestsModule } from './modules/weighbridge-and-qualitycontrol/grain-quality-test/grain-quality-tests.module';
+import { AuditTrailsModule } from './modules/audittrails-and-workflow/audit-trail/audit-trails.module';
+import { WorkflowsModule } from './modules/audittrails-and-workflow/workflows/workflows.module';
 
 @Module({
   imports: [
@@ -107,7 +109,9 @@ import { GrainQualityTestsModule } from './modules/weighbridge-and-qualitycontro
     SupplierInvoicesModule,
     PurchaseOrdersModule,
     WeighbridgeTicketsModule,
-    GrainQualityTestsModule
+    GrainQualityTestsModule,
+    AuditTrailsModule,
+    WorkflowsModule
   ],
   controllers: [AppController],
   providers: [AppService],
