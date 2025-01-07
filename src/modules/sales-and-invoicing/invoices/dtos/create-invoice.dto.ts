@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsString,
   IsOptional,
@@ -15,6 +15,11 @@ export class CreateInvoiceDto {
   @ApiProperty({ description: 'UUID of the company issuing this invoice' })
   @IsUUID()
   companyId: string;
+
+  @ApiPropertyOptional({ description: 'Link to a sales order (optional)' })
+  @IsOptional()
+  @IsUUID()
+  salesOrderId?: string; 
 
   @ApiProperty({ description: 'UUID of the customer', required: false })
   @IsUUID()

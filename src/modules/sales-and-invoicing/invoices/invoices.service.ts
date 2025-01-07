@@ -2,19 +2,23 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Invoice } from './entities/invoice.entity';
+import { InvoiceItem } from './entities/invoice-item.entity';
 import { CreateInvoiceDto } from './dtos/create-invoice.dto';
 import { UpdateInvoiceDto } from './dtos/update-invoice.dto';
-import { InvoiceItem } from './entities/invoice-item.entity';
 import { Company } from 'src/modules/companies/entities/company.entity';
 import { CustomerEntity } from 'src/modules/company-contacts/customers/entities/customer.entity';
 import { BrokerEntity } from 'src/modules/company-contacts/brokers/entities/broker.entity';
 import { ProductEntity } from 'src/modules/product-and-inventory/products/entities/product.entity';
+import { JournalService } from 'src/modules/financial/journal/journal.service';
+import { SalesOrderEntity } from 'src/modules/sales-and-invoicing/sales-orders/entities/sales-order.entity'; 
+// If you want to link a sales order
 
 @Injectable()
 export class InvoicesService {
   constructor(
     @InjectRepository(Invoice)
     private readonly invoiceRepo: Repository<Invoice>,
+
     @InjectRepository(InvoiceItem)
     private readonly invoiceItemRepo: Repository<InvoiceItem>,
 
@@ -29,97 +33,100 @@ export class InvoicesService {
 
     @InjectRepository(ProductEntity)
     private readonly productRepo: Repository<ProductEntity>,
+
+    private readonly journalService: JournalService, // for auto-posting to ledger
   ) {}
 
   /**
    * Create a new invoice with items
+   * and automatically create a balanced journal entry.
    */
   async create(dto: CreateInvoiceDto): Promise<Invoice> {
-    // Validate company
-    const company = await this.companyRepo.findOne({ where: { id: dto.companyId } });
-    if (!company) {
-      throw new BadRequestException('Invalid companyId.');
-    }
+    // 1) Validate references
+    const company = await this.validateCompany(dto.companyId);
 
-    // Optional references
     let customer: CustomerEntity | null = null;
     if (dto.customerId) {
-      customer = await this.customerRepo.findOne({ where: { id: dto.customerId } });
-      if (!customer) {
-        throw new BadRequestException('Invalid customerId.');
-      }
+      customer = await this.validateCustomer(dto.customerId);
     }
 
     let broker: BrokerEntity | null = null;
     if (dto.brokerId) {
-      broker = await this.brokerRepo.findOne({ where: { id: dto.brokerId } });
-      if (!broker) {
-        throw new BadRequestException('Invalid brokerId.');
-      }
+      broker = await this.validateBroker(dto.brokerId);
     }
 
-    // Build invoice
+    // 2) Build the invoice
     const invoice = this.invoiceRepo.create({
       company,
-      customer: customer || null,
-      broker: broker || null,
+      customer,
+      broker,
       invoiceNumber: dto.invoiceNumber,
       invoiceDate: dto.invoiceDate ? new Date(dto.invoiceDate) : new Date(),
       dueDate: dto.dueDate ? new Date(dto.dueDate) : null,
       termsAndConditions: dto.termsAndConditions,
       notes: dto.notes,
-      // items will be set below
+      status: 'Unpaid',
     });
 
-    // Build items
+    // If your DB has a `salesOrderId` column, do:
+    if (dto.salesOrderId) {
+      invoice.salesOrder = { id: dto.salesOrderId } as SalesOrderEntity;
+    }
+
+    // 3) Build items
     const items = await Promise.all(
       dto.items.map(async (itemDto) => {
-        // Optional product validation
-        const product = await this.productRepo.findOne({ where: { id: itemDto.productId } });
-        if (!product) {
-          throw new BadRequestException(`Invalid productId: ${itemDto.productId}`);
-        }
+        const product = await this.validateProduct(itemDto.productId);
+        const base = itemDto.quantity * itemDto.unitPrice - (itemDto.discount || 0);
+        const totalLine = base + (base * (itemDto.taxRate || 0)) / 100;
 
-        const item = this.invoiceItemRepo.create({
+        return this.invoiceItemRepo.create({
           product,
           description: itemDto.description,
           quantity: itemDto.quantity,
           unitPrice: itemDto.unitPrice,
           discount: itemDto.discount || 0,
           taxRate: itemDto.taxRate || 0,
+          totalPrice: totalLine,
         });
-        // Calculate total price
-        item.totalPrice =
-          item.quantity * item.unitPrice -
-          item.discount +
-          ((item.quantity * item.unitPrice - item.discount) * item.taxRate) / 100;
-
-        return item;
       }),
     );
 
-    // Assign items to invoice
     invoice.items = items;
-    // Calculate total amount
     invoice.totalAmount = items.reduce((sum, it) => sum + it.totalPrice, 0);
 
-    return this.invoiceRepo.save(invoice);
+    // 4) Save invoice first (no journal link yet)
+    const savedInvoice = await this.invoiceRepo.save(invoice);
+
+    // 5) Create a balanced journal entry
+    const journal = await this.createSalesInvoiceJournal(savedInvoice);
+
+    // 6) Link invoice -> journal
+    savedInvoice.journalEntry = journal;
+    await this.invoiceRepo.save(savedInvoice);
+
+    return savedInvoice;
   }
 
   /**
    * Get all invoices for a specific company
-   * If 'companyId' is mandatory, keep this required.
-   * Otherwise, remove the filter or handle it conditionally.
    */
   async findAll(companyId: string): Promise<Invoice[]> {
     if (!companyId) {
-      // or throw an error if it's required
       throw new BadRequestException('companyId is required.');
     }
 
     return this.invoiceRepo.find({
       where: { company: { id: companyId } },
-      relations: ['items', 'customer', 'broker', 'items.product', 'company'],
+      relations: [
+        'items',
+        'customer',
+        'broker',
+        'items.product',
+        'company',
+        'salesOrder',
+        'journalEntry',
+      ],
       order: { createdAt: 'DESC' },
     });
   }
@@ -130,7 +137,15 @@ export class InvoicesService {
   async findOne(id: string): Promise<Invoice> {
     const invoice = await this.invoiceRepo.findOne({
       where: { id },
-      relations: ['items', 'customer', 'broker', 'items.product', 'company'],
+      relations: [
+        'items',
+        'customer',
+        'broker',
+        'items.product',
+        'company',
+        'salesOrder',
+        'journalEntry',
+      ],
     });
     if (!invoice) {
       throw new NotFoundException(`Invoice with ID "${id}" not found.`);
@@ -140,34 +155,20 @@ export class InvoicesService {
 
   /**
    * Update an existing invoice
-   * This implementation REPLACES items with the new ones (if dto.items is provided).
    */
   async update(id: string, dto: UpdateInvoiceDto): Promise<Invoice> {
     const invoice = await this.findOne(id);
 
-    // Update references
     if (dto.customerId !== undefined) {
-      if (dto.customerId) {
-        const customer = await this.customerRepo.findOne({ where: { id: dto.customerId } });
-        if (!customer) {
-          throw new BadRequestException('Invalid customerId.');
-        }
-        invoice.customer = customer;
-      } else {
-        invoice.customer = null;
-      }
+      invoice.customer = dto.customerId
+        ? await this.validateCustomer(dto.customerId)
+        : null;
     }
 
     if (dto.brokerId !== undefined) {
-      if (dto.brokerId) {
-        const broker = await this.brokerRepo.findOne({ where: { id: dto.brokerId } });
-        if (!broker) {
-          throw new BadRequestException('Invalid brokerId.');
-        }
-        invoice.broker = broker;
-      } else {
-        invoice.broker = null;
-      }
+      invoice.broker = dto.brokerId
+        ? await this.validateBroker(dto.brokerId)
+        : null;
     }
 
     if (dto.invoiceDate) {
@@ -182,43 +183,120 @@ export class InvoicesService {
     if (dto.notes !== undefined) {
       invoice.notes = dto.notes;
     }
+    // if (dto.status !== undefined) {
+    //   invoice.status = dto.status;
+    // }
 
+    // If we have updated items
     if (dto.items) {
-      // Remove old items & re-add
       await this.invoiceItemRepo.remove(invoice.items);
-      const newItems: InvoiceItem[] = [];
-      for (const itemDto of dto.items) {
-        const product = await this.productRepo.findOne({ where: { id: itemDto.productId } });
-        if (!product) {
-          throw new BadRequestException(`Invalid productId: ${itemDto.productId}`);
-        }
-
-        const lineItem = this.invoiceItemRepo.create({
-          product,
-          description: itemDto.description,
-          quantity: itemDto.quantity,
-          unitPrice: itemDto.unitPrice,
-          discount: itemDto.discount || 0,
-          taxRate: itemDto.taxRate || 0,
-        });
-        lineItem.totalPrice =
-          lineItem.quantity * lineItem.unitPrice -
-          lineItem.discount +
-          ((lineItem.quantity * lineItem.unitPrice - lineItem.discount) * lineItem.taxRate) / 100;
-        newItems.push(lineItem);
-      }
+      const newItems = await Promise.all(
+        dto.items.map(async (iDto) => {
+          const product = await this.validateProduct(iDto.productId);
+          const base = iDto.quantity * iDto.unitPrice - (iDto.discount || 0);
+          const totalLine = base + (base * (iDto.taxRate || 0)) / 100;
+          return this.invoiceItemRepo.create({
+            product,
+            description: iDto.description,
+            quantity: iDto.quantity,
+            unitPrice: iDto.unitPrice,
+            discount: iDto.discount || 0,
+            taxRate: iDto.taxRate || 0,
+            totalPrice: totalLine,
+          });
+        }),
+      );
       invoice.items = newItems;
       invoice.totalAmount = newItems.reduce((sum, it) => sum + it.totalPrice, 0);
     }
 
-    return this.invoiceRepo.save(invoice);
+    // Possibly also re-link the invoice to a different sales order if needed
+    if (dto.salesOrderId !== undefined) {
+      invoice.salesOrder = dto.salesOrderId
+        ? ({ id: dto.salesOrderId } as SalesOrderEntity)
+        : undefined;
+    }
+
+    // Save changes
+    const updatedInvoice = await this.invoiceRepo.save(invoice);
+
+    // Optionally update or correct the existing journal entry
+    // (We skip that here, but you might do so for accurate ledger)
+
+    return updatedInvoice;
+  }
+
+  async remove(id: string): Promise<void> {
+    const invoice = await this.findOne(id);
+    // Possibly reverse the existing journal entry or do another approach
+    await this.invoiceRepo.remove(invoice);
+  }
+
+  // ----------------------------
+  // PRIVATE METHODS
+  // ----------------------------
+  private async validateCompany(companyId: string): Promise<Company> {
+    const company = await this.companyRepo.findOne({ where: { id: companyId } });
+    if (!company) {
+      throw new BadRequestException('Invalid companyId.');
+    }
+    return company;
+  }
+
+  private async validateCustomer(customerId: string): Promise<CustomerEntity> {
+    const customer = await this.customerRepo.findOne({ where: { id: customerId } });
+    if (!customer) {
+      throw new BadRequestException('Invalid customerId.');
+    }
+    return customer;
+  }
+
+  private async validateBroker(brokerId: string): Promise<BrokerEntity> {
+    const broker = await this.brokerRepo.findOne({ where: { id: brokerId } });
+    if (!broker) {
+      throw new BadRequestException('Invalid brokerId.');
+    }
+    return broker;
+  }
+
+  private async validateProduct(productId: string): Promise<ProductEntity> {
+    const product = await this.productRepo.findOne({ where: { id: productId } });
+    if (!product) {
+      throw new BadRequestException(`Invalid productId: ${productId}`);
+    }
+    return product;
   }
 
   /**
-   * Delete an invoice by ID
+   * Creates a balanced journal entry for a sales invoice
+   *  - Debit Accounts Receivable
+   *  - Credit Sales Revenue
    */
-  async remove(id: string): Promise<void> {
-    const invoice = await this.findOne(id);
-    await this.invoiceRepo.remove(invoice);
+  private async createSalesInvoiceJournal(inv: Invoice) {
+    const accountsReceivable = 'ACCOUNTS-RECEIVABLE-ID';
+    const salesRevenue = 'SALES-REVENUE-ID';
+
+    const lines = [
+      {
+        accountId: accountsReceivable,
+        debit: inv.totalAmount,
+        credit: 0,
+      },
+      {
+        accountId: salesRevenue,
+        debit: 0,
+        credit: inv.totalAmount,
+      },
+    ];
+
+    const entry = await this.journalService.create({
+      companyId: inv.company.id,
+      entryDate: inv.invoiceDate.toISOString(),
+      reference: `Invoice #${inv.invoiceNumber}`,
+      description: `Auto posted sales invoice ${inv.id}`,
+      lines,
+    });
+
+    return entry;
   }
 }

@@ -80,6 +80,8 @@ export class AddSalesAndInvoicing1672000000000 implements MigrationInterface {
         status VARCHAR(50) DEFAULT 'Unpaid' CHECK(status IN('Unpaid', 'Paid', 'Partially Paid', 'Cancelled')),
         terms_and_conditions TEXT,
         notes TEXT,
+        sales_order_id UUID REFERENCES sales_orders(id) ON UPDATE CASCADE ON DELETE SET NULL,
+        journal_entry_id UUID REFERENCES journal_entries(id) ON UPDATE CASCADE ON DELETE SET NULL,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       );
@@ -90,6 +92,8 @@ export class AddSalesAndInvoicing1672000000000 implements MigrationInterface {
       CREATE INDEX idx_${this.TABLE_INVOICES}_company_id ON ${this.TABLE_INVOICES}(company_id);
       CREATE INDEX idx_${this.TABLE_INVOICES}_customer_id ON ${this.TABLE_INVOICES}(customer_id);
       CREATE INDEX idx_${this.TABLE_INVOICES}_broker_id ON ${this.TABLE_INVOICES}(broker_id);
+      CREATE INDEX idx_${this.TABLE_INVOICES}_sales_order_id ON ${this.TABLE_INVOICES}(sales_order_id);
+      CREATE INDEX idx_${this.TABLE_INVOICES}_journal_entry_id ON ${this.TABLE_INVOICES}(journal_entry_id);
     `);
 
     // 4. Create `invoice_items` table
@@ -218,6 +222,8 @@ export class AddSalesAndInvoicing1672000000000 implements MigrationInterface {
     await queryRunner.query(`DROP TABLE IF EXISTS ${this.TABLE_PAYMENTS}`);
     await queryRunner.query(`DROP TABLE IF EXISTS ${this.TABLE_DEBIT_NOTES}`);
     await queryRunner.query(`DROP TABLE IF EXISTS ${this.TABLE_CREDIT_NOTES}`);
+    await queryRunner.query(`ALTER TABLE "${this.TABLE_INVOICES}" DROP COLUMN IF EXISTS "journal_entry_id"`);
+    await queryRunner.query(`ALTER TABLE "${this.TABLE_INVOICES}" DROP COLUMN IF EXISTS "sales_order_id"`);
     await queryRunner.query(`DROP TABLE IF EXISTS ${this.TABLE_INVOICE_ITEMS}`);
     await queryRunner.query(`DROP TABLE IF EXISTS ${this.TABLE_INVOICES}`);
     await queryRunner.query(`DROP TABLE IF EXISTS ${this.TABLE_SALES_ORDER_LINES}`);

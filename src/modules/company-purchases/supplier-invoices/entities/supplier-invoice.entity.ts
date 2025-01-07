@@ -15,6 +15,8 @@ import {
 import { SupplierEntity } from 'src/modules/company-contacts/suppliers/entities/supplier.entity';
 import { BrokerEntity } from 'src/modules/company-contacts/brokers/entities/broker.entity';
 import { SupplierInvoiceItem } from './supplier-invoice-item.entity';
+import { JournalEntry } from 'src/modules/financial/journal/entities/journal-entry.entity';
+import { PurchaseOrder } from '../../purchase-orders/entities/purchase-order.entity';
   
   @Entity('supplier_invoices')
   @Check(`"status" IN ('Unpaid','Paid','Partially Paid','Cancelled')`)
@@ -50,6 +52,15 @@ import { SupplierInvoiceItem } from './supplier-invoice-item.entity';
     @ApiProperty()
     @Column({ name: 'total_amount', type: 'numeric', precision: 15, scale: 2, default: 0 })
     totalAmount: number;
+
+    @ManyToOne(() => PurchaseOrder, { nullable: true, onDelete: 'SET NULL' })
+    @JoinColumn({ name: 'purchase_order_id' })
+    purchaseOrder?: PurchaseOrder;
+  
+    // Link to journal
+    @ManyToOne(() => JournalEntry, { nullable: true, onDelete: 'SET NULL' })
+    @JoinColumn({ name: 'journal_entry_id' })
+    journalEntry?: JournalEntry;
   
     @ApiProperty({ required: false })
     @Column({ type: 'varchar', length: 10, nullable: true })

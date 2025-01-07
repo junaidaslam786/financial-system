@@ -110,6 +110,8 @@ export class AddPurchasesAndSupplierInvoices1675000000000
         "currency" VARCHAR(10),
         "status" VARCHAR(50) DEFAULT 'Unpaid'
           CHECK ("status" IN ('Unpaid','Paid','Partially Paid','Cancelled')),
+        purchase_order_id UUID REFERENCES "purchase_orders"("id") ON UPDATE CASCADE ON DELETE SET NULL,
+        journal_entry_id UUID REFERENCES "journal_entries"("id") ON UPDATE CASCADE ON DELETE SET NULL,
         "created_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
         "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       );
@@ -126,6 +128,14 @@ export class AddPurchasesAndSupplierInvoices1675000000000
     await queryRunner.query(`
       CREATE INDEX "idx_supplier_invoices_broker_id"
         ON "supplier_invoices" ("broker_id");
+    `);
+    await queryRunner.query(`
+      CREATE INDEX "idx_supplier_invoices_purchase_order_id"
+        ON "supplier_invoices" ("purchase_order_id");
+    `);
+    await queryRunner.query(`
+      CREATE INDEX "idx_supplier_invoices_journal_entry_id"
+        ON "supplier_invoices" ("journal_entry_id");
     `);
 
     // 4) supplier_invoice_items table
@@ -172,25 +182,47 @@ export class AddPurchasesAndSupplierInvoices1675000000000
   public async down(queryRunner: QueryRunner): Promise<void> {
     // Drop in reverse order to avoid FK constraints
     // 4) supplier_invoice_items
-    await queryRunner.query(`DROP INDEX IF EXISTS "idx_supplier_invoice_items_product_id";`);
-    await queryRunner.query(`DROP INDEX IF EXISTS "idx_supplier_invoice_items_invoice_id";`);
+    await queryRunner.query(
+      `DROP INDEX IF EXISTS "idx_supplier_invoice_items_product_id";`,
+    );
+    await queryRunner.query(
+      `DROP INDEX IF EXISTS "idx_supplier_invoice_items_invoice_id";`,
+    );
     await queryRunner.query(`DROP TABLE IF EXISTS "supplier_invoice_items";`);
 
     // 3) supplier_invoices
-    await queryRunner.query(`DROP INDEX IF EXISTS "idx_supplier_invoices_broker_id";`);
-    await queryRunner.query(`DROP INDEX IF EXISTS "idx_supplier_invoices_supplier_id";`);
-    await queryRunner.query(`DROP INDEX IF EXISTS "idx_supplier_invoices_company_id";`);
+    await queryRunner.query(
+      `DROP INDEX IF EXISTS "idx_supplier_invoices_broker_id";`,
+    );
+    await queryRunner.query(
+      `DROP INDEX IF EXISTS "idx_supplier_invoices_supplier_id";`,
+    );
+    await queryRunner.query(
+      `DROP INDEX IF EXISTS "idx_supplier_invoices_company_id";`,
+    );
+    await queryRunner.query(`ALTER TABLE "supplier_invoices" DROP COLUMN IF EXISTS "journal_entry_id"`);
+    await queryRunner.query(`ALTER TABLE "supplier_invoices" DROP COLUMN IF EXISTS "purchase_order_id"`);
     await queryRunner.query(`DROP TABLE IF EXISTS "supplier_invoices";`);
 
     // 2) purchase_order_lines
-    await queryRunner.query(`DROP INDEX IF EXISTS "idx_purchase_order_lines_product_id";`);
-    await queryRunner.query(`DROP INDEX IF EXISTS "idx_purchase_order_lines_po_id";`);
+    await queryRunner.query(
+      `DROP INDEX IF EXISTS "idx_purchase_order_lines_product_id";`,
+    );
+    await queryRunner.query(
+      `DROP INDEX IF EXISTS "idx_purchase_order_lines_po_id";`,
+    );
     await queryRunner.query(`DROP TABLE IF EXISTS "purchase_order_lines";`);
 
     // 1) purchase_orders
-    await queryRunner.query(`DROP INDEX IF EXISTS "idx_purchase_orders_broker_id";`);
-    await queryRunner.query(`DROP INDEX IF EXISTS "idx_purchase_orders_supplier_id";`);
-    await queryRunner.query(`DROP INDEX IF EXISTS "idx_purchase_orders_company_id";`);
+    await queryRunner.query(
+      `DROP INDEX IF EXISTS "idx_purchase_orders_broker_id";`,
+    );
+    await queryRunner.query(
+      `DROP INDEX IF EXISTS "idx_purchase_orders_supplier_id";`,
+    );
+    await queryRunner.query(
+      `DROP INDEX IF EXISTS "idx_purchase_orders_company_id";`,
+    );
     await queryRunner.query(`DROP TABLE IF EXISTS "purchase_orders";`);
   }
 }
