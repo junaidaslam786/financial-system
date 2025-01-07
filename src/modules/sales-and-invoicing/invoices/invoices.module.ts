@@ -4,22 +4,24 @@ import { InvoicesService } from './invoices.service';
 import { InvoicesController } from './invoices.controller';
 import { Invoice } from './entities/invoice.entity';
 import { InvoiceItem } from './entities/invoice-item.entity';
-
-import { CustomersModule } from 'src/modules/company-contacts/customers/customers.module';
-import { BrokersModule } from 'src/modules/company-contacts/brokers/brokers.module';
-import { ProductsModule } from 'src/modules/product-and-inventory/products/products.module';
-import { CompaniesModule } from 'src/modules/companies/companies.module';
+import { Company } from 'src/modules/companies/entities/company.entity';
+import { CustomerEntity } from 'src/modules/company-contacts/customers/entities/customer.entity';
+import { BrokerEntity } from 'src/modules/company-contacts/brokers/entities/broker.entity';
+import { ProductEntity } from 'src/modules/product-and-inventory/products/entities/product.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Invoice, InvoiceItem]),
-    CustomersModule, // To fetch customer details and validate customer-related data
-    BrokersModule, // To fetch broker details and validate broker-related data
-    ProductsModule, // To validate product-related data in invoice items
-    CompaniesModule, // For company validation and data access
+    TypeOrmModule.forFeature([
+      Invoice,
+      InvoiceItem,
+      Company,
+      CustomerEntity,
+      BrokerEntity,
+      ProductEntity,
+    ]),
   ],
   controllers: [InvoicesController],
   providers: [InvoicesService],
-  exports: [InvoicesService], // Exporting the service for potential use in other modules
+  exports: [InvoicesService],
 })
 export class InvoicesModule {}

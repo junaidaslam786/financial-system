@@ -1,30 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-
-class InvoiceItemResponseDto {
-  @ApiProperty()
-  id: string;
-
-  @ApiProperty()
-  productId: string;
-
-  @ApiProperty()
-  quantity: number;
-
-  @ApiProperty()
-  unitPrice: number;
-
-  @ApiProperty()
-  discount: number;
-
-  @ApiProperty()
-  taxRate: number;
-
-  @ApiProperty()
-  totalPrice: number;
-
-  @ApiProperty()
-  description?: string;
-}
+import { InvoiceItemResponseDto } from './invoice-item-response.dto';
 
 export class InvoiceResponseDto {
   @ApiProperty()
@@ -33,10 +8,10 @@ export class InvoiceResponseDto {
   @ApiProperty()
   companyId: string;
 
-  @ApiProperty()
+  @ApiProperty({ required: false })
   customerId?: string;
 
-  @ApiProperty()
+  @ApiProperty({ required: false })
   brokerId?: string;
 
   @ApiProperty()
@@ -45,22 +20,22 @@ export class InvoiceResponseDto {
   @ApiProperty()
   invoiceDate: Date;
 
-  @ApiProperty()
+  @ApiProperty({ required: false })
   dueDate?: Date;
 
   @ApiProperty()
   totalAmount: number;
 
-  @ApiProperty()
+  @ApiProperty({ required: false })
   currency?: string;
 
   @ApiProperty()
   status: string;
 
-  @ApiProperty()
+  @ApiProperty({ required: false })
   termsAndConditions?: string;
 
-  @ApiProperty()
+  @ApiProperty({ required: false })
   notes?: string;
 
   @ApiProperty({ type: [InvoiceItemResponseDto] })

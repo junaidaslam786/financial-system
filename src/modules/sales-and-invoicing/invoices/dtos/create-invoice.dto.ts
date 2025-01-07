@@ -1,81 +1,62 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsString,
-  IsNotEmpty,
   IsOptional,
   IsDateString,
-  IsArray,
   ValidateNested,
+  IsUUID,
+  IsArray,
+  ArrayNotEmpty,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-
-class CreateInvoiceItemDto {
-  @ApiProperty()
-  @IsString()
-  productId: string;
-
-  @ApiProperty()
-  @IsNotEmpty()
-  quantity: number;
-
-  @ApiProperty()
-  @IsNotEmpty()
-  unitPrice: number;
-
-  @ApiProperty()
-  @IsOptional()
-  discount: number;
-
-  @ApiProperty()
-  @IsOptional()
-  taxRate: number;
-
-  @ApiProperty()
-  @IsOptional()
-  description?: string;
-}
+import { CreateInvoiceItemDto } from './create-invoice-item.dto';
 
 export class CreateInvoiceDto {
-  @ApiProperty()
-  @IsString()
+  @ApiProperty({ description: 'UUID of the company issuing this invoice' })
+  @IsUUID()
   companyId: string;
 
-  @ApiProperty()
+  @ApiProperty({ description: 'UUID of the customer', required: false })
+  @IsUUID()
   @IsOptional()
-  @IsString()
   customerId?: string;
 
-  @ApiProperty()
+  @ApiProperty({ description: 'UUID of the broker', required: false })
+  @IsUUID()
   @IsOptional()
-  @IsString()
   brokerId?: string;
 
-  @ApiProperty()
+  @ApiProperty({ description: 'Invoice date', required: false })
   @IsOptional()
   @IsDateString()
   invoiceDate?: string;
 
-  @ApiProperty()
+  @ApiProperty({ description: 'Due date of the invoice', required: false })
   @IsOptional()
   @IsDateString()
   dueDate?: string;
 
-  @ApiProperty()
+  @ApiProperty({ description: 'Unique invoice number' })
   @IsString()
   invoiceNumber: string;
 
-  @ApiProperty({ type: [CreateInvoiceItemDto] })
+  @ApiProperty({
+    type: [CreateInvoiceItemDto],
+    description: 'Array of line items for this invoice',
+  })
   @ValidateNested({ each: true })
   @Type(() => CreateInvoiceItemDto)
+  @IsArray()
+  @ArrayNotEmpty()
   items: CreateInvoiceItemDto[];
 
-  @ApiProperty()
-  @IsOptional()
+  @ApiProperty({ description: 'Invoice terms and conditions', required: false })
   @IsString()
+  @IsOptional()
   termsAndConditions?: string;
 
-  @ApiProperty()
-  @IsOptional()
+  @ApiProperty({ description: 'Any additional notes for the invoice', required: false })
   @IsString()
+  @IsOptional()
   notes?: string;
 }
