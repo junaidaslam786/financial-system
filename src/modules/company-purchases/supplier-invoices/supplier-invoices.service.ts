@@ -38,7 +38,7 @@ export class SupplierInvoicesService {
     private readonly journalService: JournalService,
   ) {}
 
- // ----------------------------
+  // ----------------------------
   // Supplier Invoices
   // ----------------------------
   async createInvoice(dto: CreateSupplierInvoiceDto): Promise<SupplierInvoice> {
@@ -137,7 +137,10 @@ export class SupplierInvoicesService {
     return inv;
   }
 
-  async updateInvoice(id: string, dto: UpdateSupplierInvoiceDto): Promise<SupplierInvoice> {
+  async updateInvoice(
+    id: string,
+    dto: UpdateSupplierInvoiceDto,
+  ): Promise<SupplierInvoice> {
     const inv = await this.findOneInvoice(id);
 
     if (dto.companyId) {
@@ -196,10 +199,14 @@ export class SupplierInvoicesService {
   // ----------------------------
   // Supplier Invoice Items (Sub-resource)
   // ----------------------------
-  private async buildInvoiceItem(dto: CreateSupplierInvoiceItemDto): Promise<SupplierInvoiceItem> {
+  private async buildInvoiceItem(
+    dto: CreateSupplierInvoiceItemDto,
+  ): Promise<SupplierInvoiceItem> {
     let product: ProductEntity | undefined;
     if (dto.productId) {
-      product = await this.productRepo.findOne({ where: { id: dto.productId } });
+      product = await this.productRepo.findOne({
+        where: { id: dto.productId },
+      });
       if (!product) {
         throw new BadRequestException('Invalid productId.');
       }
@@ -220,7 +227,10 @@ export class SupplierInvoicesService {
   }
 
   // A sub-resource approach for items...
-  async createItem(invoiceId: string, dto: CreateSupplierInvoiceItemDto): Promise<SupplierInvoiceItem> {
+  async createItem(
+    invoiceId: string,
+    dto: CreateSupplierInvoiceItemDto,
+  ): Promise<SupplierInvoiceItem> {
     const invoice = await this.findOneInvoice(invoiceId);
     const itemEntity = await this.buildInvoiceItem(dto);
     itemEntity.supplierInvoice = invoice;
@@ -233,17 +243,24 @@ export class SupplierInvoicesService {
       relations: ['supplierInvoice', 'product'],
     });
     if (!item) {
-      throw new NotFoundException(`SupplierInvoiceItem with id "${id}" not found.`);
+      throw new NotFoundException(
+        `SupplierInvoiceItem with id "${id}" not found.`,
+      );
     }
     return item;
   }
 
-  async updateItem(id: string, dto: UpdateSupplierInvoiceItemDto): Promise<SupplierInvoiceItem> {
+  async updateItem(
+    id: string,
+    dto: UpdateSupplierInvoiceItemDto,
+  ): Promise<SupplierInvoiceItem> {
     const item = await this.findOneItem(id);
 
     if (dto.productId !== undefined) {
       if (dto.productId) {
-        const product = await this.productRepo.findOne({ where: { id: dto.productId } });
+        const product = await this.productRepo.findOne({
+          where: { id: dto.productId },
+        });
         if (!product) {
           throw new BadRequestException('Invalid productId.');
         }
@@ -274,7 +291,9 @@ export class SupplierInvoicesService {
   // HELPER METHODS
   // ----------------------------
   private async validateCompany(companyId: string): Promise<Company> {
-    const company = await this.companyRepo.findOne({ where: { id: companyId } });
+    const company = await this.companyRepo.findOne({
+      where: { id: companyId },
+    });
     if (!company) {
       throw new BadRequestException('Invalid companyId.');
     }
@@ -282,7 +301,9 @@ export class SupplierInvoicesService {
   }
 
   private async validateSupplier(supplierId: string): Promise<SupplierEntity> {
-    const supplier = await this.supplierRepo.findOne({ where: { id: supplierId } });
+    const supplier = await this.supplierRepo.findOne({
+      where: { id: supplierId },
+    });
     if (!supplier) {
       throw new BadRequestException('Invalid supplierId.');
     }
@@ -299,18 +320,19 @@ export class SupplierInvoicesService {
 
   // Create the balanced journal entry for a purchase invoice
   private async createPurchaseInvoiceJournal(inv: SupplierInvoice) {
-    // Hard-coded account references (should come from config or database)
-    const accountsPayableId = 'ACCOUNTS-PAYABLE-ID';
-    const expenseOrInventoryId = 'EXPENSE-OR-INVENTORY-ID';
+    const company = inv.company;
+    if (!company.defaultApAccountId) {
+      throw new BadRequestException('Company default AP account not set.');
+    }
 
     const lines = [
       {
-        accountId: expenseOrInventoryId,
+        accountId: company.defaultCashAccountId,
         debit: inv.totalAmount,
         credit: 0,
       },
       {
-        accountId: accountsPayableId,
+        accountId: company.defaultApAccountId,
         debit: 0,
         credit: inv.totalAmount,
       },
@@ -318,7 +340,7 @@ export class SupplierInvoicesService {
 
     // You can store the date in the invoiceDate or use new Date()
     const entry = await this.journalService.create({
-      companyId: inv.company.id,
+      companyId: company.id,
       entryDate: inv.invoiceDate?.toISOString() || new Date().toISOString(),
       reference: `Supplier Invoice #${inv.invoiceNumber}`,
       description: `Auto posted for invoice ${inv.id}`,

@@ -35,12 +35,20 @@ export class Company {
   @Column({ name: 'default_currency', length: 10, default: 'USD' })
   defaultCurrency?: string;
 
-  /**
-   * The user who created this company
-   * (not a foreign key in the migration, but you can set it up as a relation if you want)
-   */
   @Column({ name: 'created_by_user_id', type: 'uuid', nullable: true })
   createdByUserId?: string;
+
+  @Column({ name: 'default_ar_account_id', type: 'uuid', nullable: true })
+  defaultArAccountId?: string;
+
+  @Column({ name: 'default_ap_account_id', type: 'uuid', nullable: true })
+  defaultApAccountId?: string;
+
+  @Column({ name: 'default_cash_account_id', type: 'uuid', nullable: true })
+  defaultCashAccountId?: string;
+
+  @Column({ name: 'default_sales_account_id', type: 'uuid', nullable: true })
+  defaultSalesAccountId?: string;
 
   @OneToMany(() => CompanyOwnerEntity, (owner) => owner.company, {
     cascade: true,

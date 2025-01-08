@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Invoice } from './entities/invoice.entity';
@@ -10,7 +14,7 @@ import { CustomerEntity } from 'src/modules/company-contacts/customers/entities/
 import { BrokerEntity } from 'src/modules/company-contacts/brokers/entities/broker.entity';
 import { ProductEntity } from 'src/modules/product-and-inventory/products/entities/product.entity';
 import { JournalService } from 'src/modules/financial/journal/journal.service';
-import { SalesOrderEntity } from 'src/modules/sales-and-invoicing/sales-orders/entities/sales-order.entity'; 
+import { SalesOrderEntity } from 'src/modules/sales-and-invoicing/sales-orders/entities/sales-order.entity';
 // If you want to link a sales order
 
 @Injectable()
@@ -77,7 +81,8 @@ export class InvoicesService {
     const items = await Promise.all(
       dto.items.map(async (itemDto) => {
         const product = await this.validateProduct(itemDto.productId);
-        const base = itemDto.quantity * itemDto.unitPrice - (itemDto.discount || 0);
+        const base =
+          itemDto.quantity * itemDto.unitPrice - (itemDto.discount || 0);
         const totalLine = base + (base * (itemDto.taxRate || 0)) / 100;
 
         return this.invoiceItemRepo.create({
@@ -207,7 +212,10 @@ export class InvoicesService {
         }),
       );
       invoice.items = newItems;
-      invoice.totalAmount = newItems.reduce((sum, it) => sum + it.totalPrice, 0);
+      invoice.totalAmount = newItems.reduce(
+        (sum, it) => sum + it.totalPrice,
+        0,
+      );
     }
 
     // Possibly also re-link the invoice to a different sales order if needed
@@ -236,7 +244,9 @@ export class InvoicesService {
   // PRIVATE METHODS
   // ----------------------------
   private async validateCompany(companyId: string): Promise<Company> {
-    const company = await this.companyRepo.findOne({ where: { id: companyId } });
+    const company = await this.companyRepo.findOne({
+      where: { id: companyId },
+    });
     if (!company) {
       throw new BadRequestException('Invalid companyId.');
     }
@@ -244,7 +254,9 @@ export class InvoicesService {
   }
 
   private async validateCustomer(customerId: string): Promise<CustomerEntity> {
-    const customer = await this.customerRepo.findOne({ where: { id: customerId } });
+    const customer = await this.customerRepo.findOne({
+      where: { id: customerId },
+    });
     if (!customer) {
       throw new BadRequestException('Invalid customerId.');
     }
@@ -260,7 +272,9 @@ export class InvoicesService {
   }
 
   private async validateProduct(productId: string): Promise<ProductEntity> {
-    const product = await this.productRepo.findOne({ where: { id: productId } });
+    const product = await this.productRepo.findOne({
+      where: { id: productId },
+    });
     if (!product) {
       throw new BadRequestException(`Invalid productId: ${productId}`);
     }
@@ -273,24 +287,28 @@ export class InvoicesService {
    *  - Credit Sales Revenue
    */
   private async createSalesInvoiceJournal(inv: Invoice) {
-    const accountsReceivable = 'ACCOUNTS-RECEIVABLE-ID';
-    const salesRevenue = 'SALES-REVENUE-ID';
+    const company = inv.company;
+    if (!company.defaultArAccountId || !company.defaultSalesAccountId) {
+      throw new BadRequestException(
+        'Company default AR or Sales account not set.',
+      );
+    }
 
     const lines = [
       {
-        accountId: accountsReceivable,
+        accountId: company.defaultArAccountId,
         debit: inv.totalAmount,
         credit: 0,
       },
       {
-        accountId: salesRevenue,
+        accountId: company.defaultSalesAccountId,
         debit: 0,
         credit: inv.totalAmount,
       },
     ];
 
     const entry = await this.journalService.create({
-      companyId: inv.company.id,
+      companyId: company.id,
       entryDate: inv.invoiceDate.toISOString(),
       reference: `Invoice #${inv.invoiceNumber}`,
       description: `Auto posted sales invoice ${inv.id}`,

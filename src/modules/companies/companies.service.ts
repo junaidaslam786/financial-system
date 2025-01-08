@@ -10,6 +10,7 @@ import { CreateCompanyDto, UpdateCompanyDto } from './dtos';
 import { UsersService } from '../users/users.service';
 import { CompanyOwnersService } from '../company-owners/company-owners.service';
 import { Role } from '../auth/interfaces/role.enum';
+import { AccountsService } from '../financial/accounts/accounts.service';
 
 @Injectable()
 export class CompaniesService {
@@ -18,6 +19,7 @@ export class CompaniesService {
     private readonly companyRepo: Repository<Company>,
     private readonly usersService: UsersService,
     private readonly companyOwnersService: CompanyOwnersService,
+    private readonly accountsService: AccountsService,
   ) {}
 
   /**
@@ -59,7 +61,28 @@ export class CompaniesService {
       ownershipPercentage: 100, // If you want to default to full ownership
     });
 
+    // 5) Create the default chart of accounts for this company
+    await this.createDefaultAccountsForCompany(savedCompany);
+
     return savedCompany;
+  }
+
+  private async createDefaultAccountsForCompany(company: Company) {
+    // E.g. call AccountsService to create minimal chart of accounts
+    const {
+      arAccount,
+      apAccount,
+      cashAccount,
+      salesAccount,
+    } = await this.accountsService.createMinimalChartOfAccounts(company.id);
+
+    // Update the company record with these default account IDs
+    company.defaultArAccountId = arAccount.id;
+    company.defaultApAccountId = apAccount.id;
+    company.defaultCashAccountId = cashAccount.id;
+    company.defaultSalesAccountId = salesAccount.id;
+
+    await this.companyRepo.save(company);
   }
 
   async findAllCompanies(userId: string) {
