@@ -44,7 +44,6 @@ import { DebitNotesModule } from './modules/sales-and-invoicing/debit-notes/debi
 import { PaymentsModule } from './modules/sales-and-invoicing/payments/payments.module';
 import { PaymentMethodsModule } from './modules/sales-and-invoicing/payment-methods/payment-methods.module';
 import { TransactionsPaymentsModule } from './modules/sales-and-invoicing/transactions-payments/transactions-payments.module';
-import { SupplierInvoicesModule } from './modules/company-purchases/supplier-invoices/supplier-invoices.module';
 import { PurchaseOrdersModule } from './modules/company-purchases/purchase-orders/purchase-orders.module';
 import { WeighbridgeTicketsModule } from './modules/weighbridge-and-qualitycontrol/weighbridge-ticket/weighbridge-tickets.module';
 import { GrainQualityTestsModule } from './modules/weighbridge-and-qualitycontrol/grain-quality-test/grain-quality-tests.module';
@@ -107,7 +106,6 @@ import { DayBookModule } from './modules/financial/day-book/day-book.module';
     PaymentsModule,
     PaymentMethodsModule,
     TransactionsPaymentsModule,
-    SupplierInvoicesModule,
     PurchaseOrdersModule,
     WeighbridgeTicketsModule,
     GrainQualityTestsModule,

@@ -1,3 +1,4 @@
+import { ContactEntity } from 'src/modules/company-contacts/contacts/entities/contact.entity';
 import { CompanyOwnerEntity } from 'src/modules/company-owners/entities/company-owner.entity';
 import { EmployeeEntity } from 'src/modules/employees/entities/employee.entity';
 import { PartnerEntity } from 'src/modules/partners/entities/partner.entity';
@@ -60,6 +61,9 @@ export class Company {
 
   @OneToMany(() => PartnerEntity, (partner) => partner.company)
   partners: PartnerEntity[];
+
+  @OneToMany(() => ContactEntity, (contact) => contact.company)
+  contacts: ContactEntity[];
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamp with time zone' })
   createdAt: Date;

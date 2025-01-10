@@ -10,6 +10,7 @@ import { BrokerEntity } from 'src/modules/company-contacts/brokers/entities/brok
 import { ProductEntity } from 'src/modules/product-and-inventory/products/entities/product.entity';
 import { JournalService } from 'src/modules/financial/journal/journal.service';
 import { JournalEntry } from 'src/modules/financial/journal/entities/journal-entry.entity';
+import { SupplierEntity } from 'src/modules/company-contacts/suppliers/entities/supplier.entity';
 
 @Module({
   imports: [
@@ -20,7 +21,8 @@ import { JournalEntry } from 'src/modules/financial/journal/entities/journal-ent
       CustomerEntity,
       BrokerEntity,
       ProductEntity,
-      JournalEntry
+      JournalEntry,
+      SupplierEntity
     ]),
     
   ],

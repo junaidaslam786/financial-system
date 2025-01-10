@@ -7,6 +7,8 @@ import {
   IsUUID,
   IsArray,
   ArrayNotEmpty,
+  IsEnum,
+  IsDate,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { CreateInvoiceItemDto } from './create-invoice-item.dto';
@@ -16,10 +18,24 @@ export class CreateInvoiceDto {
   @IsUUID()
   companyId: string;
 
+  @ApiProperty({ description: 'Type of invoice (Purchase or Sale)' })
+  @IsEnum(['Purchase','Sale'])
+  invoiceType: 'Purchase' | 'Sale';
+
   @ApiPropertyOptional({ description: 'Link to a sales order (optional)' })
   @IsOptional()
   @IsUUID()
   salesOrderId?: string; 
+
+  @ApiPropertyOptional({ description: 'Link to a purchase order (optional)' })
+  @IsOptional()
+  @IsUUID()
+  purchaseOrderId?: string;
+
+  @ApiPropertyOptional({description: 'UUID of the supplier (optional)'})
+  @IsUUID()
+  @IsOptional()
+  supplierId?: string;
 
   @ApiProperty({ description: 'UUID of the customer', required: false })
   @IsUUID()
@@ -32,8 +48,9 @@ export class CreateInvoiceDto {
   brokerId?: string;
 
   @ApiProperty({ description: 'Invoice date', required: false })
+  @Type(() => Date)
   @IsOptional()
-  @IsDateString()
+  @IsDate()
   invoiceDate?: string;
 
   @ApiProperty({ description: 'Due date of the invoice', required: false })
@@ -59,6 +76,13 @@ export class CreateInvoiceDto {
   @IsString()
   @IsOptional()
   termsAndConditions?: string;
+
+  @IsOptional() @IsString()
+  currency?: string;
+
+  @IsOptional() @IsString()
+  status?: string; // 'Unpaid','Paid','Partially Paid','Cancelled'
+
 
   @ApiProperty({ description: 'Any additional notes for the invoice', required: false })
   @IsString()

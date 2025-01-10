@@ -7,6 +7,8 @@ import {
     Param,
     Body,
     UseGuards,
+    ParseUUIDPipe,
+    BadRequestException,
   } from '@nestjs/common';
   import { CurrenciesService } from './currencies.service';
   import { CreateCurrencyDto } from './dtos/create-currency.dto';
@@ -31,9 +33,12 @@ import { Roles } from 'src/common/decorators/roles.decorator';
       return this.currenciesService.create(dto);
     }
   
-    @Get()
-    async findAll(): Promise<Currency[]> {
-      return this.currenciesService.findAll();
+    @Get('company/:companyId')
+    async findAll(@Param('companyId', ParseUUIDPipe) companyId: string): Promise<Currency[]> {
+      if (!companyId) {
+        throw new BadRequestException('companyId param is required');
+      }
+      return this.currenciesService.findAll(companyId);
     }
   
     @Get(':id')

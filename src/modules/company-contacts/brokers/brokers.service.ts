@@ -61,8 +61,11 @@ export class BrokersService {
     return this.brokerRepo.save(broker);
   }
 
-  async findAll(): Promise<BrokerEntity[]> {
-    return this.brokerRepo.find();
+  async findAll(companyId: string): Promise<BrokerEntity[]> {
+    return this.brokerRepo.find({
+      where: { company: { id: companyId } },
+      relations: ['account', 'company'],
+    });
   }
 
   async findOne(id: string): Promise<BrokerEntity> {

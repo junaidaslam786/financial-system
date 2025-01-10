@@ -86,8 +86,9 @@ export class PurchaseOrdersService {
     return this.purchaseOrderRepo.save(purchaseOrder);
   }
 
-  async findAllPurchaseOrders(): Promise<PurchaseOrder[]> {
+  async findAllPurchaseOrders(companyId: string): Promise<PurchaseOrder[]> {
     return this.purchaseOrderRepo.find({
+      where: {company: { id: companyId }},
       relations: ['company', 'supplier', 'broker', 'lines', 'lines.product'],
     });
   }

@@ -7,6 +7,8 @@ import {
     Param,
     Body,
     UseGuards,
+    ParseUUIDPipe,
+    BadRequestException,
   } from '@nestjs/common';
   import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
   import { PurchaseOrdersService } from './purchase-orders.service';
@@ -41,10 +43,13 @@ import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
     }
   
     
-    @Get()
+    @Get('company/:companyId')
     @ApiOperation({ summary: 'Get all purchase orders' })
-    findAll(): Promise<PurchaseOrder[]> {
-      return this.purchaseOrdersService.findAllPurchaseOrders();
+    findAll(@Param('companyId', ParseUUIDPipe) companyId: string ): Promise<PurchaseOrder[]> {
+      if (!companyId) {
+        throw new BadRequestException('companyId param is required');
+      }
+      return this.purchaseOrdersService.findAllPurchaseOrders(companyId);
     }
   
     

@@ -1,9 +1,14 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Company } from 'src/modules/companies/entities/company.entity';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 
 @Entity('exchange_rates')
 export class ExchangeRate {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @ManyToOne(() => Company, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'company_id' })
+  company: Company;
 
   @Column({ name: 'base_currency', length: 10 })
   baseCurrency: string;

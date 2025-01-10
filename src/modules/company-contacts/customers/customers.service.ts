@@ -71,8 +71,11 @@ export class CustomersService {
     return this.customerRepo.save(customer);
   }
 
-  async findAll(): Promise<CustomerEntity[]> {
-    return this.customerRepo.find();
+  async findAll(companyId: string): Promise<CustomerEntity[]> {
+    return this.customerRepo.find({
+      where: { company: { id: companyId } },
+      relations: ['account', 'defaultPriceList', 'company'],
+    });
   }
 
   async findOne(id: string): Promise<CustomerEntity> {

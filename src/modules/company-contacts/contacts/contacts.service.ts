@@ -25,8 +25,11 @@ export class ContactsService {
     return this.contactRepo.save(contact);
   }
 
-  async findAll(): Promise<ContactEntity[]> {
-    return this.contactRepo.find();
+  async findAll(companyId: string): Promise<ContactEntity[]> {
+    return this.contactRepo.find({
+      where: { company: { id: companyId } },
+      relations: ['company'],
+    });
   }
 
   async findOne(id: string): Promise<ContactEntity> {

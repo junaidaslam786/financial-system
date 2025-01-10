@@ -23,13 +23,20 @@ export class UomService {
       throw new NotFoundException(`Company with ID "${dto.companyId}" not found.`);
     }
   
-    const uom = this.uomRepo.create(dto);
+    const uom = this.uomRepo.create({
+      uomName: dto.uomName,
+      uomDescription: dto.uomDescription || '',
+      company: { id: dto.companyId } as Company,
+    });
     return this.uomRepo.save(uom);
   }
   
 
-  async findAllUom() {
-    return this.uomRepo.find();
+  async findAllUom(companyId: string) {
+    return this.uomRepo.find({
+      where: { company: { id: companyId } },
+
+    });
   }
 
   async updateUom(id: string, dto: UpdateUomDto) {

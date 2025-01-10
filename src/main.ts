@@ -34,8 +34,9 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
 
   SwaggerModule.setup('api', app, document, {
-    // optional: customSiteTitle: 'My Financial System Docs'
-      
+    swaggerOptions: {
+      persistAuthorization: true,
+    },
   });
 
 

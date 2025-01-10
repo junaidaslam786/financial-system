@@ -23,8 +23,13 @@ export class BrokerageAgreementsService {
     return this.agreementRepo.save(agreement);
   }
 
-  async findAll(): Promise<BrokerageAgreementEntity[]> {
-    return this.agreementRepo.find();
+  async findAll(companyId: string): Promise<BrokerageAgreementEntity[]> {
+    return this.agreementRepo.find({
+      where: {
+        broker: { company: { id: companyId } },
+      },
+      relations: ['broker', 'broker.company'],
+    });
   }
 
   async findOne(id: string): Promise<BrokerageAgreementEntity> {

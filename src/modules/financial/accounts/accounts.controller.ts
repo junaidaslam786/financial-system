@@ -8,6 +8,7 @@ import {
     Body,
     Query,
     UseGuards,
+    BadRequestException,
   } from '@nestjs/common';
   import { AccountsService } from './accounts.service';
   import { CreateAccountDto } from './dtos/create-account.dto';
@@ -35,7 +36,9 @@ import { Roles } from 'src/common/decorators/roles.decorator';
   
     @Get()
     async findAll(@Query('companyId') companyId: string): Promise<Account[]> {
-      // Optionally pass companyId as a query param
+      if (!companyId) {
+        throw new BadRequestException('companyId query param is required');
+      }
       return this.accountsService.findAll(companyId);
     }
   

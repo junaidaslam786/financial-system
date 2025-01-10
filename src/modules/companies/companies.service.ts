@@ -158,6 +158,9 @@ export class CompaniesService {
     user.defaultCompanyId = savedCompany.id;
     await this.usersService.saveUser(user);
 
+    // Create default chart of accounts for this company
+    await this.createDefaultAccountsForCompany(savedCompany);
+
     return savedCompany;
   }
 }

@@ -8,6 +8,7 @@ import {
     Body,
     Query,
     UseGuards,
+    BadRequestException,
   } from '@nestjs/common';
   import { PriceListsService } from './price-lists.service';
   import { CreatePriceListDto } from './dtos/create-price-list.dto';
@@ -34,6 +35,9 @@ import { Roles } from 'src/common/decorators/roles.decorator';
   
     @Get()
     async findAll(@Query('companyId') companyId: string): Promise<PriceList[]> {
+      if (!companyId) {
+        throw new BadRequestException('companyId param is required');
+      }
       return this.priceListsService.findAll(companyId);
     }
   

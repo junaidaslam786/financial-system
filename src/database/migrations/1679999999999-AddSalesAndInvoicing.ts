@@ -70,6 +70,8 @@ export class AddSalesAndInvoicing1672000000000 implements MigrationInterface {
       CREATE TABLE ${this.TABLE_INVOICES} (
         id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
         company_id UUID NOT NULL REFERENCES companies(id) ON UPDATE CASCADE ON DELETE CASCADE,
+        invoice_type VARCHAR(20) NOT NULL CHECK (invoice_type IN ('Purchase','Sale')),
+        supplier_id UUID REFERENCES suppliers(id) ON UPDATE CASCADE ON DELETE SET NULL,
         customer_id UUID REFERENCES customers(id) ON UPDATE CASCADE ON DELETE SET NULL,
         broker_id UUID REFERENCES brokers(id) ON UPDATE CASCADE ON DELETE SET NULL,
         invoice_number VARCHAR(100) UNIQUE,
@@ -81,6 +83,7 @@ export class AddSalesAndInvoicing1672000000000 implements MigrationInterface {
         terms_and_conditions TEXT,
         notes TEXT,
         sales_order_id UUID REFERENCES sales_orders(id) ON UPDATE CASCADE ON DELETE SET NULL,
+        purchase_order_id UUID REFERENCES purchase_orders(id) ON UPDATE CASCADE ON DELETE SET NULL,
         journal_entry_id UUID REFERENCES journal_entries(id) ON UPDATE CASCADE ON DELETE SET NULL,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -90,8 +93,10 @@ export class AddSalesAndInvoicing1672000000000 implements MigrationInterface {
     // Create indexes for `invoices`
     await queryRunner.query(`
       CREATE INDEX idx_${this.TABLE_INVOICES}_company_id ON ${this.TABLE_INVOICES}(company_id);
+      CREATE INDEX idx_${this.TABLE_INVOICES}_supplier_id ON ${this.TABLE_INVOICES}(supplier_id);
       CREATE INDEX idx_${this.TABLE_INVOICES}_customer_id ON ${this.TABLE_INVOICES}(customer_id);
       CREATE INDEX idx_${this.TABLE_INVOICES}_broker_id ON ${this.TABLE_INVOICES}(broker_id);
+      CREATE INDEX idx_${this.TABLE_INVOICES}_purchase_order_id ON ${this.TABLE_INVOICES}(purchase_order_id);
       CREATE INDEX idx_${this.TABLE_INVOICES}_sales_order_id ON ${this.TABLE_INVOICES}(sales_order_id);
       CREATE INDEX idx_${this.TABLE_INVOICES}_journal_entry_id ON ${this.TABLE_INVOICES}(journal_entry_id);
     `);
@@ -107,10 +112,7 @@ export class AddSalesAndInvoicing1672000000000 implements MigrationInterface {
         unit_price NUMERIC(12, 2) CHECK(unit_price >= 0),
         discount NUMERIC(12, 2) DEFAULT 0.00 CHECK(discount >= 0),
         tax_rate NUMERIC(5, 2) DEFAULT 0.00 CHECK(tax_rate >= 0),
-        total_price NUMERIC(12, 2) GENERATED ALWAYS AS (
-          (quantity * unit_price) - discount +
-          ((quantity * unit_price - discount) * (tax_rate / 100))
-        ) STORED
+        total_price NUMERIC(12, 2)
       );
     `);
 
@@ -222,9 +224,16 @@ export class AddSalesAndInvoicing1672000000000 implements MigrationInterface {
     await queryRunner.query(`DROP TABLE IF EXISTS ${this.TABLE_PAYMENTS}`);
     await queryRunner.query(`DROP TABLE IF EXISTS ${this.TABLE_DEBIT_NOTES}`);
     await queryRunner.query(`DROP TABLE IF EXISTS ${this.TABLE_CREDIT_NOTES}`);
-    await queryRunner.query(`ALTER TABLE "${this.TABLE_INVOICES}" DROP COLUMN IF EXISTS "journal_entry_id"`);
-    await queryRunner.query(`ALTER TABLE "${this.TABLE_INVOICES}" DROP COLUMN IF EXISTS "sales_order_id"`);
+     // drop invoice_items first
+     await queryRunner.query(`DROP INDEX IF EXISTS idx_invoice_items_product_id;`);
+     await queryRunner.query(`DROP INDEX IF EXISTS idx_invoice_items_invoice_id;`);
     await queryRunner.query(`DROP TABLE IF EXISTS ${this.TABLE_INVOICE_ITEMS}`);
+    // drop invoices
+    await queryRunner.query(`DROP INDEX IF EXISTS idx_invoices_journal_entry_id;`);
+    await queryRunner.query(`DROP INDEX IF EXISTS idx_invoices_broker_id;`);
+    await queryRunner.query(`DROP INDEX IF EXISTS idx_invoices_customer_id;`);
+    await queryRunner.query(`DROP INDEX IF EXISTS idx_invoices_supplier_id;`);
+    await queryRunner.query(`DROP INDEX IF EXISTS idx_invoices_company_id;`);
     await queryRunner.query(`DROP TABLE IF EXISTS ${this.TABLE_INVOICES}`);
     await queryRunner.query(`DROP TABLE IF EXISTS ${this.TABLE_SALES_ORDER_LINES}`);
     await queryRunner.query(`DROP TABLE IF EXISTS ${this.TABLE_SALES_ORDERS}`);

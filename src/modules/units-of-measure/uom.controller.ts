@@ -9,6 +9,7 @@ import {
     Body,
     ParseUUIDPipe,
     UseGuards,
+    NotFoundException,
   } from '@nestjs/common';
   import { UomService } from './uom.service';
   import { CreateUomDto, UpdateUomDto } from './dtos';
@@ -31,9 +32,12 @@ import { Roles } from 'src/common/decorators/roles.decorator';
       return this.uomService.createUom(dto);
     }
   
-    @Get()
-    async findAll() {
-      return this.uomService.findAllUom();
+    @Get('company/:companyId')
+    async findAll(@Param('companyId', ParseUUIDPipe) companyId: string) {
+      if (!companyId) {
+        throw new NotFoundException('Company ID not provided');
+      }
+      return this.uomService.findAllUom(companyId);
     }
   
     @Patch(':id')

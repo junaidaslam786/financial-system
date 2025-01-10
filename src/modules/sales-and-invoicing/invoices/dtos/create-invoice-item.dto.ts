@@ -5,11 +5,13 @@ import {
   IsOptional,
   IsNotEmpty,
   Min,
+  IsUUID,
 } from 'class-validator';
 
 export class CreateInvoiceItemDto {
   @ApiProperty({ description: 'UUID of the product' })
-  @IsString()
+  @IsOptional()
+  @IsUUID()
   productId: string;
 
   @ApiProperty({ description: 'Quantity of the product', example: 10 })

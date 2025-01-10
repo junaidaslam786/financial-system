@@ -8,6 +8,7 @@ import {
     Body,
     ParseUUIDPipe,
     UseGuards,
+    BadRequestException,
   } from '@nestjs/common';
   import { TradersService } from './traders.service';
   import { CreateTraderDto } from './dtos/create-trader.dto';
@@ -31,9 +32,12 @@ import {
       return this.tradersService.create(dto);
     }
   
-    @Get()
-    async findAll() {
-      return this.tradersService.findAll();
+    @Get('company/:companyId')
+    async findAll(@Param('companyId', ParseUUIDPipe) companyId: string) {
+      if (!companyId) {
+        throw new BadRequestException('companyId param is required');
+      }
+      return this.tradersService.findAll(companyId);
     }
   
     @Get(':id')

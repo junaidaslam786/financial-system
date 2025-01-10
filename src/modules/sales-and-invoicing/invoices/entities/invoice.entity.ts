@@ -15,6 +15,8 @@ import { CustomerEntity } from 'src/modules/company-contacts/customers/entities/
 import { BrokerEntity } from 'src/modules/company-contacts/brokers/entities/broker.entity';
 import { SalesOrderEntity } from '../../sales-orders/entities/sales-order.entity';
 import { JournalEntry } from 'src/modules/financial/journal/entities/journal-entry.entity';
+import { SupplierEntity } from 'src/modules/company-contacts/suppliers/entities/supplier.entity';
+import { PurchaseOrder } from 'src/modules/company-purchases/purchase-orders/entities/purchase-order.entity';
 
 @Entity('invoices')
 export class Invoice {
@@ -24,6 +26,14 @@ export class Invoice {
   @ManyToOne(() => Company, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'company_id' })
   company: Company;
+
+  @Column({ name: 'invoice_type', type: 'varchar', length: 20 })
+  invoiceType: 'Purchase' | 'Sale';
+
+  // For a Purchase
+  @ManyToOne(() => SupplierEntity, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'supplier_id' })
+  supplier?: SupplierEntity;
 
   @ManyToOne(() => CustomerEntity, { onDelete: 'SET NULL', nullable: true })
   @JoinColumn({ name: 'customer_id' })
@@ -41,6 +51,9 @@ export class Invoice {
 
   @Column({ name: 'due_date', type: 'date', nullable: true })
   dueDate?: Date;
+  
+  @Column({ length: 10, nullable: true })
+  currency?: string;
 
   @Column({
     name: 'total_amount',
@@ -55,13 +68,15 @@ export class Invoice {
   @JoinColumn({ name: 'sales_order_id' })
   salesOrder?: SalesOrderEntity;
 
+  @ManyToOne(() => PurchaseOrder, { onDelete: 'SET NULL', nullable: true })
+  @JoinColumn({ name: 'purchase_order_id' })
+  purchaseOrder?: PurchaseOrder;
+
   // Linking to journal entries
   @ManyToOne(() => JournalEntry, { onDelete: 'SET NULL', nullable: true })
   @JoinColumn({ name: 'journal_entry_id' })
   journalEntry?: JournalEntry;
 
-  @Column({ length: 10, nullable: true })
-  currency?: string;
 
   @Column({
     type: 'varchar',

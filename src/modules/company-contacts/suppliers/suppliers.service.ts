@@ -68,9 +68,11 @@ export class SuppliersService {
     return this.supplierRepo.save(supplier);
   }
 
-  async findAll(): Promise<SupplierEntity[]> {
-    // Possibly load relations if needed: { relations: ['company', 'account'] }
-    return this.supplierRepo.find();
+  async findAll(companyId: string): Promise<SupplierEntity[]> {
+    return this.supplierRepo.find({
+      where: { company: { id: companyId } },
+      relations: ['account', 'company', 'defaultPriceList'],
+    });
   }
 
   async findOne(id: string): Promise<SupplierEntity> {

@@ -22,8 +22,11 @@ export class ExchangeRatesService {
     return this.exchangeRateRepo.save(exchangeRate);
   }
 
-  async findAll(): Promise<ExchangeRate[]> {
-    return this.exchangeRateRepo.find();
+  async findAll(companyId: string): Promise<ExchangeRate[]> {
+    return this.exchangeRateRepo.find({
+      where: { company: { id: companyId } },
+      relations: ['company'],
+    });
   }
 
   async findOne(id: string): Promise<ExchangeRate> {

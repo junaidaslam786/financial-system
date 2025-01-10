@@ -1,4 +1,5 @@
 // entities/unit-of-measure.entity.ts
+import { Company } from 'src/modules/companies/entities/company.entity';
 import {
     Entity,
     PrimaryGeneratedColumn,
@@ -7,18 +8,20 @@ import {
     UpdateDateColumn,
     Index,
     Unique,
+    ManyToOne,
+    JoinColumn,
   } from 'typeorm';
   
   @Entity({ name: 'units_of_measure' })
-  @Unique('idx_units_of_measure_company_uom_name', ['companyId', 'uomName']) 
+  // @Unique('idx_units_of_measure_company_uom_name', ['companyId', 'uomName']) 
   export class UnitOfMeasureEntity {
     @PrimaryGeneratedColumn('uuid')
     id: string;
   
     // Possibly relate to a company if needed:
-    @Column({ type: 'uuid' })
-    @Index('idx_units_of_measure_company_id')
-    companyId: string;
+    @ManyToOne(() => Company, { nullable: true })
+    @JoinColumn({ name: 'company_id' })
+    company?: Company;
   
     @Column({ name: 'uom_name', length: 50 })
     uomName: string;

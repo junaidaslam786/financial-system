@@ -28,6 +28,7 @@ export class AccountsService {
   async findAll(companyId: string): Promise<Account[]> {
     return this.accountRepo.find({
       where: { company: { id: companyId } },
+      relations: ['company'],
     });
   }
 

@@ -21,7 +21,7 @@ import {
     @JoinColumn({ name: 'company_id' })
     company: Company;
   
-    @Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
+    @Column({ type: 'date', default: () => 'CURRENT_TIMESTAMP' })
     entryDate: Date;
   
     @Column({ length: 100, nullable: true })

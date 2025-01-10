@@ -23,8 +23,11 @@ export class CurrenciesService {
     return await this.currencyRepo.save(currency);
   }
 
-  async findAll(): Promise<Currency[]> {
-    return this.currencyRepo.find();
+  async findAll(companyId: string): Promise<Currency[]> {
+    return this.currencyRepo.find({
+      where: { company: { id: companyId } },
+      relations: ['company'],
+    });
   }
 
   async findOne(id: string): Promise<Currency> {
