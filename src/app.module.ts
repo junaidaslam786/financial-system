@@ -50,6 +50,7 @@ import { GrainQualityTestsModule } from './modules/weighbridge-and-qualitycontro
 import { AuditTrailsModule } from './modules/audittrails-and-workflow/audit-trail/audit-trails.module';
 import { WorkflowsModule } from './modules/audittrails-and-workflow/workflows/workflows.module';
 import { DayBookModule } from './modules/financial/day-book/day-book.module';
+import { ContactLedgerModule } from './modules/company-contacts/contact-ledger/contact-ledger.module';
 
 @Module({
   imports: [
@@ -111,7 +112,8 @@ import { DayBookModule } from './modules/financial/day-book/day-book.module';
     GrainQualityTestsModule,
     AuditTrailsModule,
     WorkflowsModule,
-    DayBookModule
+    DayBookModule,
+    ContactLedgerModule
   ],
   controllers: [AppController],
   providers: [AppService],

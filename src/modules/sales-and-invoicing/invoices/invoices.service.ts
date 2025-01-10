@@ -18,6 +18,7 @@ import { SalesOrderEntity } from 'src/modules/sales-and-invoicing/sales-orders/e
 import { SupplierEntity } from 'src/modules/company-contacts/suppliers/entities/supplier.entity';
 import { PurchaseOrder } from 'src/modules/company-purchases/purchase-orders/entities/purchase-order.entity';
 import { CreateInvoiceItemDto } from './dtos/create-invoice-item.dto';
+import { ContactLedgerService } from 'src/modules/company-contacts/contact-ledger/contact-ledger.service';
 // If you want to link a sales order
 
 @Injectable()
@@ -48,6 +49,7 @@ export class InvoicesService {
     private readonly productRepo: Repository<ProductEntity>,
 
     private readonly journalService: JournalService, // for auto-posting to ledger
+    private readonly contactLedgerService: ContactLedgerService,
   ) {}
 
   /**
@@ -229,9 +231,38 @@ export class InvoicesService {
   
       // Link the newly created journal entry
       savedInvoice.journalEntry = journalEntry;
-      const finalInvoice = await invoiceRepoTx.save(savedInvoice);
-  
-      return finalInvoice;
+      await invoiceRepoTx.save(savedInvoice);
+
+      // 5) Post to contact ledger
+      // Purchase => credit the supplier ledger
+      if (savedInvoice.invoiceType === 'Purchase' && savedInvoice.supplier) {
+        await this.contactLedgerService.addCredit(
+          company.id,
+          'Supplier',
+          savedInvoice.supplier.id,
+          savedInvoice.totalAmount,
+          'INVOICE',
+          savedInvoice.id,
+          `Purchase Invoice #${savedInvoice.invoiceNumber}`,
+          manager,
+        );
+      }
+
+      // Sale => debit the customer ledger
+      if (savedInvoice.invoiceType === 'Sale' && savedInvoice.customer) {
+        await this.contactLedgerService.addDebit(
+          company.id,
+          'Customer',
+          savedInvoice.customer.id,
+          savedInvoice.totalAmount,
+          'INVOICE',
+          savedInvoice.id,
+          `Sales Invoice #${savedInvoice.invoiceNumber}`,
+          manager,
+        );
+      }
+
+      return savedInvoice;
     });
   }
   

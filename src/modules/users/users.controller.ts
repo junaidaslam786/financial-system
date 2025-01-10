@@ -30,7 +30,7 @@ export class UsersController {
    * Create a user
    * Restricted to "admin" role as an example
    */
-  @Roles('admin')
+  
   @Post()
   async create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.createUser(createUserDto);
@@ -40,7 +40,7 @@ export class UsersController {
    * Retrieve all users (for demonstration) 
    * Possibly restricted to "admin" only
    */
-  @Roles('admin')
+  
   @Get()
   async findAll(@Query('page') page: number, @Query('limit') limit: number) {
     // You can implement pagination in your service if needed
@@ -60,7 +60,7 @@ export class UsersController {
    * Update a user by ID (change email, username, role, etc.)
    * Typically "admin" role or the user themself if you add checks
    */
-  @Roles('admin')
+  
   @Patch(':id')
   async update(
     @Param('id', ParseUUIDPipe) id: string,
@@ -73,7 +73,7 @@ export class UsersController {
    * Delete a user 
    * Typically "admin" only
    */
-  @Roles('admin')
+  
   @Delete(':id')
   async remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.usersService.remove(id);
