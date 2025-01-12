@@ -76,6 +76,7 @@ export class InvoicesController {
       customerId: invoice.customer?.id || null,
       brokerId: invoice.broker?.id || null,
       invoiceNumber: invoice.invoiceNumber,
+      invoiceType: invoice.invoiceType,
       invoiceDate: invoice.invoiceDate,
       dueDate: invoice.dueDate,
       totalAmount: invoice.totalAmount,

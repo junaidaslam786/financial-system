@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository, EntityManager } from 'typeorm';
 import { ContactLedgerEntry } from './entities/contact-ledger-entry.entity';
+import { ContactType } from 'src/common/enums/contact-type.enum';
 
 @Injectable()
 export class ContactLedgerService {
@@ -20,7 +21,7 @@ export class ContactLedgerService {
    */
   async addCredit(
     companyId: string,
-    contactType: 'Supplier' | 'Customer' | 'Broker' | 'Trader' | 'Partner',
+    contactType: ContactType,
     contactId: string,
     amount: number,
     referenceType: string,
@@ -52,7 +53,7 @@ export class ContactLedgerService {
    */
   async addDebit(
     companyId: string,
-    contactType: 'Supplier' | 'Customer' | 'Broker' | 'Trader' | 'Partner',
+    contactType: ContactType,
     contactId: string,
     amount: number,
     referenceType: string,
@@ -89,7 +90,7 @@ export class ContactLedgerService {
    */
   async getContactBalance(
     companyId: string,
-    contactType: 'Supplier' | 'Customer' | 'Broker' | 'Trader' | 'Partner',
+    contactType: ContactType,
     contactId: string,
   ): Promise<number> {
     const result = await this.ledgerRepo
@@ -108,7 +109,7 @@ export class ContactLedgerService {
    */
   async getContactLedger(
     companyId: string,
-    contactType: 'Supplier' | 'Customer' | 'Broker' | 'Trader' | 'Partner',
+    contactType: ContactType,
     contactId: string,
   ): Promise<ContactLedgerEntry[]> {
     return this.ledgerRepo.find({

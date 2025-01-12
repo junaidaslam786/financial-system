@@ -85,6 +85,7 @@ export class JournalService {
   async findAll(companyId: string): Promise<JournalEntry[]> {
     return this.journalEntryRepo.find({
       where: { company: { id: companyId } },
+      relations: ['lines', 'createdBy', 'company', 'lines.account'],
       order: { entryDate: 'DESC', createdAt: 'DESC' },
     });
   }
@@ -95,6 +96,7 @@ export class JournalService {
   async findOne(id: string): Promise<JournalEntry> {
     const entry = await this.journalEntryRepo.findOne({
       where: { id },
+      relations: ['lines', 'createdBy', 'company', 'lines.account'],
     });
     if (!entry) {
       throw new NotFoundException(`Journal Entry with ID "${id}" not found`);

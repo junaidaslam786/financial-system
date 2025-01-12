@@ -1,3 +1,4 @@
+import { ContactType } from 'src/common/enums/contact-type.enum';
 import {
     Entity,
     PrimaryGeneratedColumn,
@@ -25,7 +26,7 @@ import {
       name: 'contact_type',
       length: 50,
     })
-    contactType: 'Supplier' | 'Customer' | 'Broker' | 'Trader' | 'Partner';
+    contactType: ContactType;
   
     @Column({ name: 'contact_id' })
     contactId: string; // references e.g. suppliers.id or customers.id

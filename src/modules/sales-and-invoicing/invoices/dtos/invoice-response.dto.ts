@@ -18,6 +18,9 @@ export class InvoiceResponseDto {
   invoiceNumber: string;
 
   @ApiProperty()
+  invoiceType: string;
+
+  @ApiProperty()
   invoiceDate: Date;
 
   @ApiProperty({ required: false })

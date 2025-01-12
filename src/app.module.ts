@@ -51,6 +51,7 @@ import { AuditTrailsModule } from './modules/audittrails-and-workflow/audit-trai
 import { WorkflowsModule } from './modules/audittrails-and-workflow/workflows/workflows.module';
 import { DayBookModule } from './modules/financial/day-book/day-book.module';
 import { ContactLedgerModule } from './modules/company-contacts/contact-ledger/contact-ledger.module';
+import { ReportsModule } from './modules/reports/reports.module';
 
 @Module({
   imports: [
@@ -113,7 +114,8 @@ import { ContactLedgerModule } from './modules/company-contacts/contact-ledger/c
     AuditTrailsModule,
     WorkflowsModule,
     DayBookModule,
-    ContactLedgerModule
+    ContactLedgerModule,
+    ReportsModule
   ],
   controllers: [AppController],
   providers: [AppService],
