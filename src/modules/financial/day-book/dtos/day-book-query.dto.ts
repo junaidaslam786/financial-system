@@ -1,8 +1,10 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   IsString,
   IsOptional,
   IsDateString,
+  IsDate,
 } from 'class-validator';
 
 export class DayBookQueryDto {
@@ -13,16 +15,18 @@ export class DayBookQueryDto {
   @ApiPropertyOptional({
     description: 'Start date (YYYY-MM-DD). If omitted, defaults to current day.',
   })
+  @Type(() => Date)
   @IsOptional()
-  @IsDateString()
-  startDate?: string; // e.g. '2025-01-01'
+  @IsDate()
+  startDate?: Date; // e.g. '2025-01-01'
 
   @ApiPropertyOptional({
     description: 'End date (YYYY-MM-DD). If omitted, same as startDate.',
   })
+  @Type(() => Date)
   @IsOptional()
-  @IsDateString()
-  endDate?: string; // e.g. '2025-01-01'
+  @IsDate()
+  endDate?: Date; // e.g. '2025-01-01'
 
   /**
    * You can add more filters, e.g. showDetailed vs. aggregated

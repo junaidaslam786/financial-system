@@ -20,29 +20,42 @@ export class DayBookService {
    */
   async getDayBook(query: DayBookQueryDto): Promise<DayBookResponseDto> {
     // 1) Resolve date range
-    const start = query.startDate ? query.startDate : this.today();
-    const end = query.endDate ? query.endDate : start;
-
-    const startDateTime = new Date(`${start}T00:00:00`);
-    const endDateTime = new Date(`${end}T23:59:59.999`);
-
-    // 2) Query journal entries for the date range & company
+    const start = query.startDate || this.today(); 
+    const end = query.endDate || start;
+  
+    const startDateValue = new Date(start);
+    const endDateValue = new Date(end);
+  
+    const startDateTime = new Date(
+      startDateValue.getFullYear(),
+      startDateValue.getMonth(),
+      startDateValue.getDate(),
+      0, 0, 0, 0
+    );
+  
+    const endDateTime = new Date(
+      endDateValue.getFullYear(),
+      endDateValue.getMonth(),
+      endDateValue.getDate(),
+      23, 59, 59, 999
+    );
+  
     const entries = await this.journalEntryRepo.find({
       where: {
         company: { id: query.companyId },
         entryDate: Between(startDateTime, endDateTime),
       },
-      relations: ['lines'], // we want to load lines
+      relations: ['lines'],
       order: { entryDate: 'ASC' },
     });
-
     // 3) Decide if we want aggregated or detailed
     if (query.aggregated) {
-      return this.buildAggregatedResponse(start, end, entries);
+      return this.buildAggregatedResponse(start.toString(), end.toString(), entries);
     } else {
-      return this.buildDetailedResponse(start, end, entries);
+      return this.buildDetailedResponse(start.toString(), end.toString(), entries);
     }
   }
+  
 
   /**
    * Build a detailed daybook response, listing each journal entry & lines
@@ -75,6 +88,9 @@ export class DayBookService {
     const aggregationMap: Record<string, Record<string, { debit: number; credit: number }>> = {};
 
     for (const entry of entries) {
+      if (typeof entry.entryDate === 'string') {
+        entry.entryDate = new Date(entry.entryDate);
+      }
       const dateStr = entry.entryDate.toISOString().split('T')[0];
       if (!aggregationMap[dateStr]) {
         aggregationMap[dateStr] = {};

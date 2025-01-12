@@ -9,7 +9,7 @@ export class CreateJournalEntryDto {
   @Type(() => Date)
   @IsOptional()
   @IsDate()
-  entryDate?: string;
+  entryDate?: Date;
 
   @IsOptional()
   @IsString()

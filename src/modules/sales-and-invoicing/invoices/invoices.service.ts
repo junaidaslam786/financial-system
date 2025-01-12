@@ -475,7 +475,7 @@ export class InvoicesService {
 
     const entry = await this.journalService.create({
       companyId: company.id,
-      entryDate: inv.invoiceDate.toISOString(),
+      entryDate: inv.invoiceDate,
       reference: `Invoice #${inv.invoiceNumber}`,
       description: `Auto posted sales invoice ${inv.id}`,
       lines,
@@ -548,7 +548,7 @@ export class InvoicesService {
 
       const journalEntry = await this.journalService.createInTransaction(manager, {
         companyId: company.id,
-        entryDate: inv.invoiceDate?.toISOString(),
+        entryDate: inv.invoiceDate,
         reference: `Purchase Invoice #${inv.invoiceNumber}`,
         description: `Auto posted purchase invoice ${inv.id}`,
         lines, // ...
@@ -580,7 +580,7 @@ export class InvoicesService {
 
       const journalEntry = await this.journalService.create({
         companyId: company.id,
-        entryDate: inv.invoiceDate?.toISOString(),
+        entryDate: inv.invoiceDate,
         reference: `Sales Invoice #${inv.invoiceNumber}`,
         description: `Auto posted sales invoice ${inv.id}`,
         lines,

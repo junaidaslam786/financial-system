@@ -54,8 +54,9 @@ export class CreateInvoiceDto {
   invoiceDate?: string;
 
   @ApiProperty({ description: 'Due date of the invoice', required: false })
+  @Type(() => Date)
   @IsOptional()
-  @IsDateString()
+  @IsDate()
   dueDate?: string;
 
   @ApiProperty({ description: 'Unique invoice number' })
