@@ -9,13 +9,25 @@ export class PurchaseOrderResponseDto {
   id: string;
 
   @ApiProperty()
-  companyId: string;
+  company: {
+    id: string;
+    name: string;
+    defaultCurrency: string;
+  };
 
   @ApiProperty({ required: false })
-  supplierId?: string;
+  supplier: {
+    id: string;
+    supplierName: string;
+    contactInfo: string;
+  };
 
   @ApiProperty({ required: false })
-  brokerId?: string;
+  broker: {
+    id: string;
+    brokerName: string;
+    contactInfo: string
+  };
 
   @ApiProperty()
   orderNumber: string;
@@ -38,10 +50,5 @@ export class PurchaseOrderResponseDto {
   @ApiProperty({ type: () => [PurchaseOrderLineResponseDto] })
   lines: PurchaseOrderLineResponseDto[];
 
-  // If you want the full objects instead of just IDs:
-  @ApiProperty({ type: () => SupplierEntity, required: false })
-  supplier?: SupplierEntity;
-
-  @ApiProperty({ type: () => BrokerEntity, required: false })
-  broker?: BrokerEntity;
+ 
 }

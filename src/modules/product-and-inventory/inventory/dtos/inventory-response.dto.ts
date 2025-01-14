@@ -5,13 +5,37 @@ export class InventoryResponseDto {
   id: string;
 
   @ApiProperty()
-  companyId: string;
+  company: {
+    id: string;
+    name: string;
+    defaultCurrency: string;
+  };
 
   @ApiProperty({ nullable: true })
-  warehouseId?: string;
+  warehouse: {
+    id: string;
+    location: string;
+    capacity: number;
+  };
 
   @ApiProperty({ nullable: true })
-  productId?: string;
+  product: {
+    id: string;
+    productName: string;
+    productType: string;
+    sku: string;
+    category: {
+      id: string;
+      categoryName: string;
+    };
+    unitOfMeasure: {
+      id: string;
+      uomName: string;
+    };
+    costPrice: number;
+    sellingPrice: number;
+    defaultCurrency: string;
+  };
 
   @ApiProperty()
   quantity: number;

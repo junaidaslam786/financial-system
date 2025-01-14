@@ -5,7 +5,11 @@ export class SupplierResponseDto {
   id: string;
 
   @ApiProperty()
-  companyId: string;
+  company: {
+    id: string;
+    name: string;
+    defaultCurrency: string
+  };
 
   @ApiProperty()
   supplierName: string;
@@ -17,10 +21,19 @@ export class SupplierResponseDto {
   paymentTerms?: string;
 
   @ApiProperty({ nullable: true })
-  defaultPriceListId?: string;
+  defaultPriceList: {
+    id: string;
+    listName: string;
+    currency: string;
+  };
 
   @ApiProperty({ nullable: true })
-  accountId?: string;
+  account: {
+    id: string;
+    accountName: string;
+    accountType: string;
+    currency: string
+  };
 
   @ApiProperty()
   createdAt: Date;

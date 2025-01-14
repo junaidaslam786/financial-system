@@ -6,13 +6,25 @@ export class InvoiceResponseDto {
   id: string;
 
   @ApiProperty()
-  companyId: string;
+  company: {
+    id: string;
+    name: string;
+    defaultCurrency: string;
+  };
 
   @ApiProperty({ required: false })
-  customerId?: string;
+  customer: {
+    id: string;
+    customerName: string;
+    customerInfo: string;
+  }
 
   @ApiProperty({ required: false })
-  brokerId?: string;
+  broker: {
+    id: string;
+    brokerName: string;
+    ContactInfo: string
+  };
 
   @ApiProperty()
   invoiceNumber: string;

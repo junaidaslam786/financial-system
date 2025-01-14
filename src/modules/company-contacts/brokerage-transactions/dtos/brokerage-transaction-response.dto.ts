@@ -5,7 +5,11 @@ export class BrokerageTransactionResponseDto {
   id: string;
 
   @ApiProperty()
-  brokerId: string;
+  broker: {
+    id: string;
+    brokerName: string;
+    contactInfo: string;
+  };
 
   @ApiProperty({ nullable: true })
   relatedDocumentId?: string;

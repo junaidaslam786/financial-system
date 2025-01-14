@@ -5,7 +5,11 @@ export class PurchaseOrderLineResponseDto {
   id: string;
 
   @ApiProperty({ required: false })
-  productId?: string;
+  product: {
+    id: string;
+    productName: string;
+    productType: string;
+  };
 
   @ApiProperty()
   quantity: number;

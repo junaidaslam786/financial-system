@@ -16,7 +16,26 @@ export class DayBookResponseDto {
  */
 export class DayBookEntryDto {
   @ApiProperty()
-  journalEntryId: string;
+  journalEntry: {
+    id: string;
+    reference: string;
+    description: string;
+    entryDate: string;
+    createdBy: {
+      id: string;
+      username: string
+    };
+    lines: {
+      id: string;
+      account: {
+        id: string;
+        accountName: string;
+        accountType: string;
+      };
+      debit: number;
+      credit: number;
+    }[];
+  };
 
   @ApiProperty()
   reference?: string;

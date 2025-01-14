@@ -69,12 +69,8 @@ export class CompaniesService {
 
   private async createDefaultAccountsForCompany(company: Company) {
     // E.g. call AccountsService to create minimal chart of accounts
-    const {
-      arAccount,
-      apAccount,
-      cashAccount,
-      salesAccount,
-    } = await this.accountsService.createMinimalChartOfAccounts(company.id);
+    const { arAccount, apAccount, cashAccount, salesAccount } =
+      await this.accountsService.createMinimalChartOfAccounts(company.id);
 
     // Update the company record with these default account IDs
     company.defaultArAccountId = arAccount.id;
@@ -108,13 +104,24 @@ export class CompaniesService {
         'employees',
         'partners',
         'contacts',
+      
+
         // ... other relations ...
       ],
     });
   }
 
   async findOneCompany(id: string) {
-    const company = await this.companyRepo.findOne({ where: { id } });
+    const company = await this.companyRepo.findOne({
+      where: { id },
+      relations: [
+        'companyOwners',
+        'employees',
+        'partners',
+        'contacts',
+        
+      ],
+    });
     if (!company) {
       throw new NotFoundException('Company not found');
     }

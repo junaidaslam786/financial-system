@@ -28,12 +28,12 @@ export class BrokerageAgreementsService {
       where: {
         broker: { company: { id: companyId } },
       },
-      relations: ['broker', 'broker.company'],
+      relations: ['broker', 'broker.company', ],
     });
   }
 
   async findOne(id: string): Promise<BrokerageAgreementEntity> {
-    const agreement = await this.agreementRepo.findOne({ where: { id } });
+    const agreement = await this.agreementRepo.findOne({ where: { id }, relations: ['broker', 'broker.company'] });
     if (!agreement) {
       throw new NotFoundException(`BrokerageAgreement with ID "${id}" not found`);
     }

@@ -5,13 +5,21 @@ export class LotResponseDto {
   id: string;
 
   @ApiProperty()
-  companyId: string;
+  company: {
+    id: string;
+    name: string;
+    defaultCurrency: string;
+  };
 
   @ApiProperty()
   lotNumber: string;
 
   @ApiProperty({ nullable: true })
-  sourceSupplierId?: string;
+  sourceSupplier: {
+    id: string;
+    supplierName: string;
+    contactInfo: string;
+  };
 
   @ApiProperty()
   initialQuantity: number;

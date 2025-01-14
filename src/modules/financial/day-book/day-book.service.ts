@@ -62,7 +62,26 @@ export class DayBookService {
    */
   private buildDetailedResponse(start: string, end: string, entries: JournalEntry[]): DayBookResponseDto {
     const data: DayBookEntryDto[] = entries.map((entry) => ({
-      journalEntryId: entry.id,
+      journalEntry: {
+        id: entry.id,
+        reference: entry.reference,
+        description: entry.description,
+        entryDate: entry.entryDate.toISOString().split('T')[0],
+        createdBy: {
+          id: entry.createdBy.id,
+          username: entry.createdBy.username,
+        },
+        lines: entry.lines.map((l) => ({
+          id: l.id,
+          account: {
+            id: l.account.id,
+            accountName: l.account.accountName,
+            accountType: l.account.accountType,
+          },
+          debit: Number(l.debit),
+          credit: Number(l.credit),
+        })),
+      },
       reference: entry.reference,
       description: entry.description,
       entryDate: entry.entryDate.toISOString().split('T')[0],

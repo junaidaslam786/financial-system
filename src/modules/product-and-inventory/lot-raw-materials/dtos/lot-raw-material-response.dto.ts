@@ -5,10 +5,31 @@ export class LotRawMaterialResponseDto {
   id: string;
 
   @ApiProperty()
-  lotId: string;
+  lot: {
+    id: string;
+    lotNumber: string;
+    currentQuantity: number;
+    status: string;
+  };
 
   @ApiProperty()
-  productId: string;
+  product: {
+    id: string;
+    productName: string;
+    productType: string;
+    sku: string;
+    category: {
+      id: string;
+      categoryName: string;
+    };
+    unitOfMeasure: {
+      id: string;
+      uomName: string;
+    };
+    costPrice: number;
+    sellingPrice: number;
+    defaultCurrency: string;
+  };
 
   @ApiProperty()
   quantity: number;

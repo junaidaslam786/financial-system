@@ -5,7 +5,11 @@ export class ProcessingStageResponseDto {
   id: string;
 
   @ApiProperty()
-  companyId: string;
+  company: {
+    id: string;
+    name: string;
+    defaultCurrency: string
+  };
 
   @ApiProperty()
   stageName: string;

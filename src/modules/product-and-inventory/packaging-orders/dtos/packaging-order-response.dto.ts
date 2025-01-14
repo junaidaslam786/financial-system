@@ -5,10 +5,20 @@ export class PackagingOrderResponseDto {
   id: string;
 
   @ApiProperty()
-  companyId: string;
+  company: {
+    id: string;
+    name: string;
+    defaultCurrency: string;
+  };
 
   @ApiProperty({ nullable: true })
-  productionOrderId?: string;
+  productionOrder: {
+    id: string;
+    orderNumber: string;
+    orderDate: Date;
+    expectedDeliveryDate: Date;
+    status: string;
+  };
 
   @ApiProperty({ nullable: true })
   orderNumber?: string;

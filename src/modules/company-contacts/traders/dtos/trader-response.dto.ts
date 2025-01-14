@@ -5,7 +5,11 @@ export class SupplierResponseDto {
   id: string;
 
   @ApiProperty()
-  companyId: string;
+  company: {
+    id: string;
+    name: string;
+    defaultCurrency: string;
+  };
 
   @ApiProperty()
   traderName: string;
@@ -17,7 +21,12 @@ export class SupplierResponseDto {
   commissionRate?: string;
 
   @ApiProperty({ nullable: true })
-  accountId?: string;
+  account: {
+    id: string;
+    accountName: string;
+    accountType: string;
+    currency: string;
+  };
 
   @ApiProperty()
   createdAt: Date;

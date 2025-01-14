@@ -5,7 +5,11 @@ export class InvoiceItemResponseDto {
   id: string;
 
   @ApiProperty()
-  productId: string;
+  product: {
+    id: string;
+    productName: string;
+    productType: string;
+  };
 
   @ApiProperty()
   quantity: number;

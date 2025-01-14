@@ -31,16 +31,20 @@ export class InvoicesController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new invoice with line items' })
-  async create(@Body() createInvoiceDto: CreateInvoiceDto): Promise<InvoiceResponseDto> {
+  async create(
+    @Body() createInvoiceDto: CreateInvoiceDto,
+  ): Promise<InvoiceResponseDto> {
     const invoice = await this.invoicesService.create(createInvoiceDto);
     return this.toInvoiceResponseDto(invoice);
   }
 
   @Get()
   @ApiOperation({ summary: 'Get all invoices for a given company' })
-  async findAll(@Query('companyId') companyId: string): Promise<InvoiceResponseDto[]> {
+  async findAll(
+    @Query('companyId') companyId: string,
+  ): Promise<InvoiceResponseDto[]> {
     const invoices = await this.invoicesService.findAll(companyId);
-    return invoices.map((inv) => this.toInvoiceResponseDto(inv));
+    return invoices.map((invoice) => this.toInvoiceResponseDto(invoice));
   }
 
   @Get(':id')
@@ -72,9 +76,22 @@ export class InvoicesController {
   private toInvoiceResponseDto(invoice: Invoice): InvoiceResponseDto {
     return {
       id: invoice.id,
-      companyId: invoice.company?.id || '',
-      customerId: invoice.customer?.id || null,
-      brokerId: invoice.broker?.id || null,
+      company: {
+        id: invoice.company?.id || '',
+        name: invoice.company?.name || '',
+        defaultCurrency: invoice.company?.defaultCurrency || '',
+        // Add other company fields as needed
+      },
+      customer: {
+        id: invoice.customer?.id || '',
+        customerName: invoice.customer?.customerName || '',
+        customerInfo: invoice.customer?.contactInfo || '',
+      },
+      broker: {
+        id: invoice.broker?.id || '',
+        brokerName: invoice.broker?.brokerName || '',
+        ContactInfo: invoice.broker?.contactInfo || '',
+      },
       invoiceNumber: invoice.invoiceNumber,
       invoiceType: invoice.invoiceType,
       invoiceDate: invoice.invoiceDate,
@@ -86,18 +103,23 @@ export class InvoicesController {
       notes: invoice.notes,
       createdAt: invoice.createdAt,
       updatedAt: invoice.updatedAt,
-      items: invoice.items?.map((item: InvoiceItem) => ({
-        id: item.id,
-        productId: item.product?.id || '',
-        quantity: item.quantity,
-        unitPrice: item.unitPrice,
-        discount: item.discount,
-        taxRate: item.taxRate,
-        totalPrice: item.totalPrice,
-        description: item.description,
-        createdAt: item.createdAt,
-        updatedAt: item.updatedAt,
-      })) || [],
+      items:
+        invoice.items?.map((item: InvoiceItem) => ({
+          id: item.id,
+          product: {
+            id: item.product?.id || '',
+            productName: item.product?.productName || '',
+            productType: item.product?.productType || '',
+          },
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+          discount: item.discount,
+          taxRate: item.taxRate,
+          totalPrice: item.totalPrice,
+          description: item.description,
+          createdAt: item.createdAt,
+          updatedAt: item.updatedAt,
+        })) || [],
     };
   }
 }
