@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, EntityManager, Repository } from 'typeorm';
 import { JournalEntry } from './entities/journal-entry.entity';
@@ -22,40 +22,159 @@ export class JournalService {
   /**
    * Create a new journal entry + lines in one go.
    */
+  // async create(dto: CreateJournalEntryDto): Promise<JournalEntry> {
+  //   // Basic line validation
+  //   this.validateLines(dto.lines);
+
+  //   // Check total debit == total credit
+  //   if (!this.isBalanced(dto.lines)) {
+  //     throw new UnbalancedJournalEntryException();
+  //   }
+
+  //   // Create the JournalEntry entity
+  //   const entry = this.journalEntryRepo.create({
+  //     company: { id: dto.companyId } as any,
+  //     entryDate: dto.entryDate ? new Date(dto.entryDate) : undefined,
+  //     reference: dto.reference,
+  //     description: dto.description,
+  //     createdBy: dto.createdBy ? ({ id: dto.createdBy } as any) : undefined,
+  //     lines: dto.lines.map((lineDto) => {
+  //       const line = new JournalLine();
+  //       line.account = { id: lineDto.accountId } as any;
+  //       line.debit = lineDto.debit;
+  //       line.credit = lineDto.credit;
+  //       return line;
+  //     }),
+  //   });
+
+  //   return this.journalEntryRepo.save(entry);
+  // }
+
   async create(dto: CreateJournalEntryDto): Promise<JournalEntry> {
-    // Basic line validation
+    // 1) Basic line validation
     this.validateLines(dto.lines);
 
-    // Check total debit == total credit
+    // 2) Possibly auto-offset if single line
+    if (dto.lines.length === 1 && dto.autoOffset) {
+      // Load the company for default account
+      const companyRepo = this.dataSource.getRepository(Company);
+      const company = await companyRepo.findOne({ where: { id: dto.companyId } });
+      if (!company) {
+        throw new BadRequestException(`Company not found for ID: ${dto.companyId}`);
+      }
+      if (!company.defaultCashAccountId) {
+        // or pick whichever default you want
+        throw new BadRequestException(`No defaultCashAccountId set for this company.`);
+      }
+
+      const [singleLine] = dto.lines;
+      const { debit, credit } = singleLine;
+
+      if (debit > 0 && credit === 0) {
+        // We'll credit the defaultCashAccountId with the same amount
+        dto.lines.push({
+          accountId: company.defaultArAccountId,
+          debit: 0,
+          credit: debit,
+        });
+      } else if (credit > 0 && debit === 0) {
+        // We'll debit the defaultCashAccountId with the same amount
+        dto.lines.push({
+          accountId: company.defaultApAccountId,
+          debit: credit,
+          credit: 0,
+        });
+      } else {
+        throw new BadRequestException(
+          'Single-line entry must have either debit > 0 or credit > 0 (not both).',
+        );
+      }
+    }
+
+    // 3) Check total debit == total credit
     if (!this.isBalanced(dto.lines)) {
       throw new UnbalancedJournalEntryException();
     }
 
-    // Create the JournalEntry entity
+    // 4) Build the JournalEntry entity
     const entry = this.journalEntryRepo.create({
-      company: { id: dto.companyId } as any,
+      company: { id: dto.companyId } as Company,
       entryDate: dto.entryDate ? new Date(dto.entryDate) : undefined,
       reference: dto.reference,
       description: dto.description,
-      createdBy: dto.createdBy ? ({ id: dto.createdBy } as any) : undefined,
+      createdBy: dto.createdBy ? ({ id: dto.createdBy } as User) : undefined,
       lines: dto.lines.map((lineDto) => {
         const line = new JournalLine();
-        line.account = { id: lineDto.accountId } as any;
+        line.account = { id: lineDto.accountId } as Account;
         line.debit = lineDto.debit;
         line.credit = lineDto.credit;
         return line;
       }),
     });
 
+    // 5) Save & return
     return this.journalEntryRepo.save(entry);
   }
 
-  // journal.service.ts
-  async createInTransaction(
-    manager: EntityManager,
-    dto: CreateJournalEntryDto,
-  ): Promise<JournalEntry> {
+  
+  // async createInTransaction(
+  //   manager: EntityManager,
+  //   dto: CreateJournalEntryDto,
+  // ): Promise<JournalEntry> {
+  //   this.validateLines(dto.lines);
+  //   if (!this.isBalanced(dto.lines)) {
+  //     throw new UnbalancedJournalEntryException();
+  //   }
+
+  //   const entry = manager.create(JournalEntry, {
+  //     company: { id: dto.companyId } as Company,
+  //     entryDate: dto.entryDate ? new Date(dto.entryDate) : undefined,
+  //     reference: dto.reference,
+  //     description: dto.description,
+  //     createdBy: dto.createdBy ? ({ id: dto.createdBy } as User) : undefined,
+  //     lines: dto.lines.map((lineDto) => {
+  //       return manager.create(JournalLine, {
+  //         account: { id: lineDto.accountId } as Account,
+  //         debit: lineDto.debit,
+  //         credit: lineDto.credit,
+  //       });
+  //     }),
+  //   });
+
+  //   return manager.save(entry);
+  // }
+
+  async createInTransaction(manager: EntityManager, dto: CreateJournalEntryDto): Promise<JournalEntry> {
     this.validateLines(dto.lines);
+
+    if (dto.lines.length === 1 && dto.autoOffset) {
+      // load the company using manager
+      const company = await manager.findOne(Company, { where: { id: dto.companyId } });
+      if (!company) {
+        throw new BadRequestException(`Company not found for ID: ${dto.companyId}`);
+      }
+      if (!company.defaultCashAccountId) {
+        throw new BadRequestException(`No defaultCashAccountId set for this company.`);
+      }
+
+      const [singleLine] = dto.lines;
+      if (singleLine.debit > 0 && singleLine.credit === 0) {
+        dto.lines.push({
+          accountId: company.defaultArAccountId,
+          debit: 0,
+          credit: singleLine.debit,
+        });
+      } else if (singleLine.credit > 0 && singleLine.debit === 0) {
+        dto.lines.push({
+          accountId: company.defaultApAccountId,
+          debit: singleLine.credit,
+          credit: 0,
+        });
+      } else {
+        throw new BadRequestException('Invalid single line for auto-offset');
+      }
+    }
+
     if (!this.isBalanced(dto.lines)) {
       throw new UnbalancedJournalEntryException();
     }

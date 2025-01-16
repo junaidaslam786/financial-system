@@ -33,6 +33,8 @@ import {
     @ManyToOne(() => User, { nullable: true, onDelete: 'SET NULL' })
     @JoinColumn({ name: 'created_by' })
     createdBy?: User;
+
+    
   
     /**
      * One JournalEntry -> Many JournalLine
