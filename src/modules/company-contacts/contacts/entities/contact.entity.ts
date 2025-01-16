@@ -1,5 +1,5 @@
 import { Company } from 'src/modules/companies/entities/company.entity';
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn } from 'typeorm';
 
 @Entity({ name: 'contacts' })
 export class ContactEntity {
@@ -35,9 +35,9 @@ export class ContactEntity {
   @JoinColumn({ name: 'company_id' })
   company: Company;
 
-  @Column({ name: 'created_at', type: 'timestamptz' })
+  @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 
-  @Column({ name: 'updated_at', type: 'timestamptz' })
+  @CreateDateColumn({ name: 'updated_at', type: 'timestamptz' })
   updatedAt: Date;
 }

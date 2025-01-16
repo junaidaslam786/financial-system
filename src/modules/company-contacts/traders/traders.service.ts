@@ -1,81 +1,71 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { TraderEntity } from './entities/trader.entity';
 import { CreateTraderDto } from './dtos/create-trader.dto';
 import { UpdateTraderDto } from './dtos/update-trader.dto';
 import { Account } from 'src/modules/financial/accounts/entities/account.entity';
 import { Company } from 'src/modules/companies/entities/company.entity';
+import { ContactsService } from '../contacts/contacts.service';
+import { ContactEntity } from '../contacts/entities/contact.entity';
 
 @Injectable()
 export class TradersService {
   constructor(
+    private readonly dataSource: DataSource,
     @InjectRepository(TraderEntity)
     private readonly traderRepo: Repository<TraderEntity>,
     @InjectRepository(Account)
     private readonly accountRepo: Repository<Account>,
+    private readonly contactsService: ContactsService,
   ) {}
 
-  // async create(dto: CreateTraderDto): Promise<TraderEntity> {
-  //   // Convert commissionRate from string to number (if provided)
-  //   const commissionRate = dto.commissionRate ? Number(dto.commissionRate) : undefined;
-
-  //   let account = null;
-  //   if (dto.accountId) {
-  //     account = await this.accountRepo.findOne({ where: { id: dto.accountId } });
-  //     if (!account) {
-  //       throw new NotFoundException(`Account with ID "${dto.accountId}" not found`);
-  //     }
-  //   }
-
-  //   const trader = this.traderRepo.create({
-  //     company: { id: dto.companyId } as Company,
-  //     traderName: dto.traderName,
-  //     contactInfo: dto.contactInfo,
-  //     commissionRate,
-  //     account,
-  //   });
-
-  //   return this.traderRepo.save(trader);
-  // }
-
   async create(dto: CreateTraderDto): Promise<TraderEntity> {
-    // Convert commissionRate from string to number (if provided)
-    const commissionRate = dto.commissionRate
-      ? Number(dto.commissionRate)
-      : undefined;
-
-    // Handle account creation or retrieval
-    let account = null;
-    if (dto.accountId) {
-      account = await this.accountRepo.findOne({
-        where: { id: dto.accountId },
-      });
-      if (!account) {
-        throw new NotFoundException(
-          `Account with ID "${dto.accountId}" not found`,
-        );
+    return this.dataSource.transaction(async (manager) => {
+      // Handle Account logic
+      let account = null;
+      if (dto.accountId) {
+        account = await manager.findOne(Account, {
+          where: { id: dto.accountId },
+        });
+        if (!account) {
+          throw new NotFoundException(
+            `Account with ID "${dto.accountId}" not found`,
+          );
+        }
+      } else {
+        account = manager.create(Account, {
+          accountName: dto.traderName,
+          accountType: 'Trader',
+          company: { id: dto.companyId },
+        });
+        account = await manager.save(account);
       }
-    } else {
-      // Automatically create an account for the trader if not provided
-      account = this.accountRepo.create({
-        accountName: dto.traderName,
-        accountType: 'Trader',
+
+      // Create the Trader entity
+      const trader = manager.create(TraderEntity, {
+        traderName: dto.traderName,
+        contactInfo: dto.contactInfo,
+        commissionRate: Number(dto.commissionRate) ?? 0,
         company: { id: dto.companyId },
+        account,
       });
-      account = await this.accountRepo.save(account);
-    }
+      const savedTrader = await manager.save(trader);
 
-    // Create the trader entity
-    const trader = this.traderRepo.create({
-      company: { id: dto.companyId } as Company,
-      traderName: dto.traderName,
-      contactInfo: dto.contactInfo,
-      commissionRate,
-      account,
+      // Sync with Contacts table
+      await this.contactsService.create({
+        entityType: 'Trader',
+        entityId: savedTrader.id,
+        contactName: savedTrader.traderName,
+        phone: dto.phone,
+        email: dto.email,
+        address: dto.address,
+        companyId: dto.companyId,
+        isPrimary: true,
+      });
+
+      return savedTrader;
     });
-
-    return this.traderRepo.save(trader);
   }
 
   async findAll(companyId: string): Promise<TraderEntity[]> {
@@ -94,38 +84,87 @@ export class TradersService {
   }
 
   async update(id: string, dto: UpdateTraderDto): Promise<TraderEntity> {
-    const trader = await this.findOne(id);
-
-    if (dto.traderName !== undefined) {
-      trader.traderName = dto.traderName;
-    }
-    if (dto.contactInfo !== undefined) {
-      trader.contactInfo = dto.contactInfo;
-    }
-    if (dto.commissionRate !== undefined) {
-      trader.commissionRate = Number(dto.commissionRate);
-    }
-    if (dto.accountId !== undefined) {
-      if (dto.accountId) {
-        const account = await this.accountRepo.findOne({
-          where: { id: dto.accountId },
-        });
-        if (!account) {
-          throw new NotFoundException(
-            `Account with ID "${dto.accountId}" not found`,
-          );
-        }
-        trader.account = account;
-      } else {
-        trader.account = null;
+    return this.dataSource.transaction(async (manager) => {
+      const trader = await manager.findOne(TraderEntity, { where: { id } });
+      if (!trader) {
+        throw new NotFoundException(`Trader with ID "${id}" not found`);
       }
-    }
 
-    return this.traderRepo.save(trader);
+      if (dto.traderName !== undefined) {
+        trader.traderName = dto.traderName;
+      }
+      if (dto.contactInfo !== undefined) {
+        trader.contactInfo = dto.contactInfo;
+      }
+      if (dto.commissionRate !== undefined) {
+        trader.commissionRate = Number(dto.commissionRate);
+      }
+      if (dto.accountId !== undefined) {
+        if (dto.accountId) {
+          const account = await manager.findOne(Account, {
+            where: { id: dto.accountId },
+          });
+          if (!account) {
+            throw new NotFoundException(
+              `Account with ID "${dto.accountId}" not found`,
+            );
+          }
+          trader.account = account;
+        } else {
+          trader.account = null;
+        }
+      }
+
+      const updatedTrader = await manager.save(trader);
+
+      // Update Contacts table
+      const contact = await manager.findOne(ContactEntity, {
+        where: { entityId: trader.id, entityType: 'Trader', isPrimary: true },
+      });
+      if (contact) {
+        if (dto.traderName !== undefined) {
+          contact.contactName = updatedTrader.traderName;
+        }
+        if (dto.phone !== undefined) {
+          contact.phone = dto.phone;
+        }
+        if (dto.email !== undefined) {
+          contact.email = dto.email;
+        }
+        if (dto.address !== undefined) {
+          contact.address = dto.address;
+        }
+        await manager.save(contact);
+      } else {
+        await this.contactsService.create({
+          entityType: 'Trader',
+          entityId: updatedTrader.id,
+          contactName: updatedTrader.traderName,
+          phone: dto.phone,
+          email: dto.email,
+          address: dto.address,
+          companyId: updatedTrader.company.id,
+          isPrimary: true,
+        });
+      }
+
+      return updatedTrader;
+    });
   }
 
   async remove(id: string): Promise<void> {
-    const trader = await this.findOne(id);
-    await this.traderRepo.remove(trader);
+    return this.dataSource.transaction(async (manager) => {
+      const trader = await manager.findOne(TraderEntity, { where: { id } });
+      if (!trader) {
+        throw new NotFoundException(`Trader with ID "${id}" not found`);
+      }
+
+      await manager.delete(ContactEntity, {
+        entityId: id,
+        entityType: 'Trader',
+      });
+
+      await manager.remove(trader);
+    });
   }
 }

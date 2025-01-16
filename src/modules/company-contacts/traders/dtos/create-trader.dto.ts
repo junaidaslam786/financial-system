@@ -23,4 +23,17 @@ export class CreateTraderDto {
   @IsUUID()
   @IsOptional()
   accountId?: string;
+
+  @ApiProperty({ example: '+1-555-123-4567' })
+  @IsOptional()
+  phone?: string;
+
+  @ApiProperty({ example: 'trader email'})
+  @IsOptional()
+  email?: string;
+
+  @ApiProperty({ example: 'trader address' })
+  @IsOptional()
+  address?: string;
+  
 }

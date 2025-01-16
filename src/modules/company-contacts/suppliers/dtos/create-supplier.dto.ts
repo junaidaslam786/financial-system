@@ -28,4 +28,16 @@ export class CreateSupplierDto {
   @IsUUID()
   @IsOptional()
   accountId?: string;
+
+  @ApiProperty({ example: '+1-555-123-4567' })
+  @IsOptional()
+  phone?: string;
+
+  @ApiProperty({ example: 'supplier email'})
+  @IsOptional()
+  email?: string;
+
+  @ApiProperty({ example: 'supplier address' })
+  @IsOptional()
+  address?: string;
 }

@@ -38,4 +38,19 @@ export class CreateCustomerDto {
   @IsOptional()
   @IsUUID()
   accountId?: string;
+
+  @ApiProperty({ example: '+1-555-123-4567' })
+  @IsOptional()
+  @IsString()
+  phone?: string;
+
+  @ApiProperty({ example: 'customer email'})
+  @IsOptional()
+  @IsString()
+  email?: string;
+
+  @ApiProperty({ example: 'customer address' })
+  @IsOptional()
+  @IsString()
+  address?: string;
 }

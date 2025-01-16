@@ -24,4 +24,16 @@ export class CreateBrokerDto {
   @IsOptional()
   @IsUUID()
   accountId?: string;
+
+  @ApiProperty({ example: '+1-555-123-4567', required: false })
+  @IsOptional()
+  phone?: string;
+
+  @ApiProperty({ example: 'broker email', required: false })
+  @IsOptional()
+  email?: string;
+
+  @ApiProperty({ example: 'broker address', required: false })
+  @IsOptional()
+  address?: string;
 }

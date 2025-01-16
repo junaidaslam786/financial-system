@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { ContactEntity } from './entities/contact.entity';
 import { CreateContactDto } from './dtos/create-contact.dto';
 import { UpdateContactDto } from './dtos/update-contact.dto';
+import { Company } from 'src/modules/companies/entities/company.entity';
 
 @Injectable()
 export class ContactsService {
@@ -14,6 +15,7 @@ export class ContactsService {
 
   async create(dto: CreateContactDto): Promise<ContactEntity> {
     const contact = this.contactRepo.create({
+      company: { id: dto.companyId } as Company,
       entityType: dto.entityType,
       entityId: dto.entityId,
       contactName: dto.contactName,
