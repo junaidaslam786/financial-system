@@ -65,7 +65,7 @@ export class CreateInvoiceDto {
 
   @ApiProperty({
     type: [CreateInvoiceItemDto],
-    description: 'Array of line items for this invoice',
+    description: 'Array of line items (products or charges)',
   })
   @ValidateNested({ each: true })
   @Type(() => CreateInvoiceItemDto)

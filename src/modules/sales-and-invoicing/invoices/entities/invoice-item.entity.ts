@@ -9,6 +9,7 @@ import {
   } from 'typeorm';
   import { Invoice } from './invoice.entity';
 import { ProductEntity } from 'src/modules/product-and-inventory/products/entities/product.entity';
+import { InvoiceLineType } from '../enums/invoice-line-type.enum';
  
   
   @Entity('invoice_items')
@@ -23,6 +24,13 @@ import { ProductEntity } from 'src/modules/product-and-inventory/products/entiti
     @ManyToOne(() => ProductEntity, { onDelete: 'SET NULL', nullable: true })
     @JoinColumn({ name: 'product_id' })
     product: ProductEntity;
+
+    @Column({
+      type: 'enum',
+      enum: InvoiceLineType,
+      default: InvoiceLineType.PRODUCT,
+    })
+    lineType: InvoiceLineType;
   
     @Column({ type: 'text', nullable: true })
     description?: string;

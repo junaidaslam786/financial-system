@@ -6,13 +6,20 @@ import {
   IsNotEmpty,
   Min,
   IsUUID,
+  IsEnum,
 } from 'class-validator';
+import { InvoiceLineType } from '../enums/invoice-line-type.enum';
 
 export class CreateInvoiceItemDto {
+
+  @ApiProperty({ enum: InvoiceLineType, default: InvoiceLineType.PRODUCT })
+  @IsEnum(InvoiceLineType)
+  lineType: InvoiceLineType;
+
   @ApiProperty({ description: 'UUID of the product' })
   @IsOptional()
   @IsUUID()
-  productId: string;
+  productId?: string;
 
   @ApiProperty({ description: 'Quantity of the product', example: 10 })
   @IsNumber()

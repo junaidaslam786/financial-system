@@ -20,6 +20,7 @@ import { PurchaseOrder } from 'src/modules/company-purchases/purchase-orders/ent
 import { CreateInvoiceItemDto } from './dtos/create-invoice-item.dto';
 import { ContactLedgerService } from 'src/modules/company-contacts/contact-ledger/contact-ledger.service';
 import { ContactType } from 'src/common/enums/contact-type.enum';
+import { InvoiceLineType } from './enums/invoice-line-type.enum';
 // If you want to link a sales order
 
 @Injectable()
@@ -169,6 +170,7 @@ export class InvoicesService {
   //     return savedInvoice;
   //   });
   // }
+
   async create(
     dto: CreateInvoiceDto,
     manager?: EntityManager,
@@ -498,6 +500,7 @@ export class InvoicesService {
       discount: Number(line.discount) || 0,
       taxRate: Number(line.taxRate) || 0,
       description: line.product?.productName,
+      lineType: InvoiceLineType.PRODUCT, // Assuming the line type is PRODUCT
     }));
   }
 
@@ -520,6 +523,7 @@ export class InvoicesService {
       discount: line.discount,
       taxRate: line.taxRate,
       description: line.product?.productName,
+      lineType: InvoiceLineType.PRODUCT, // Assuming the line type is PRODUCT
     }));
   }
   
@@ -554,33 +558,46 @@ export class InvoicesService {
   // Private Helpers
   // ----------------------------
   private async buildInvoiceItem(
-    dto: CreateInvoiceItemDto,
-    manager: EntityManager,
-  ): Promise<InvoiceItem> {
-    let product: ProductEntity | undefined;
-    if (dto.productId) {
-      product = await manager
-        .getRepository(ProductEntity)
-        .findOne({ where: { id: dto.productId } });
-      if (!product) {
-        throw new BadRequestException(`Invalid productId: ${dto.productId}`);
-      }
+  dto: CreateInvoiceItemDto,
+  manager: EntityManager,
+): Promise<InvoiceItem> {
+  let product: ProductEntity | undefined;
+
+  // If the line is a product, load the product entity
+  if (dto.lineType === InvoiceLineType.PRODUCT) {
+    if (!dto.productId) {
+      throw new BadRequestException(
+        'productId is required when lineType = PRODUCT',
+      );
     }
 
-    // lineDescription can store "Labor", "Transportation", "Brokerage" etc. if no product
-    const base = dto.quantity * dto.unitPrice - (dto.discount || 0);
-    const totalPrice = base + (base * (dto.taxRate || 0)) / 100;
-
-    return this.invoiceItemRepo.create({
-      product,
-      description: dto.description,
-      quantity: dto.quantity,
-      unitPrice: dto.unitPrice,
-      discount: dto.discount || 0,
-      taxRate: dto.taxRate || 0,
-      totalPrice,
+    product = await manager.getRepository(ProductEntity).findOne({
+      where: { id: dto.productId },
     });
+
+    if (!product) {
+      throw new BadRequestException(`Invalid productId: ${dto.productId}`);
+    }
   }
+
+  // If the line is a CHARGE (or SERVICE), we do NOT need product. 
+  // Just rely on dto.description, which should hold e.g. "Transport Fee" or "Labor Charge"
+
+  const base = dto.quantity * dto.unitPrice - (dto.discount || 0);
+  const totalPrice = base + (base * (dto.taxRate || 0)) / 100;
+
+  // Create the invoice item
+  return manager.getRepository(InvoiceItem).create({
+    product,
+    lineType: dto.lineType,
+    description: dto.description,
+    quantity: dto.quantity,
+    unitPrice: dto.unitPrice,
+    discount: dto.discount || 0,
+    taxRate: dto.taxRate || 0,
+    totalPrice,
+  });
+}
 
   /**
    * Auto-create the correct journal entry lines:
