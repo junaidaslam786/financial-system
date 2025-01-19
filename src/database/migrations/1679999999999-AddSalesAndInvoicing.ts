@@ -25,6 +25,7 @@ export class AddSalesAndInvoicing1672000000000 implements MigrationInterface {
         trader_id UUID REFERENCES traders(id) ON UPDATE CASCADE ON DELETE SET NULL,
         order_number VARCHAR(100) UNIQUE,
         order_date DATE DEFAULT CURRENT_DATE,
+        auto_invoicing BOOLEAN DEFAULT FALSE,
         status VARCHAR(50) DEFAULT 'Pending' CHECK(status IN('Pending', 'Confirmed', 'Shipped', 'Completed', 'Cancelled')),
         total_amount NUMERIC(15, 2),
         brokerage_id UUID REFERENCES brokers(id) ON UPDATE CASCADE ON DELETE SET NULL,

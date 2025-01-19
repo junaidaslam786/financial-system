@@ -19,7 +19,7 @@ import {
     @JoinColumn({ name: 'journal_entry_id' })
     journalEntry: JournalEntry;
   
-    @ManyToOne(() => Account, { onDelete: 'CASCADE' })
+    @ManyToOne(() => Account, { onDelete: 'CASCADE', eager: true })
     @JoinColumn({ name: 'account_id' })
     account: Account;
   

@@ -8,6 +8,7 @@ import {
   import { PurchaseOrder } from './purchase-order.entity';
   import { ApiProperty } from '@nestjs/swagger';
 import { ProductEntity } from 'src/modules/product-and-inventory/products/entities/product.entity';
+import { Exclude } from 'class-transformer';
   
   @Entity('purchase_order_lines')
   export class PurchaseOrderLine {
@@ -15,6 +16,7 @@ import { ProductEntity } from 'src/modules/product-and-inventory/products/entiti
     @PrimaryGeneratedColumn('uuid')
     id: string;
   
+    @Exclude()
     @ManyToOne(() => PurchaseOrder, (po) => po.lines, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'purchase_order_id' })
     purchaseOrder: PurchaseOrder;

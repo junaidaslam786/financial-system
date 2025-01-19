@@ -82,15 +82,89 @@ export class InvoicesController {
         defaultCurrency: invoice.company?.defaultCurrency || '',
         // Add other company fields as needed
       },
+      supplier: {
+        id: invoice.supplier?.id || '',
+        supplierName: invoice.supplier?.supplierName || '',
+        ContactInfo: invoice.supplier?.contactInfo || '',
+        account: {
+          id: invoice.supplier?.account?.id || '',
+          accountName: invoice.supplier?.account?.accountName || '',
+          accountType: invoice.supplier?.account?.accountType || '',
+        },
+      },
       customer: {
         id: invoice.customer?.id || '',
         customerName: invoice.customer?.customerName || '',
         customerInfo: invoice.customer?.contactInfo || '',
+        account: {
+          id: invoice.customer?.account?.id || '',
+          accountName: invoice.customer?.account?.accountName || '',
+          accountType: invoice.customer?.account?.accountType || '',
+        },
       },
       broker: {
         id: invoice.broker?.id || '',
         brokerName: invoice.broker?.brokerName || '',
         ContactInfo: invoice.broker?.contactInfo || '',
+        account: {
+          id: invoice.broker?.account?.id || '',
+          accountName: invoice.broker?.account?.accountName || '',
+          accountType: invoice.broker?.account?.accountType || '',
+        },
+      },
+      salesOrder: {
+        id: invoice.salesOrder?.id || '',
+        orderNumber: invoice.salesOrder?.orderNumber || '',
+        orderDate: invoice.salesOrder?.orderDate || new Date(),
+        totalAmount: invoice.salesOrder?.totalAmount || 0,
+        status: invoice.salesOrder?.status || '',
+        lines:
+          invoice.salesOrder?.lines?.map((line) => ({
+            id: line.id,
+            product: {
+              id: line.product?.id || '',
+              productName: line.product?.productName || '',
+              productType: line.product?.productType || '',
+            },
+            quantity: line.quantity,
+            unitPrice: line.unitPrice,
+            totalLineAmount: line.totalLineAmount,
+          })) || [],
+      },
+      purchaseOrder: {
+        id: invoice.purchaseOrder?.id || '',
+        orderNumber: invoice.purchaseOrder?.orderNumber || '',
+        orderDate: invoice.purchaseOrder?.orderDate || new Date(),
+        expectedDeliveryDate: invoice.purchaseOrder?.expectedDeliveryDate,
+        status: invoice.purchaseOrder?.status || '',
+        lines:
+          invoice.purchaseOrder?.lines?.map((line) => ({
+            id: line.id,
+            product: {
+              id: line.product?.id || '',
+              productName: line.product?.productName || '',
+              productType: line.product?.productType || '',
+            },
+            quantity: line.quantity,
+            unitPrice: line.unitPrice,
+            totalLineAmount: line.totalLineAmount,
+          })) || [],
+      },
+      journalEntry: {
+        id: invoice.journalEntry?.id || '',
+        entryDate: invoice.journalEntry?.entryDate || new Date(),
+        reference: invoice.journalEntry?.reference || '',
+        lines:
+          invoice.journalEntry?.lines?.map((line) => ({
+            id: line.id,
+            account: {
+              id: line.account?.id || '',
+              accountName: line.account?.accountName || '',
+              accountType: line.account?.accountType || '',
+            },
+            debitAmount: line.debit,
+            creditAmount: line.credit,
+          })) || [],
       },
       invoiceNumber: invoice.invoiceNumber,
       invoiceType: invoice.invoiceType,

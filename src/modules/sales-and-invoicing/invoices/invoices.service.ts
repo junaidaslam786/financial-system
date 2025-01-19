@@ -25,7 +25,6 @@ import { ContactType } from 'src/common/enums/contact-type.enum';
 @Injectable()
 export class InvoicesService {
   constructor(
-
     private readonly dataSource: DataSource,
 
     @InjectRepository(Invoice)
@@ -53,13 +52,130 @@ export class InvoicesService {
     private readonly contactLedgerService: ContactLedgerService,
   ) {}
 
+  // async create(dto: CreateInvoiceDto): Promise<Invoice> {
+  //   // Use the transaction manager
+  //   return this.dataSource.manager.transaction(async (manager) => {
+  //     //
+  //     // 1) Validate references
+  //     //
+  //     const company = await this.validateCompany(dto.companyId, manager);
 
-  async create(dto: CreateInvoiceDto): Promise<Invoice> {
-    // Use the transaction manager
-    return this.dataSource.manager.transaction(async (manager) => {
-      //
+  //     if (!['Purchase', 'Sale'].includes(dto.invoiceType)) {
+  //       throw new BadRequestException(
+  //         `invoiceType must be 'Purchase' or 'Sale'`,
+  //       );
+  //     }
+
+  //     let customer: CustomerEntity | null = null;
+  //     if (dto.customerId) {
+  //       customer = await this.validateCustomer(dto.customerId, manager);
+  //     }
+
+  //     let supplier: SupplierEntity | null = null;
+  //     if (dto.supplierId) {
+  //       supplier = await this.validateSupplier(dto.supplierId, manager);
+  //     }
+
+  //     let broker: BrokerEntity | null = null;
+  //     if (dto.brokerId) {
+  //       broker = await this.validateBroker(dto.brokerId, manager);
+  //     }
+
+  //     //
+  //     // 2) Build the invoice
+  //     //
+  //     const invoiceRepoTx = manager.getRepository(Invoice); // transaction-bound repo
+  //     const invoice = invoiceRepoTx.create({
+  //       company,
+  //       invoiceType: dto.invoiceType,
+  //       customer,
+  //       supplier,
+  //       broker,
+  //       invoiceNumber: dto.invoiceNumber,
+  //       invoiceDate: dto.invoiceDate ? new Date(dto.invoiceDate) : new Date(),
+  //       dueDate: dto.dueDate ? new Date(dto.dueDate) : null,
+  //       termsAndConditions: dto.termsAndConditions,
+  //       notes: dto.notes,
+  //       status: 'Unpaid',
+  //     });
+
+  //     if (dto.salesOrderId) {
+  //       invoice.salesOrder = { id: dto.salesOrderId } as SalesOrderEntity;
+  //     }
+  //     if (dto.purchaseOrderId) {
+  //       invoice.purchaseOrder = { id: dto.purchaseOrderId } as PurchaseOrder;
+  //     }
+
+  //     //
+  //     // 3) Build items (if any)
+  //     //
+  //     if (dto.items?.length) {
+  //       const invoiceItemRepoTx = manager.getRepository(InvoiceItem);
+
+  //       invoice.items = await Promise.all(
+  //         dto.items.map((itemDto) =>
+  //           this.buildInvoiceItem(itemDto, manager),
+  //         ),
+  //       );
+  //     } else {
+  //       invoice.items = [];
+  //     }
+
+  //     // Recalculate total
+  //     const total = invoice.items.reduce((sum, i) => sum + i.totalPrice, 0);
+  //     invoice.totalAmount = total;
+
+  //     // Save invoice (still no journal linked)
+  //     const savedInvoice = await invoiceRepoTx.save(invoice);
+
+  //     //
+  //     // 4) Auto-create the journal entry in the same transaction
+  //     //
+  //     const journalEntry = await this.createInvoiceJournal(savedInvoice, manager);
+
+  //     // Link the newly created journal entry
+  //     savedInvoice.journalEntry = journalEntry;
+  //     await invoiceRepoTx.save(savedInvoice);
+
+  //     // 5) Post to contact ledger
+  //     // Purchase => credit the supplier ledger
+  //     if (savedInvoice.invoiceType === 'Purchase' && savedInvoice.supplier) {
+  //       await this.contactLedgerService.addCredit(
+  //         company.id,
+  //         ContactType.SUPPLIER,
+  //         savedInvoice.supplier.id,
+  //         savedInvoice.totalAmount,
+  //         'INVOICE',
+  //         savedInvoice.id,
+  //         `Purchase Invoice #${savedInvoice.invoiceNumber}`,
+  //         manager,
+  //       );
+  //     }
+
+  //     // Sale => debit the customer ledger
+  //     if (savedInvoice.invoiceType === 'Sale' && savedInvoice.customer) {
+  //       await this.contactLedgerService.addDebit(
+  //         company.id,
+  //         ContactType.CUSTOMER,
+  //         savedInvoice.customer.id,
+  //         savedInvoice.totalAmount,
+  //         'INVOICE',
+  //         savedInvoice.id,
+  //         `Sales Invoice #${savedInvoice.invoiceNumber}`,
+  //         manager,
+  //       );
+  //     }
+
+  //     return savedInvoice;
+  //   });
+  // }
+  async create(
+    dto: CreateInvoiceDto,
+    manager?: EntityManager,
+  ): Promise<Invoice> {
+    const txnMgr = manager || this.dataSource.manager;
+    return txnMgr.transaction(async (manager) => {
       // 1) Validate references
-      //
       const company = await this.validateCompany(dto.companyId, manager);
   
       if (!['Purchase', 'Sale'].includes(dto.invoiceType)) {
@@ -83,10 +199,29 @@ export class InvoicesService {
         broker = await this.validateBroker(dto.brokerId, manager);
       }
   
-      //
-      // 2) Build the invoice
-      //
-      const invoiceRepoTx = manager.getRepository(Invoice); // transaction-bound repo
+      // 2) Build or fetch invoice items
+      let itemsToUse: CreateInvoiceItemDto[] = dto.items;
+  
+      // If it's a Sales Invoice and no items provided but we have salesOrderId -> fetch lines
+      if (
+        dto.invoiceType === 'Sale' &&
+        dto.salesOrderId &&
+        (!dto.items || dto.items.length === 0)
+      ) {
+        itemsToUse = await this.loadSalesOrderLines(dto.salesOrderId, manager);
+      }
+  
+      // If it's a Purchase Invoice and no items provided but we have purchaseOrderId -> fetch lines
+      if (
+        dto.invoiceType === 'Purchase' &&
+        dto.purchaseOrderId &&
+        (!dto.items || dto.items.length === 0)
+      ) {
+        itemsToUse = await this.loadPurchaseOrderLines(dto.purchaseOrderId, manager);
+      }
+  
+      // 3) Build the invoice
+      const invoiceRepoTx = manager.getRepository(Invoice);
       const invoice = invoiceRepoTx.create({
         company,
         invoiceType: dto.invoiceType,
@@ -99,75 +234,43 @@ export class InvoicesService {
         termsAndConditions: dto.termsAndConditions,
         notes: dto.notes,
         status: 'Unpaid',
+        salesOrder: dto.salesOrderId
+          ? ({ id: dto.salesOrderId } as SalesOrderEntity)
+          : undefined,
+        purchaseOrder: dto.purchaseOrderId
+          ? ({ id: dto.purchaseOrderId } as PurchaseOrder)
+          : undefined,
       });
   
-      if (dto.salesOrderId) {
-        invoice.salesOrder = { id: dto.salesOrderId } as SalesOrderEntity;
-      }
-      if (dto.purchaseOrderId) {
-        invoice.purchaseOrder = { id: dto.purchaseOrderId } as PurchaseOrder;
-      }
-  
-      //
-      // 3) Build items (if any)
-      //
-      if (dto.items?.length) {
-        const invoiceItemRepoTx = manager.getRepository(InvoiceItem);
-  
+      // 4) Build items (if any)
+      if (itemsToUse?.length) {
         invoice.items = await Promise.all(
-          dto.items.map((itemDto) =>
-            this.buildInvoiceItem(itemDto, manager),
-          ),
+          itemsToUse.map((itemDto) => this.buildInvoiceItem(itemDto, manager)),
         );
       } else {
         invoice.items = [];
       }
   
-      // Recalculate total
-      const total = invoice.items.reduce((sum, i) => sum + i.totalPrice, 0);
-      invoice.totalAmount = total;
+      // re-sum total
+      invoice.totalAmount = invoice.items.reduce(
+        (sum, i) => sum + i.totalPrice,
+        0,
+      );
   
-      // Save invoice (still no journal linked)
+      // 5) Save invoice
       const savedInvoice = await invoiceRepoTx.save(invoice);
   
-      //
-      // 4) Auto-create the journal entry in the same transaction
-      //
-      const journalEntry = await this.createInvoiceJournal(savedInvoice, manager);
-  
-      // Link the newly created journal entry
+      // 6) Create the journal entry
+      const journalEntry = await this.createInvoiceJournal(
+        savedInvoice,
+        manager,
+      );
       savedInvoice.journalEntry = journalEntry;
       await invoiceRepoTx.save(savedInvoice);
-
-      // 5) Post to contact ledger
-      // Purchase => credit the supplier ledger
-      if (savedInvoice.invoiceType === 'Purchase' && savedInvoice.supplier) {
-        await this.contactLedgerService.addCredit(
-          company.id,
-          ContactType.SUPPLIER,
-          savedInvoice.supplier.id,
-          savedInvoice.totalAmount,
-          'INVOICE',
-          savedInvoice.id,
-          `Purchase Invoice #${savedInvoice.invoiceNumber}`,
-          manager,
-        );
-      }
-
-      // Sale => debit the customer ledger
-      if (savedInvoice.invoiceType === 'Sale' && savedInvoice.customer) {
-        await this.contactLedgerService.addDebit(
-          company.id,
-          ContactType.CUSTOMER,
-          savedInvoice.customer.id,
-          savedInvoice.totalAmount,
-          'INVOICE',
-          savedInvoice.id,
-          `Sales Invoice #${savedInvoice.invoiceNumber}`,
-          manager,
-        );
-      }
-
+  
+      // 7) Post to contact ledger
+      await this.postToLedger(savedInvoice, manager);
+  
       return savedInvoice;
     });
   }
@@ -186,8 +289,11 @@ export class InvoicesService {
       relations: [
         'items',
         'supplier',
+        'supplier.account',
         'customer',
+        'customer.account',
         'broker',
+        'broker.account',
         'company',
         'purchaseOrder',
         'salesOrder',
@@ -206,12 +312,15 @@ export class InvoicesService {
       relations: [
         'items',
         'customer',
+        'supplier',
+        'supplier.account',
+        'customer.account',
+        'broker.account',
         'broker',
         'items.product',
         'company',
         'salesOrder',
         'journalEntry',
-        
       ],
     });
     if (!invoice) {
@@ -263,16 +372,18 @@ export class InvoicesService {
     //   invoice.status = dto.status;
     // }
 
-   // Rebuild items if provided
-   if (dto.items) {
-    // remove old items
-    await this.invoiceItemRepo.remove(invoice.items);
-    // build new
-    const newItems = await Promise.all(dto.items.map(i => this.buildInvoiceItem(i, this.dataSource.manager)));
-    invoice.items = newItems;
-    // re-sum total
-    invoice.totalAmount = newItems.reduce((sum, i) => sum + i.totalPrice, 0);
-  }
+    // Rebuild items if provided
+    if (dto.items) {
+      // remove old items
+      await this.invoiceItemRepo.remove(invoice.items);
+      // build new
+      const newItems = await Promise.all(
+        dto.items.map((i) => this.buildInvoiceItem(i, this.dataSource.manager)),
+      );
+      invoice.items = newItems;
+      // re-sum total
+      invoice.totalAmount = newItems.reduce((sum, i) => sum + i.totalPrice, 0);
+    }
 
     // Possibly also re-link the invoice to a different sales order if needed
     if (dto.salesOrderId !== undefined) {
@@ -286,7 +397,6 @@ export class InvoicesService {
         ? ({ id: dto.purchaseOrderId } as PurchaseOrder)
         : undefined;
     }
-
 
     // Save changes
     const updatedInvoice = await this.invoiceRepo.save(invoice);
@@ -306,7 +416,10 @@ export class InvoicesService {
   // ----------------------------
   // PRIVATE METHODS
   // ----------------------------
-  private async validateCompany(companyId: string, manager: EntityManager): Promise<Company> {
+  private async validateCompany(
+    companyId: string,
+    manager: EntityManager,
+  ): Promise<Company> {
     const company = await manager.getRepository(Company).findOne({
       where: { id: companyId },
     });
@@ -316,7 +429,10 @@ export class InvoicesService {
     return company;
   }
 
-  private async validateCustomer(customerId: string, manager: EntityManager): Promise<CustomerEntity> {
+  private async validateCustomer(
+    customerId: string,
+    manager: EntityManager,
+  ): Promise<CustomerEntity> {
     const customer = await manager.getRepository(CustomerEntity).findOne({
       where: { id: customerId },
     });
@@ -326,7 +442,10 @@ export class InvoicesService {
     return customer;
   }
 
-  private async validateSupplier(supplierId: string, manager: EntityManager): Promise<SupplierEntity> {
+  private async validateSupplier(
+    supplierId: string,
+    manager: EntityManager,
+  ): Promise<SupplierEntity> {
     const supplier = await manager.getRepository(SupplierEntity).findOne({
       where: { id: supplierId },
     });
@@ -336,8 +455,13 @@ export class InvoicesService {
     return supplier;
   }
 
-  private async validateBroker(brokerId: string, manager: EntityManager): Promise<BrokerEntity> {
-    const broker = await manager.getRepository(BrokerEntity).findOne({ where: { id: brokerId } });
+  private async validateBroker(
+    brokerId: string,
+    manager: EntityManager,
+  ): Promise<BrokerEntity> {
+    const broker = await manager
+      .getRepository(BrokerEntity)
+      .findOne({ where: { id: brokerId } });
     if (!broker) {
       throw new BadRequestException('Invalid brokerId.');
     }
@@ -354,50 +478,90 @@ export class InvoicesService {
     return product;
   }
 
-  /**
-   * Creates a balanced journal entry for a sales invoice
-   *  - Debit Accounts Receivable
-   *  - Credit Sales Revenue
-   */
-  private async createSalesInvoiceJournal(inv: Invoice) {
-    const company = inv.company;
-    if (!company.defaultArAccountId || !company.defaultSalesAccountId) {
-      throw new BadRequestException(
-        'Company default AR or Sales account not set.',
-      );
+  private async loadSalesOrderLines(
+    salesOrderId: string,
+    manager: EntityManager,
+  ): Promise<CreateInvoiceItemDto[]> {
+    const so = await manager.getRepository(SalesOrderEntity).findOne({
+      where: { id: salesOrderId },
+      relations: ['lines', 'lines.product'],
+    });
+    if (!so) {
+      throw new BadRequestException(`Sales order not found: ${salesOrderId}`);
     }
 
-    const lines = [
-      {
-        accountId: company.defaultArAccountId,
-        debit: inv.totalAmount,
-        credit: 0,
-      },
-      {
-        accountId: company.defaultSalesAccountId,
-        debit: 0,
-        credit: inv.totalAmount,
-      },
-    ];
+    // Convert each SalesOrderLine to CreateInvoiceItemDto
+    return so.lines.map((line) => ({
+      productId: line.product?.id,
+      quantity: Number(line.quantity),
+      unitPrice: Number(line.unitPrice),
+      discount: Number(line.discount) || 0,
+      taxRate: Number(line.taxRate) || 0,
+      description: line.product?.productName,
+    }));
+  }
 
-    const entry = await this.journalService.create({
-      companyId: company.id,
-      entryDate: inv.invoiceDate,
-      reference: `Invoice #${inv.invoiceNumber}`,
-      description: `Auto posted sales invoice ${inv.id}`,
-      lines,
+  private async loadPurchaseOrderLines(
+    purchaseOrderId: string,
+    manager: EntityManager,
+  ): Promise<CreateInvoiceItemDto[]> {
+    const po = await manager.getRepository(PurchaseOrder).findOne({
+      where: { id: purchaseOrderId },
+      relations: ['lines', 'lines.product'],
     });
+    if (!po) {
+      throw new BadRequestException(`Purchase order not found: ${purchaseOrderId}`);
+    }
+  
+    return po.lines.map((line) => ({
+      productId: line.product?.id,
+      quantity: line.quantity,
+      unitPrice: line.unitPrice,
+      discount: line.discount,
+      taxRate: line.taxRate,
+      description: line.product?.productName,
+    }));
+  }
+  
 
-    return entry;
+  private async postToLedger(inv: Invoice, manager: EntityManager) {
+    if (inv.invoiceType === 'Purchase' && inv.supplier) {
+      await this.contactLedgerService.addCredit(
+        inv.company.id,
+        ContactType.SUPPLIER,
+        inv.supplier.id,
+        inv.totalAmount,
+        'INVOICE',
+        inv.id,
+        `Purchase Invoice #${inv.invoiceNumber}`,
+        manager,
+      );
+    } else if (inv.invoiceType === 'Sale' && inv.customer) {
+      await this.contactLedgerService.addDebit(
+        inv.company.id,
+        ContactType.CUSTOMER,
+        inv.customer.id,
+        inv.totalAmount,
+        'INVOICE',
+        inv.id,
+        `Sales Invoice #${inv.invoiceNumber}`,
+        manager,
+      );
+    }
   }
 
   // ----------------------------
   // Private Helpers
   // ----------------------------
-  private async buildInvoiceItem(dto: CreateInvoiceItemDto, manager: EntityManager): Promise<InvoiceItem> {
+  private async buildInvoiceItem(
+    dto: CreateInvoiceItemDto,
+    manager: EntityManager,
+  ): Promise<InvoiceItem> {
     let product: ProductEntity | undefined;
     if (dto.productId) {
-      product = await manager.getRepository(ProductEntity).findOne({ where: { id: dto.productId } });
+      product = await manager
+        .getRepository(ProductEntity)
+        .findOne({ where: { id: dto.productId } });
       if (!product) {
         throw new BadRequestException(`Invalid productId: ${dto.productId}`);
       }
@@ -423,76 +587,162 @@ export class InvoicesService {
    *  If Purchase -> Debit Inventory/Expense, Credit AP
    *  If Sale -> Debit AR, Credit Sales
    */
+  // private async createInvoiceJournal(inv: Invoice, manager: EntityManager) {
+  //   const company = inv.company;
+
+  //   if (inv.invoiceType === 'Purchase') {
+  //     // Purchase: need default AP account, default expense or inventory account
+  //     if (!company.defaultApAccountId) {
+  //       throw new BadRequestException(
+  //         'No default AP account for purchase invoices',
+  //       );
+  //     }
+  //     if (!company.defaultCashAccountId) {
+  //       // or company.defaultExpenseAccountId or defaultInventoryId
+  //       throw new BadRequestException(
+  //         'No default expense or inventory account set',
+  //       );
+  //     }
+
+  //     if (typeof inv.invoiceDate === 'string') {
+  //       inv.invoiceDate = new Date(inv.invoiceDate);
+  //     }
+
+  //     const lines = [
+  //       {
+  //         accountId: company.defaultCashAccountId, // or defaultExpenseAccountId
+  //         debit: inv.totalAmount,
+  //         credit: 0,
+  //       },
+  //       {
+  //         accountId: company.defaultApAccountId,
+  //         debit: 0,
+  //         credit: inv.totalAmount,
+  //       },
+  //     ];
+
+  //     const journalEntry = await this.journalService.createInTransaction(
+  //       manager,
+  //       {
+  //         companyId: company.id,
+  //         entryDate: inv.invoiceDate,
+  //         reference: `Purchase Invoice #${inv.invoiceNumber}`,
+  //         description: `Auto posted purchase invoice ${inv.id}`,
+  //         lines, // ...
+  //       },
+  //     );
+
+  //     return journalEntry;
+  //   } else {
+  //     // Sale
+  //     if (!company.defaultArAccountId) {
+  //       throw new BadRequestException(
+  //         'No default AR account for sales invoices',
+  //       );
+  //     }
+  //     if (!company.defaultSalesAccountId) {
+  //       throw new BadRequestException(
+  //         'No default Sales account for sales invoices',
+  //       );
+  //     }
+
+  //     const lines = [
+  //       {
+  //         accountId: company.defaultArAccountId,
+  //         debit: inv.totalAmount,
+  //         credit: 0,
+  //       },
+  //       {
+  //         accountId: company.defaultSalesAccountId,
+  //         debit: 0,
+  //         credit: inv.totalAmount,
+  //       },
+  //     ];
+
+  //     const journalEntry = await this.journalService.create({
+  //       companyId: company.id,
+  //       entryDate: inv.invoiceDate,
+  //       reference: `Sales Invoice #${inv.invoiceNumber}`,
+  //       description: `Auto posted sales invoice ${inv.id}`,
+  //       lines,
+  //     });
+  //     return journalEntry;
+  //   }
+  // }
+
   private async createInvoiceJournal(inv: Invoice, manager: EntityManager) {
     const company = inv.company;
 
+    console.log("Invoice", inv);
+  
     if (inv.invoiceType === 'Purchase') {
-      // Purchase: need default AP account, default expense or inventory account
-      if (!company.defaultApAccountId) {
-        throw new BadRequestException('No default AP account for purchase invoices');
+      // 1) We want the supplier's AP account for credit
+      if (!inv.supplier || !inv.supplier?.account?.id) {
+        throw new BadRequestException('Supplier or supplier account not set.');
       }
-      if (!company.defaultCashAccountId) {
-        // or company.defaultExpenseAccountId or defaultInventoryId
+      // 2) Choose a default expense or inventory for the debit
+      const debitAccountId = company.defaultApAccountId 
+                             || company.defaultCashAccountId;
+      if (!debitAccountId) {
         throw new BadRequestException('No default expense or inventory account set');
       }
-
-      if (typeof inv.invoiceDate === 'string') {
-        inv.invoiceDate = new Date(inv.invoiceDate);
-      }
-
+  
       const lines = [
         {
-          accountId: company.defaultCashAccountId, // or defaultExpenseAccountId
+          accountId: debitAccountId,
           debit: inv.totalAmount,
           credit: 0,
         },
         {
-          accountId: company.defaultApAccountId,
+          accountId: inv.supplier?.account?.id, // Supplier’s AP account
           debit: 0,
           credit: inv.totalAmount,
         },
       ];
-
-      const journalEntry = await this.journalService.createInTransaction(manager, {
+  
+      // Create the JournalEntry
+      return this.journalService.createInTransaction(manager, {
         companyId: company.id,
         entryDate: inv.invoiceDate,
         reference: `Purchase Invoice #${inv.invoiceNumber}`,
         description: `Auto posted purchase invoice ${inv.id}`,
-        lines, // ...
+        lines,
       });
-
-      return journalEntry;
-
+  
     } else {
       // Sale
-      if (!company.defaultArAccountId) {
-        throw new BadRequestException('No default AR account for sales invoices');
+      if (!inv.customer || !inv.customer.account) {
+        throw new BadRequestException('Customer or customer account not set.');
       }
       if (!company.defaultSalesAccountId) {
         throw new BadRequestException('No default Sales account for sales invoices');
       }
-
+  
       const lines = [
         {
-          accountId: company.defaultArAccountId,
+          // Customer’s AR account
+          accountId: inv.customer.account?.id,
           debit: inv.totalAmount,
           credit: 0,
         },
         {
+          // Company’s default Sales revenue
           accountId: company.defaultSalesAccountId,
           debit: 0,
           credit: inv.totalAmount,
         },
       ];
-
-      const journalEntry = await this.journalService.create({
+  
+      return this.journalService.createInTransaction(manager, {
         companyId: company.id,
         entryDate: inv.invoiceDate,
         reference: `Sales Invoice #${inv.invoiceNumber}`,
         description: `Auto posted sales invoice ${inv.id}`,
         lines,
       });
-      return journalEntry;
     }
   }
+  
+
+
 }

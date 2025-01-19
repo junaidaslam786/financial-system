@@ -50,6 +50,10 @@ export class SalesOrderEntity {
   @Column({ length: 50, default: 'Pending' })
   status: string;
 
+  @ApiProperty({ example: 'false' })
+  @Column({ type: 'boolean', default: true })
+  autoInvoicing: boolean;
+
   @ApiProperty({ example: 1000.0 })
   @Column({ name: 'total_amount', type: 'numeric', precision: 15, scale: 2 })
   totalAmount: number;

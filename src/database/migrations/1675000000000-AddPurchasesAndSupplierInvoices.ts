@@ -26,6 +26,7 @@ export class AddPurchasesAndSupplierInvoices1675000000000
         "order_number" VARCHAR(100) UNIQUE,
         "order_date" DATE DEFAULT CURRENT_DATE,
         "expected_delivery_date" DATE,
+        "auto_invoicing" BOOLEAN DEFAULT FALSE,
         "status" VARCHAR(50) DEFAULT 'Open'
           CHECK ("status" IN ('Open','Received','Closed','Cancelled')),
         "created_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),

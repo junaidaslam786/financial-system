@@ -5,7 +5,11 @@ export class SalesOrderLineResponseDto {
   id: string;
 
   @ApiProperty()
-  productId: string;
+  product: {
+    id: string;
+    productName: string;
+    productType: string;
+  };
 
   @ApiProperty()
   quantity: number;
@@ -34,13 +38,25 @@ export class SalesOrderResponseDto {
   id: string;
 
   @ApiProperty()
-  companyId: string;
+  company: {
+    id: string;
+    name: string;
+    defaultCurrency: string;
+  };
 
   @ApiProperty({ required: false })
-  customerId?: string;
+  customer:{
+    id: string;
+    customerName: string;
+    commissionRate: number;
+  };
 
   @ApiProperty({ required: false })
-  traderId?: string;
+  trader: {
+    id: string;
+    traderName: string;
+    traderType: string;
+  };
 
   @ApiProperty()
   orderNumber: string;
@@ -52,10 +68,16 @@ export class SalesOrderResponseDto {
   status: string;
 
   @ApiProperty()
+  autoInvoicing: boolean;
+
+  @ApiProperty()
   totalAmount: number;
 
   @ApiProperty({ required: false })
-  brokerageId?: string;
+  broker: {
+    id: string;
+    brokerName: string;
+  };
 
   @ApiProperty({ required: false })
   notes?: string;
