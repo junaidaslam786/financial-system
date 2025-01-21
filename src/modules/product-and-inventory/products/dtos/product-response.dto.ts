@@ -5,10 +5,17 @@ export class ProductResponseDto {
   id: string;
 
   @ApiProperty()
-  companyId: string;
+  company: {
+    id: string;
+    name: string;
+    defaultCurrency: string;
+  };
 
   @ApiProperty({ nullable: true })
-  categoryId?: string;
+  category: {
+    id: string;
+    categoryName: string;
+  };
 
   @ApiProperty()
   productName: string;
@@ -20,7 +27,10 @@ export class ProductResponseDto {
   productType?: string;
 
   @ApiProperty({ nullable: true })
-  unitOfMeasureId?: string;
+  unitOfMeasure: {
+    id: string;
+    uomName: string;
+  };
 
   @ApiProperty()
   costPrice: number;

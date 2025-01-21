@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ProductEntity } from './entities/product.entity';
@@ -18,7 +22,9 @@ export class ProductsService {
 
     // Check if SKU is unique if provided:
     if (dto.sku) {
-      const existingSku = await this.productRepo.findOne({ where: { sku: dto.sku } });
+      const existingSku = await this.productRepo.findOne({
+        where: { sku: dto.sku },
+      });
       if (existingSku) {
         throw new BadRequestException(`SKU "${dto.sku}" already exists`);
       }
@@ -42,12 +48,16 @@ export class ProductsService {
     // Return products for a given company
     return this.productRepo.find({
       where: { companyId },
+      relations: ['category', 'unitOfMeasure'],
       order: { productName: 'ASC' },
     });
   }
 
   async findOne(id: string): Promise<ProductEntity> {
-    const product = await this.productRepo.findOne({ where: { id } });
+    const product = await this.productRepo.findOne({
+      where: { id },
+      relations: ['category', 'unitOfMeasure'],
+    });
     if (!product) {
       throw new NotFoundException(`Product with ID "${id}" not found`);
     }
@@ -59,7 +69,9 @@ export class ProductsService {
 
     if (dto.sku !== undefined && dto.sku !== product.sku) {
       // Validate new SKU is unique
-      const existingSku = await this.productRepo.findOne({ where: { sku: dto.sku } });
+      const existingSku = await this.productRepo.findOne({
+        where: { sku: dto.sku },
+      });
       if (existingSku) {
         throw new BadRequestException(`SKU "${dto.sku}" already exists`);
       }
@@ -69,7 +81,8 @@ export class ProductsService {
     if (dto.productName !== undefined) product.productName = dto.productName;
     if (dto.categoryId !== undefined) product.categoryId = dto.categoryId;
     if (dto.productType !== undefined) product.productType = dto.productType;
-    if (dto.unitOfMeasureId !== undefined) product.unitOfMeasureId = dto.unitOfMeasureId;
+    if (dto.unitOfMeasureId !== undefined)
+      product.unitOfMeasureId = dto.unitOfMeasureId;
     if (dto.costPrice !== undefined) product.costPrice = dto.costPrice;
     if (dto.sellingPrice !== undefined) product.sellingPrice = dto.sellingPrice;
     if (dto.isActive !== undefined) product.isActive = dto.isActive;

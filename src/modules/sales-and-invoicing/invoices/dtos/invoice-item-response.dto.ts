@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { InvoiceLineType } from '../enums/invoice-line-type.enum';
 
 export class InvoiceItemResponseDto {
   @ApiProperty()
@@ -10,6 +11,9 @@ export class InvoiceItemResponseDto {
     productName: string;
     productType: string;
   };
+
+  @ApiProperty()
+  lineType: InvoiceLineType;
 
   @ApiProperty()
   quantity: number;

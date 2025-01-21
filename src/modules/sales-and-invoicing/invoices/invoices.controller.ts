@@ -185,6 +185,7 @@ export class InvoicesController {
             productName: item.product?.productName || '',
             productType: item.product?.productType || '',
           },
+          lineType: item.lineType,
           quantity: item.quantity,
           unitPrice: item.unitPrice,
           discount: item.discount,
