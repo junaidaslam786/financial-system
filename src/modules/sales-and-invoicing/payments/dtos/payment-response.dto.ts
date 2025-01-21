@@ -5,10 +5,20 @@ export class PaymentResponseDto {
   id: string;
 
   @ApiProperty()
-  companyId: string;
+  company: {
+    id: string;
+    name: string;
+  };
 
   @ApiProperty({ required: false })
-  invoiceId?: string;
+  invoice: {
+    id: string;
+    invoiceNumber: string;
+    invoiceType: string;
+    dueDate: Date;
+    totalAmount: number;
+    status: string;
+  };
 
   @ApiProperty()
   paymentDate: Date;
@@ -20,7 +30,11 @@ export class PaymentResponseDto {
   paymentMethod?: string;
 
   @ApiProperty({ required: false })
-  reference?: string;
+  journalEntry: {
+    id: string;
+    description: string;
+    entryDate: Date;
+  };
 
   @ApiProperty()
   createdAt: Date;
