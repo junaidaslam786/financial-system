@@ -173,8 +173,8 @@ export class AddSalesAndInvoicing1672000000000 implements MigrationInterface {
         invoice_id UUID REFERENCES ${this.TABLE_INVOICES}(id) ON UPDATE CASCADE ON DELETE SET NULL,
         payment_date DATE DEFAULT CURRENT_DATE,
         amount NUMERIC(15, 2) CHECK(amount >= 0),
-        payment_method VARCHAR(100),
-        reference TEXT,
+        payment_method_id UUID REFERENCES ${this.TABLE_PAYMENT_METHODS}(id) ON UPDATE CASCADE ON DELETE SET NULL,
+        journal_entry_id UUID REFERENCES journal_entries(id) ON UPDATE CASCADE ON DELETE SET NULL,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       );
@@ -184,6 +184,8 @@ export class AddSalesAndInvoicing1672000000000 implements MigrationInterface {
     await queryRunner.query(`
       CREATE INDEX idx_${this.TABLE_PAYMENTS}_company_id ON ${this.TABLE_PAYMENTS}(company_id);
       CREATE INDEX idx_${this.TABLE_PAYMENTS}_invoice_id ON ${this.TABLE_PAYMENTS}(invoice_id);
+      CREATE INDEX idx_${this.TABLE_PAYMENTS}_payment_method_id ON ${this.TABLE_PAYMENTS}(payment_method_id);
+      CREATE INDEX idx_${this.TABLE_PAYMENTS}_journal_entry_id ON ${this.TABLE_PAYMENTS}(journal_entry_id);
     `);
 
     // 8. Create `payment_methods` table
@@ -221,6 +223,8 @@ export class AddSalesAndInvoicing1672000000000 implements MigrationInterface {
 
   public async down(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`DROP TABLE IF EXISTS ${this.TABLE_TRANSACTIONS_PAYMENTS}`);
+    await queryRunner.query(`DROP INDEX IF EXISTS idx_payments_payment_method_id;`);
+    await queryRunner.query(`DROP TABLE IF EXISTS idx_payments_journal_entry_id`);
     await queryRunner.query(`DROP TABLE IF EXISTS ${this.TABLE_PAYMENT_METHODS}`);
     await queryRunner.query(`DROP TABLE IF EXISTS ${this.TABLE_PAYMENTS}`);
     await queryRunner.query(`DROP TABLE IF EXISTS ${this.TABLE_DEBIT_NOTES}`);

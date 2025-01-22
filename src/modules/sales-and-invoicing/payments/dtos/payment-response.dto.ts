@@ -8,6 +8,7 @@ export class PaymentResponseDto {
   company: {
     id: string;
     name: string;
+    defaultCurrency: string;
   };
 
   @ApiProperty({ required: false })
@@ -27,7 +28,11 @@ export class PaymentResponseDto {
   amount: number;
 
   @ApiProperty({ required: false })
-  paymentMethod?: string;
+  paymentMethod: {
+    id: string;
+    methodName: string;
+    details: string;
+  };
 
   @ApiProperty({ required: false })
   journalEntry: {

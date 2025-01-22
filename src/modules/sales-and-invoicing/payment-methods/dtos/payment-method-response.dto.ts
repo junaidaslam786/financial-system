@@ -5,7 +5,11 @@ export class PaymentMethodResponseDto {
   id: string;
 
   @ApiProperty()
-  companyId: string;
+  company: {
+    id: string;
+    name: string;
+    defaultCurrency: string;
+  };
 
   @ApiProperty()
   methodName: string;

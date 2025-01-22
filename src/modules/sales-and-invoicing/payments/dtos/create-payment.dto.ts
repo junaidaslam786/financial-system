@@ -25,9 +25,9 @@ export class CreatePaymentDto {
   amount: number;
 
   @ApiProperty({ description: 'Payment method', required: false, example: 'Bank Transfer' })
+  @IsUUID()
   @IsOptional()
-  @IsString()
-  paymentMethod?: string;
+  paymentMethodId?: string; 
 
   @ApiProperty({ description: 'Reference or note for payment', required: false })
   @IsOptional()

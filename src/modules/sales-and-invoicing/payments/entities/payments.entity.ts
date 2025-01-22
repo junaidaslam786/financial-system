@@ -10,6 +10,7 @@ import {
 import { Invoice } from '../../invoices/entities/invoice.entity';
 import { Company } from 'src/modules/companies/entities/company.entity';
 import { JournalEntry } from 'src/modules/financial/journal/entities/journal-entry.entity';
+import { PaymentMethod } from '../../payment-methods/entities/payment-methods.entity';
 
 @Entity('payments')
 export class Payment {
@@ -30,13 +31,9 @@ export class Payment {
   @Column({ type: 'numeric', precision: 15, scale: 2, default: 0 })
   amount: number;
 
-  @Column({
-    name: 'payment_method',
-    type: 'varchar',
-    length: 100,
-    nullable: true,
-  })
-  paymentMethod?: string;
+  @ManyToOne(() => PaymentMethod, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'payment_method_id' })
+  paymentMethod?: PaymentMethod;
 
   @ManyToOne(() => JournalEntry, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'journal_entry_id' })

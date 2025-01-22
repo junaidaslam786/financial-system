@@ -14,6 +14,7 @@ import { JournalService } from 'src/modules/financial/journal/journal.service';
 import { ContactLedgerService } from 'src/modules/company-contacts/contact-ledger/contact-ledger.service';
 import { ContactType } from 'src/common/enums/contact-type.enum';
 import { JournalEntry } from 'src/modules/financial/journal/entities/journal-entry.entity';
+import { PaymentMethod } from '../payment-methods/entities/payment-methods.entity';
 
 @Injectable()
 export class PaymentsService {
@@ -68,6 +69,18 @@ export class PaymentsService {
         }
       }
 
+      let paymentMethod: PaymentMethod | null = null;
+      if (dto.paymentMethodId) {
+        paymentMethod = await manager.getRepository(PaymentMethod).findOne({
+          where: { id: dto.paymentMethodId },
+        });
+        if (!paymentMethod) {
+          throw new BadRequestException(
+            `Invalid paymentMethodId: ${dto.paymentMethodId}`,
+          );
+        }
+      }
+
       // 2) Create the Payment entity
       const paymentRepoTx = manager.getRepository(Payment);
       const payment = paymentRepoTx.create({
@@ -75,7 +88,7 @@ export class PaymentsService {
         invoice,
         paymentDate: dto.paymentDate || new Date(),
         amount: dto.amount,
-        paymentMethod: dto.paymentMethod,
+        paymentMethod: { id: dto.paymentMethodId } as PaymentMethod,
         journalEntry: { id: dto.journalEntryId } as JournalEntry,
       });
       const savedPayment = await paymentRepoTx.save(payment);
