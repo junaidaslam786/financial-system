@@ -1,7 +1,7 @@
-import { IsString, IsOptional, IsDateString, IsArray, ValidateNested, IsBoolean, IsDate } from 'class-validator';
+import { IsString, IsOptional, IsDateString, IsArray, ValidateNested, IsBoolean, IsDate, IsUUID } from 'class-validator';
 import { Type } from 'class-transformer';
 import { SalesOrderLineDto } from './sales-order-line.dto';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateSalesOrderDto {
   @ApiProperty({ example: '123e4567-e89b-12d3-a456-426614174000' })

@@ -8,6 +8,7 @@ import {
 import { SalesOrderEntity } from './sales-order.entity';
 import { ProductEntity } from './../../../product-and-inventory/products/entities/product.entity';
 import { ApiProperty } from '@nestjs/swagger';
+import { LotEntity } from 'src/modules/product-and-inventory/lots/entities/lot.entity';
 
 @Entity('sales_order_lines')
 export class SalesOrderLine {
@@ -21,6 +22,13 @@ export class SalesOrderLine {
   })
   @JoinColumn({ name: 'sales_order_id' })
   salesOrder: SalesOrderEntity;
+
+  @ManyToOne(() => LotEntity, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'lot_id' })
+  lot?: LotEntity;
+
+  @Column({ name: 'lot_id', type: 'uuid', nullable: true })
+  lotId?: string;
 
   @ApiProperty({ type: () => ProductEntity, nullable: true })
   @ManyToOne(() => ProductEntity, { nullable: true, onDelete: 'SET NULL' })

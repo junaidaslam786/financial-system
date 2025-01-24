@@ -5,7 +5,11 @@ export class BrokerResponseDto {
   id: string;
 
   @ApiProperty()
-  companyId: string;
+  company: {
+    id: string;
+    name: string;
+    defaultCurrency: string
+  };
 
   @ApiProperty()
   brokerName: string;
@@ -17,7 +21,20 @@ export class BrokerResponseDto {
   defaultBrokerageRate?: number;
 
   @ApiProperty({ nullable: true })
-  accountId?: string;
+  account: {
+    id: string;
+    accountName: string;
+    accountType: string;
+  };
+
+  @ApiProperty({ nullable: true })
+  phone: string;
+
+  @ApiProperty({ nullable: true })
+  email: string;
+
+  @ApiProperty({ nullable: true })
+  address: string;
 
   @ApiProperty()
   createdAt: Date;

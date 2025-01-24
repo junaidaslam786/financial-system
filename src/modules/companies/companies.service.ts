@@ -69,14 +69,17 @@ export class CompaniesService {
 
   private async createDefaultAccountsForCompany(company: Company) {
     // E.g. call AccountsService to create minimal chart of accounts
-    const { arAccount, apAccount, cashAccount, salesAccount } =
-      await this.accountsService.createMinimalChartOfAccounts(company.id);
+    const { savedAccounts, arAccount, apAccount, cashAccount, salesAccount, inventoryAccount } =
+      await this.accountsService.createStandardChartOfAccounts(company.id);
 
     // Update the company record with these default account IDs
-    company.defaultArAccountId = arAccount.id;
-    company.defaultApAccountId = apAccount.id;
-    company.defaultCashAccountId = cashAccount.id;
-    company.defaultSalesAccountId = salesAccount.id;
+    
+    company.defaultArAccountId = arAccount?.id || null;
+    company.defaultApAccountId = apAccount?.id || null;
+    company.defaultCashAccountId = cashAccount?.id || null;
+    company.defaultSalesAccountId = salesAccount?.id || null;
+    company.defaultInventoryAccountId = inventoryAccount?.id || null;
+    
 
     await this.companyRepo.save(company);
   }

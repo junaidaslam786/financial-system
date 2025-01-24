@@ -51,6 +51,9 @@ export class Company {
   @Column({ name: 'default_sales_account_id', type: 'uuid', nullable: true })
   defaultSalesAccountId?: string;
 
+  @Column({ name: 'default_inventory_account_id', type: 'uuid', nullable: true })
+  defaultInventoryAccountId?: string;
+
   @OneToMany(() => CompanyOwnerEntity, (owner) => owner.company, {
     cascade: true,
   })

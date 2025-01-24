@@ -118,6 +118,7 @@ export class SalesOrdersService {
           line.unitPrice = lineDto.unitPrice;
           line.discount = lineDto.discount || 0;
           line.taxRate = lineDto.taxRate || 0;
+          line.lotId = lineDto.lotId || null;
           return line;
         }),
       });
@@ -200,6 +201,7 @@ export class SalesOrdersService {
       orderLine.discount = line.discount || 0;
       orderLine.taxRate = line.taxRate || 0;
       orderLine.salesOrder = order;
+      orderLine.lotId = line.lotId || null;
       return orderLine;
     });
 

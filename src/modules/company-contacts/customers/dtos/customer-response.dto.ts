@@ -41,6 +41,15 @@ export class CustomerResponseDto {
     currency: string;
   };
 
+  @ApiProperty({ nullable: true })
+  phone: string;
+
+  @ApiProperty({ nullable: true })
+  email: string;
+
+  @ApiProperty({ nullable: true })
+  address: string;
+
   @ApiProperty()
   createdAt: Date;
 

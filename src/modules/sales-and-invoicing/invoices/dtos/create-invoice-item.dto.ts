@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsString,
   IsNumber,
@@ -20,6 +20,11 @@ export class CreateInvoiceItemDto {
   @IsOptional()
   @IsUUID()
   productId?: string;
+
+  @ApiPropertyOptional({ description: 'If referencing a lot' })
+  @IsUUID()
+  @IsOptional()
+  lotId?: string;
 
   @ApiProperty({ description: 'Quantity of the product', example: 10 })
   @IsNumber()

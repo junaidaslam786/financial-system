@@ -121,7 +121,7 @@ export class PaymentsService {
 
   async findAll(): Promise<Payment[]> {
     return this.paymentRepo.find({
-      relations: ['company', 'invoice', 'journal'],
+      relations: ['company', 'invoice', 'journalEntry', 'paymentMethod'],
     });
   }
 

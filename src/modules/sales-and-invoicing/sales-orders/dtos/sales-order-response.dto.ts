@@ -12,6 +12,12 @@ export class SalesOrderLineResponseDto {
   };
 
   @ApiProperty()
+  lot: {
+    id: string;
+    lotNumber: string;
+  };
+
+  @ApiProperty()
   quantity: number;
 
   @ApiProperty()

@@ -48,6 +48,7 @@ export class AddSalesAndInvoicing1672000000000 implements MigrationInterface {
       CREATE TABLE ${this.TABLE_SALES_ORDER_LINES} (
         id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
         sales_order_id UUID NOT NULL REFERENCES ${this.TABLE_SALES_ORDERS}(id) ON UPDATE CASCADE ON DELETE CASCADE,
+        lot_id UUID REFERENCES lots(id) ON UPDATE CASCADE ON DELETE SET NULL,
         product_id UUID REFERENCES products(id) ON UPDATE CASCADE ON DELETE SET NULL,
         quantity NUMERIC(12, 2) CHECK(quantity >= 0),
         unit_price NUMERIC(12, 2) CHECK(unit_price >= 0),
@@ -64,6 +65,7 @@ export class AddSalesAndInvoicing1672000000000 implements MigrationInterface {
     await queryRunner.query(`
       CREATE INDEX idx_${this.TABLE_SALES_ORDER_LINES}_sales_order_id ON ${this.TABLE_SALES_ORDER_LINES}(sales_order_id);
       CREATE INDEX idx_${this.TABLE_SALES_ORDER_LINES}_product_id ON ${this.TABLE_SALES_ORDER_LINES}(product_id);
+      CREATE INDEX idx_${this.TABLE_SALES_ORDER_LINES}_lot_id ON ${this.TABLE_SALES_ORDER_LINES}(lot_id);
     `);
 
     // 3. Create `invoices` table
@@ -107,6 +109,7 @@ export class AddSalesAndInvoicing1672000000000 implements MigrationInterface {
       CREATE TABLE ${this.TABLE_INVOICE_ITEMS} (
         id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
         invoice_id UUID NOT NULL REFERENCES ${this.TABLE_INVOICES}(id) ON UPDATE CASCADE ON DELETE CASCADE,
+        lot_id UUID REFERENCES lots(id) ON UPDATE CASCADE ON DELETE SET NULL,
         product_id UUID REFERENCES products(id) ON UPDATE CASCADE ON DELETE SET NULL,
         description TEXT,
         quantity NUMERIC(12, 2) CHECK(quantity >= 0),
@@ -121,6 +124,7 @@ export class AddSalesAndInvoicing1672000000000 implements MigrationInterface {
     await queryRunner.query(`
       CREATE INDEX idx_${this.TABLE_INVOICE_ITEMS}_invoice_id ON ${this.TABLE_INVOICE_ITEMS}(invoice_id);
       CREATE INDEX idx_${this.TABLE_INVOICE_ITEMS}_product_id ON ${this.TABLE_INVOICE_ITEMS}(product_id);
+      CREATE INDEX idx_${this.TABLE_INVOICE_ITEMS}_lot_id ON ${this.TABLE_INVOICE_ITEMS}(lot_id);
     `);
 
     // 5. Create `credit_notes` table
@@ -222,25 +226,42 @@ export class AddSalesAndInvoicing1672000000000 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`DROP TABLE IF EXISTS ${this.TABLE_TRANSACTIONS_PAYMENTS}`);
-    await queryRunner.query(`DROP INDEX IF EXISTS idx_payments_payment_method_id;`);
-    await queryRunner.query(`DROP TABLE IF EXISTS idx_payments_journal_entry_id`);
-    await queryRunner.query(`DROP TABLE IF EXISTS ${this.TABLE_PAYMENT_METHODS}`);
+    await queryRunner.query(
+      `DROP TABLE IF EXISTS ${this.TABLE_TRANSACTIONS_PAYMENTS}`,
+    );
+    await queryRunner.query(
+      `DROP INDEX IF EXISTS idx_payments_payment_method_id;`,
+    );
+    await queryRunner.query(
+      `DROP TABLE IF EXISTS idx_payments_journal_entry_id`,
+    );
+    await queryRunner.query(
+      `DROP TABLE IF EXISTS ${this.TABLE_PAYMENT_METHODS}`,
+    );
     await queryRunner.query(`DROP TABLE IF EXISTS ${this.TABLE_PAYMENTS}`);
     await queryRunner.query(`DROP TABLE IF EXISTS ${this.TABLE_DEBIT_NOTES}`);
     await queryRunner.query(`DROP TABLE IF EXISTS ${this.TABLE_CREDIT_NOTES}`);
-     // drop invoice_items first
-     await queryRunner.query(`DROP INDEX IF EXISTS idx_invoice_items_product_id;`);
-     await queryRunner.query(`DROP INDEX IF EXISTS idx_invoice_items_invoice_id;`);
+    // drop invoice_items first
+    await queryRunner.query(
+      `DROP INDEX IF EXISTS idx_invoice_items_product_id;`,
+    );
+    await queryRunner.query(
+      `DROP INDEX IF EXISTS idx_invoice_items_invoice_id;`,
+    );
+    await queryRunner.query(`DROP INDEX IF EXISTS idx_invoice_items_lot_id;`);
     await queryRunner.query(`DROP TABLE IF EXISTS ${this.TABLE_INVOICE_ITEMS}`);
     // drop invoices
-    await queryRunner.query(`DROP INDEX IF EXISTS idx_invoices_journal_entry_id;`);
+    await queryRunner.query(
+      `DROP INDEX IF EXISTS idx_invoices_journal_entry_id;`,
+    );
     await queryRunner.query(`DROP INDEX IF EXISTS idx_invoices_broker_id;`);
     await queryRunner.query(`DROP INDEX IF EXISTS idx_invoices_customer_id;`);
     await queryRunner.query(`DROP INDEX IF EXISTS idx_invoices_supplier_id;`);
     await queryRunner.query(`DROP INDEX IF EXISTS idx_invoices_company_id;`);
     await queryRunner.query(`DROP TABLE IF EXISTS ${this.TABLE_INVOICES}`);
-    await queryRunner.query(`DROP TABLE IF EXISTS ${this.TABLE_SALES_ORDER_LINES}`);
+    await queryRunner.query(
+      `DROP TABLE IF EXISTS ${this.TABLE_SALES_ORDER_LINES}`,
+    );
     await queryRunner.query(`DROP TABLE IF EXISTS ${this.TABLE_SALES_ORDERS}`);
   }
 }

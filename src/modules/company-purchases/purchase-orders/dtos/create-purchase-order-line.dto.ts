@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsUUID, IsNumber, Min, IsOptional } from 'class-validator';
 
 export class CreatePurchaseOrderLineDto {
@@ -6,6 +6,13 @@ export class CreatePurchaseOrderLineDto {
   @IsUUID()
   @IsOptional()
   productId?: string;
+
+  @ApiPropertyOptional({
+    description: 'Lot ID if linking raw material to a lot',
+  })
+  @IsUUID()
+  @IsOptional()
+  lotId?: string;
 
   @ApiProperty({ description: 'Quantity ordered', example: 10 })
   @IsNumber()
@@ -17,7 +24,11 @@ export class CreatePurchaseOrderLineDto {
   @Min(0)
   unitPrice: number;
 
-  @ApiProperty({ description: 'Discount amount', example: 1.0, required: false })
+  @ApiProperty({
+    description: 'Discount amount',
+    example: 1.0,
+    required: false,
+  })
   @IsNumber()
   @Min(0)
   @IsOptional()

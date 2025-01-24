@@ -12,6 +12,7 @@ import { SupplierEntity } from 'src/modules/company-contacts/suppliers/entities/
 import { BrokerEntity } from 'src/modules/company-contacts/brokers/entities/broker.entity';
 import { ProductEntity } from 'src/modules/product-and-inventory/products/entities/product.entity';
 import { InvoicesService } from 'src/modules/sales-and-invoicing/invoices/invoices.service';
+import { LotEntity } from 'src/modules/product-and-inventory/lots/entities/lot.entity';
 
 @Injectable()
 export class PurchaseOrdersService {
@@ -270,6 +271,7 @@ export class PurchaseOrdersService {
       unitPrice: lineDto.unitPrice,
       discount: lineDto.discount || 0,
       taxRate: lineDto.taxRate || 0,
+      lot: lineDto.lotId ? { id: lineDto.lotId } : undefined,
     });
 
     return line;
@@ -306,6 +308,12 @@ export class PurchaseOrdersService {
     if (dto.unitPrice !== undefined) line.unitPrice = dto.unitPrice;
     if (dto.discount !== undefined) line.discount = dto.discount;
     if (dto.taxRate !== undefined) line.taxRate = dto.taxRate;
+    if (dto.lotId !== undefined) {
+      line.lot = dto.lotId ? await this.dataSource.manager.getRepository(LotEntity).findOne({ where: { id: dto.lotId } }) : undefined;
+      if (dto.lotId && !line.lot) {
+        throw new BadRequestException(`Invalid lotId: ${dto.lotId}`);
+      }
+    }
 
     return this.purchaseOrderLineRepo.save(line);
   }

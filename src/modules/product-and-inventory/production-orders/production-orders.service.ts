@@ -36,11 +36,12 @@ export class ProductionOrdersService {
     return this.orderRepo.find({
       where: { companyId },
       order: { createdAt: 'ASC' },
+      relations: ['lot', 'company'],
     });
   }
 
   async findOne(id: string): Promise<ProductionOrderEntity> {
-    const order = await this.orderRepo.findOne({ where: { id } });
+    const order = await this.orderRepo.findOne({ where: { id }, relations: ['lot', 'company'] });
     if (!order) {
       throw new NotFoundException(`Production Order with ID "${id}" not found`);
     }

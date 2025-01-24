@@ -59,6 +59,10 @@ export class AddPurchasesAndSupplierInvoices1675000000000
           REFERENCES "products"("id")
           ON UPDATE CASCADE
           ON DELETE SET NULL,
+        "lot_id" UUID
+          REFERENCES "lots"("id")
+          ON UPDATE CASCADE
+          ON DELETE SET NULL,
         "quantity" NUMERIC(12,2)
           CHECK ("quantity" >= 0),
         "unit_price" NUMERIC(12,2)
@@ -86,98 +90,6 @@ export class AddPurchasesAndSupplierInvoices1675000000000
       CREATE INDEX "idx_purchase_order_lines_product_id"
         ON "purchase_order_lines" ("product_id");
     `);
-
-  //   // 3) supplier_invoices table
-  //   await queryRunner.query(`
-  //     CREATE TABLE "supplier_invoices" (
-  //       "id" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  //       "company_id" UUID
-  //         REFERENCES "companies"("id")
-  //         ON UPDATE CASCADE
-  //         ON DELETE CASCADE,
-  //       "supplier_id" UUID
-  //         REFERENCES "suppliers"("id")
-  //         ON UPDATE CASCADE
-  //         ON DELETE SET NULL,
-  //       "broker_id" UUID
-  //         REFERENCES "brokers"("id")
-  //         ON UPDATE CASCADE
-  //         ON DELETE SET NULL,
-  //       "invoice_number" VARCHAR(100) UNIQUE,
-  //       "invoice_date" DATE DEFAULT CURRENT_DATE,
-  //       "due_date" DATE,
-  //       "total_amount" NUMERIC(15,2)
-  //         CHECK ("total_amount" >= 0),
-  //       "currency" VARCHAR(10),
-  //       "status" VARCHAR(50) DEFAULT 'Unpaid'
-  //         CHECK ("status" IN ('Unpaid','Paid','Partially Paid','Cancelled')),
-  //       purchase_order_id UUID REFERENCES "purchase_orders"("id") ON UPDATE CASCADE ON DELETE SET NULL,
-  //       journal_entry_id UUID REFERENCES "journal_entries"("id") ON UPDATE CASCADE ON DELETE SET NULL,
-  //       "created_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  //       "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-  //     );
-  //   `);
-
-  //   await queryRunner.query(`
-  //     CREATE INDEX "idx_supplier_invoices_company_id"
-  //       ON "supplier_invoices" ("company_id");
-  //   `);
-  //   await queryRunner.query(`
-  //     CREATE INDEX "idx_supplier_invoices_supplier_id"
-  //       ON "supplier_invoices" ("supplier_id");
-  //   `);
-  //   await queryRunner.query(`
-  //     CREATE INDEX "idx_supplier_invoices_broker_id"
-  //       ON "supplier_invoices" ("broker_id");
-  //   `);
-  //   await queryRunner.query(`
-  //     CREATE INDEX "idx_supplier_invoices_purchase_order_id"
-  //       ON "supplier_invoices" ("purchase_order_id");
-  //   `);
-  //   await queryRunner.query(`
-  //     CREATE INDEX "idx_supplier_invoices_journal_entry_id"
-  //       ON "supplier_invoices" ("journal_entry_id");
-  //   `);
-
-  //   // 4) supplier_invoice_items table
-  //   await queryRunner.query(`
-  //     CREATE TABLE "supplier_invoice_items" (
-  //       "id" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  //       "supplier_invoice_id" UUID NOT NULL
-  //         REFERENCES "supplier_invoices"("id")
-  //         ON UPDATE CASCADE
-  //         ON DELETE CASCADE,
-  //       "product_id" UUID
-  //         REFERENCES "products"("id")
-  //         ON UPDATE CASCADE
-  //         ON DELETE SET NULL,
-  //       "quantity" NUMERIC(12,2)
-  //         CHECK ("quantity" >= 0),
-  //       "unit_price" NUMERIC(12,2)
-  //         CHECK ("unit_price" >= 0),
-  //       "discount" NUMERIC(12,2) DEFAULT 0.00
-  //         CHECK ("discount" >= 0),
-  //       "tax_rate" NUMERIC(5,2) DEFAULT 0.00
-  //         CHECK ("tax_rate" >= 0),
-  //       "total_price" NUMERIC(12,2)
-  //         GENERATED ALWAYS AS (
-  //           (("quantity" * "unit_price") - "discount")
-  //            + (
-  //              (("quantity" * "unit_price") - "discount")
-  //              * ("tax_rate" / 100)
-  //            )
-  //         ) STORED
-  //     );
-  //   `);
-
-  //   await queryRunner.query(`
-  //     CREATE INDEX "idx_supplier_invoice_items_invoice_id"
-  //       ON "supplier_invoice_items" ("supplier_invoice_id");
-  //   `);
-  //   await queryRunner.query(`
-  //     CREATE INDEX "idx_supplier_invoice_items_product_id"
-  //       ON "supplier_invoice_items" ("product_id");
-  //   `);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

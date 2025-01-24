@@ -500,7 +500,8 @@ export class InvoicesService {
       discount: Number(line.discount) || 0,
       taxRate: Number(line.taxRate) || 0,
       description: line.product?.productName,
-      lineType: InvoiceLineType.PRODUCT, // Assuming the line type is PRODUCT
+      lineType: InvoiceLineType.PRODUCT,
+      lotId: line.lot?.id,
     }));
   }
 
@@ -523,7 +524,8 @@ export class InvoicesService {
       discount: line.discount,
       taxRate: line.taxRate,
       description: line.product?.productName,
-      lineType: InvoiceLineType.PRODUCT, // Assuming the line type is PRODUCT
+      lineType: InvoiceLineType.PRODUCT, 
+      lotId: line.lot?.id,
     }));
   }
   
@@ -596,6 +598,7 @@ export class InvoicesService {
     discount: dto.discount || 0,
     taxRate: dto.taxRate || 0,
     totalPrice,
+    lot: dto.lotId ? { id: dto.lotId } : undefined,
   });
 }
 

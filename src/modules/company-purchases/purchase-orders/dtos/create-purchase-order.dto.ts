@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsUUID,
   IsString,
@@ -19,12 +19,12 @@ export class CreatePurchaseOrderDto {
   @IsUUID()
   companyId: string;
 
-  @ApiProperty({ description: 'UUID of the supplier', required: false })
+  @ApiPropertyOptional({ description: 'UUID of the supplier', required: false })
   @IsUUID()
   @IsOptional()
   supplierId?: string;
 
-  @ApiProperty({ description: 'UUID of the broker', required: false })
+  @ApiPropertyOptional({ description: 'UUID of the broker', required: false })
   @IsUUID()
   @IsOptional()
   brokerId?: string;

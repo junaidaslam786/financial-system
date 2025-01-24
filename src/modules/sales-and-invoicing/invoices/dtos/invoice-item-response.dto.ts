@@ -12,6 +12,12 @@ export class InvoiceItemResponseDto {
     productType: string;
   };
 
+  @ApiProperty({ required: false })
+  lot?: {
+    id: string;
+    lotNumber: string;
+  };
+
   @ApiProperty()
   lineType: InvoiceLineType;
 
