@@ -16,11 +16,14 @@ import { RolesGuard } from './../../common/guards/roles.guard';
 import { Roles } from './../../common/decorators/roles.decorator';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Role } from '../auth/interfaces/role.enum';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { PERMISSIONS } from 'src/common/constants/permissions';
 
 @ApiBearerAuth()
 @ApiTags('Roles')
 @Controller('roles')
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
 @Roles(Role.Owner, Role.Admin)
 export class RolesController {
   constructor(private readonly rolesService: RolesService) {}
@@ -31,6 +34,7 @@ export class RolesController {
    */
   
   @Post()
+  @Permissions(PERMISSIONS.ROLES.CREATE)
   async create(@Body() createRoleDto: CreateRoleDto) {
     return this.rolesService.createRole(createRoleDto);
   }
@@ -41,6 +45,7 @@ export class RolesController {
    */
   @Roles(Role.Owner, Role.Admin)
   @Get()
+  @Permissions(PERMISSIONS.ROLES.READ)
   async findAll() {
     return this.rolesService.findAll();
   }
@@ -50,6 +55,7 @@ export class RolesController {
    */
   
   @Get(':id')
+  @Permissions(PERMISSIONS.ROLES.READ)
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.rolesService.findById(id);
   }
@@ -59,6 +65,7 @@ export class RolesController {
    */
   
   @Patch(':id')
+  @Permissions(PERMISSIONS.ROLES.UPDATE)
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateRoleDto: UpdateRoleDto,
@@ -71,6 +78,7 @@ export class RolesController {
    */
   
   @Delete(':id')
+  @Permissions(PERMISSIONS.ROLES.DELETE)
   async remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.rolesService.remove(id);
   }

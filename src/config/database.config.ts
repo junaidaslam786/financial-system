@@ -12,7 +12,7 @@ export default registerAs('database', (): TypeOrmModuleOptions => {
     password: process.env.DATABASE_PASSWORD,
     database: process.env.DATABASE_NAME,
     // Set synchronize to false in production
-    synchronize: process.env.DATABASE_SYNCHRONIZE === 'true',
+    synchronize: process.env.DATABASE_SYNCHRONIZE === 'false',
     logging: process.env.DATABASE_LOGGING === 'true',
     autoLoadEntities: true, // Automatically load entities if they're registered with TypeORM
     // You can also specify migrations and related configuration here if needed.

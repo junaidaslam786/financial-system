@@ -18,21 +18,27 @@ import {
   import { RolesGuard } from 'src/common/guards/roles.guard';
   import { Roles } from 'src/common/decorators/roles.decorator';
   import { Role } from 'src/modules/auth/interfaces/role.enum';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { PERMISSIONS } from 'src/common/constants/permissions';
   
   @ApiTags('Brokers')
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
   @Controller('brokers')
+  @Roles(Role.Owner, Role.Admin)
   export class BrokersController {
     constructor(private readonly brokersService: BrokersService) {}
   
-    @Roles(Role.Owner, Role.Admin)
+    
     @Post()
+    @Permissions(PERMISSIONS.BROKERS.CREATE)
     async create(@Body() dto: CreateBrokerDto) {
       return this.brokersService.create(dto);
     }
   
     @Get('company/:companyId')
+    @Permissions(PERMISSIONS.BROKERS.READ)
     async findAll(@Param('companyId', ParseUUIDPipe) companyId: string) {
       if (!companyId) {
         throw new BadRequestException('companyId param is required');
@@ -41,18 +47,21 @@ import {
     }
   
     @Get(':id')
+    @Permissions(PERMISSIONS.BROKERS.READ)
     async findOne(@Param('id', ParseUUIDPipe) id: string) {
       return this.brokersService.findOne(id);
     }
   
-    @Roles(Role.Owner, Role.Admin)
+    
     @Patch(':id')
+    @Permissions(PERMISSIONS.BROKERS.UPDATE)
     async update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateBrokerDto) {
       return this.brokersService.update(id, dto);
     }
   
-    @Roles(Role.Owner, Role.Admin)
+    
     @Delete(':id')
+    @Permissions(PERMISSIONS.BROKERS.DELETE)
     async remove(@Param('id', ParseUUIDPipe) id: string) {
       return this.brokersService.remove(id);
     }

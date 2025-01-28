@@ -17,38 +17,47 @@ import {
   import { RolesGuard } from 'src/common/guards/roles.guard';
   import { Roles } from 'src/common/decorators/roles.decorator';
   import { Role } from 'src/modules/auth/interfaces/role.enum';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { PERMISSIONS } from 'src/common/constants/permissions';
   
   @ApiTags('BrokerageTransactions')
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
   @Controller('brokerage-transactions')
+  @Roles(Role.Owner, Role.Admin)
   export class BrokerageTransactionsController {
     constructor(private readonly transactionsService: BrokerageTransactionsService) {}
   
-    @Roles(Role.Owner, Role.Admin)
+    
     @Post()
+    @Permissions(PERMISSIONS.BROKERAGE_TRANSACTIONS.CREATE)
     async create(@Body() dto: CreateBrokerageTransactionDto) {
       return this.transactionsService.create(dto);
     }
   
     @Get()
+    @Permissions(PERMISSIONS.BROKERAGE_TRANSACTIONS.READ)
     async findAll() {
       return this.transactionsService.findAll();
     }
   
     @Get(':id')
+    @Permissions(PERMISSIONS.BROKERAGE_TRANSACTIONS.READ)
     async findOne(@Param('id', ParseUUIDPipe) id: string) {
       return this.transactionsService.findOne(id);
     }
   
-    @Roles(Role.Owner, Role.Admin)
+    
     @Patch(':id')
+    @Permissions(PERMISSIONS.BROKERAGE_TRANSACTIONS.UPDATE)
     async update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateBrokerageTransactionDto) {
       return this.transactionsService.update(id, dto);
     }
   
-    @Roles(Role.Owner, Role.Admin)
+    
     @Delete(':id')
+    @Permissions(PERMISSIONS.BROKERAGE_TRANSACTIONS.DELETE)
     async remove(@Param('id', ParseUUIDPipe) id: string) {
       return this.transactionsService.remove(id);
     }

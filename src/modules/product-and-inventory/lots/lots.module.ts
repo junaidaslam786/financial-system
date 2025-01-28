@@ -10,6 +10,7 @@ import { ProductionOrderEntity } from '../production-orders/entities/production-
 import { PurchaseOrder } from 'src/modules/company-purchases/purchase-orders/entities/purchase-order.entity';
 import { SalesOrderEntity } from 'src/modules/sales-and-invoicing/sales-orders/entities/sales-order.entity';
 import { Invoice } from 'src/modules/sales-and-invoicing/invoices/entities/invoice.entity';
+import { UsersModule } from 'src/modules/users/users.module';
 
 @Module({
   imports: [
@@ -21,8 +22,10 @@ import { Invoice } from 'src/modules/sales-and-invoicing/invoices/entities/invoi
       ProductionOrderEntity,
       PurchaseOrder,
       SalesOrderEntity,
-      Invoice
+      Invoice,
     ]),
+    UsersModule
+
   ],
   controllers: [LotsController],
   providers: [LotsService],

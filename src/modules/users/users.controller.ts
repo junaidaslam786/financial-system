@@ -17,11 +17,14 @@ import { RolesGuard } from './../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Role } from '../auth/interfaces/role.enum';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { PERMISSIONS } from 'src/common/constants/permissions';
 
 @ApiBearerAuth()
 @ApiTags('Users') 
 @Controller('users')
-@UseGuards(JwtAuthGuard, RolesGuard) 
+@UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard) 
 @Roles(Role.Owner, Role.Admin)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
@@ -32,6 +35,7 @@ export class UsersController {
    */
   
   @Post()
+  @Permissions(PERMISSIONS.USERS.CREATE)
   async create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.createUser(createUserDto);
   }
@@ -42,6 +46,7 @@ export class UsersController {
    */
   
   @Get()
+  @Permissions(PERMISSIONS.USERS.READ)
   async findAll(@Query('page') page: number, @Query('limit') limit: number) {
     // You can implement pagination in your service if needed
     return this.usersService.findAll();
@@ -52,6 +57,7 @@ export class UsersController {
    * Possibly restricted to "admin", or the user itself
    */
   @Get(':id')
+  @Permissions(PERMISSIONS.USERS.READ)
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.usersService.findById(id);
   }
@@ -62,6 +68,7 @@ export class UsersController {
    */
   
   @Patch(':id')
+  @Permissions(PERMISSIONS.USERS.UPDATE)
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateUserDto: UpdateUserDto,
@@ -75,6 +82,7 @@ export class UsersController {
    */
   
   @Delete(':id')
+  @Permissions(PERMISSIONS.USERS.DELETE)
   async remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.usersService.remove(id);
   }

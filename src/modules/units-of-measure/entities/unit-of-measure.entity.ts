@@ -1,4 +1,4 @@
-// entities/unit-of-measure.entity.ts
+
 import { Company } from 'src/modules/companies/entities/company.entity';
 import {
     Entity,

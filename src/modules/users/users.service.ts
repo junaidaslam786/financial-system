@@ -34,6 +34,23 @@ export class UsersService {
     return this.userRepository.find({ relations: ['role'] });
   }
 
+  async findByIdWithRolePermissions(userId: string) {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: [
+        'role', // Ensure the role is loaded
+        'role.rolePermissions', // Load role permissions
+        'role.rolePermissions.permission', // Load actual permissions
+      ],
+    });
+  
+    console.log('DB User with Role and Permissions:', JSON.stringify(user, null, 2));
+  
+    return user;
+  }
+  
+  
+
   async findById(id: string) {
     const user = await this.userRepository.findOne({
       where: { id },

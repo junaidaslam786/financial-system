@@ -5,6 +5,7 @@ import {
   Controller,
   Get,
   Query,
+  UseGuards,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
@@ -17,8 +18,20 @@ import { GetBalanceSheetDto } from './dtos/get-balance-sheet.dto';
 import { GetContactLedgerDto } from './dtos/get-contact-ledger.dto';
 import { GetAgingDto } from './dtos/get-aging.dto';
 import { ContactType } from 'src/common/enums/contact-type.enum';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
+import { RolesGuard } from 'src/common/guards/roles.guard';
+import { Role } from '../auth/interfaces/role.enum';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { PERMISSIONS } from 'src/common/constants/permissions';
 
+@ApiBearerAuth()
+@ApiTags('Reports')
+@UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
 @Controller('reports')
+@Roles(Role.Owner, Role.Admin)
 export class ReportsController {
   constructor(private readonly reportsService: ReportsService) {}
 
@@ -27,6 +40,7 @@ export class ReportsController {
    * Query params: companyId, startDate?, endDate?
    */
   @Get('trial-balance')
+  @Permissions(PERMISSIONS.REPORTS.TRIAL_BALANCE)
   async getTrialBalance(
     @Query('companyId') companyId: string,
     @Query('startDate') startDate?: Date,
@@ -47,6 +61,7 @@ export class ReportsController {
    * Query params: companyId, startDate?, endDate?
    */
   @Get('income-statement')
+  @Permissions(PERMISSIONS.REPORTS.INCOME_STATEMENT)
   async getIncomeStatement(
     @Query('companyId') companyId: string,
     @Query('startDate') startDate?: Date,
@@ -69,6 +84,7 @@ export class ReportsController {
    * Query params: companyId, endDate?
    */
   @Get('balance-sheet')
+  @Permissions(PERMISSIONS.REPORTS.BALANCE_SHEET)
   @UsePipes(new ValidationPipe({ transform: true }))
   async getBalanceSheet(
     @Query('companyId') companyId: string,
@@ -85,6 +101,7 @@ export class ReportsController {
    * Query params: companyId, contactType, contactId
    */
   @Get('contact-ledger')
+  @Permissions(PERMISSIONS.REPORTS.CONTACT_LEDGER)
   @UsePipes(new ValidationPipe({ transform: true }))
   async getContactLedger(
     @Query('companyId') companyId: string,
@@ -108,6 +125,7 @@ export class ReportsController {
    * Query params: companyId, contactType
    */
   @Get('aging')
+  @Permissions(PERMISSIONS.REPORTS.AGING)
   @UsePipes(new ValidationPipe({ transform: true }))
   async getAgingReport(
     @Query('companyId') companyId: string,

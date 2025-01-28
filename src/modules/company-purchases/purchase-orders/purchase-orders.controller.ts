@@ -22,12 +22,15 @@ import { Roles } from 'src/common/decorators/roles.decorator';
 import { Role } from 'src/modules/auth/interfaces/role.enum';
 import { RolesGuard } from 'src/common/guards/roles.guard';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { PERMISSIONS } from 'src/common/constants/permissions';
   
   
   @ApiTags('purchase-orders')
   @ApiBearerAuth()
   @Controller('purchase-orders')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
   @Roles(Role.Admin, Role.Owner)
   export class PurchaseOrdersController {
     constructor(private readonly purchaseOrdersService: PurchaseOrdersService) {}
@@ -37,6 +40,7 @@ import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
     // ----------------------------
     
     @Post()
+    @Permissions(PERMISSIONS.PURCHASE_ORDERS.CREATE)
     @ApiOperation({ summary: 'Create a new purchase order (optionally with lines)' })
     create(@Body() dto: CreatePurchaseOrderDto): Promise<PurchaseOrder> {
       return this.purchaseOrdersService.createPurchaseOrder(dto);
@@ -44,6 +48,7 @@ import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
   
     
     @Get('company/:companyId')
+    @Permissions(PERMISSIONS.PURCHASE_ORDERS.READ)
     @ApiOperation({ summary: 'Get all purchase orders' })
     findAll(@Param('companyId', ParseUUIDPipe) companyId: string ): Promise<PurchaseOrder[]> {
       if (!companyId) {
@@ -54,6 +59,7 @@ import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
   
     
     @Get(':id')
+    @Permissions(PERMISSIONS.PURCHASE_ORDERS.READ)
     @ApiOperation({ summary: 'Get purchase order by ID' })
     findOne(@Param('id') id: string): Promise<PurchaseOrder> {
       return this.purchaseOrdersService.findOnePurchaseOrder(id);
@@ -61,6 +67,7 @@ import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
   
     
     @Patch(':id')
+    @Permissions(PERMISSIONS.PURCHASE_ORDERS.UPDATE)
     @ApiOperation({ summary: 'Update purchase order by ID (optionally update lines)' })
     update(
       @Param('id') id: string,
@@ -71,6 +78,7 @@ import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
   
     
     @Delete(':id')
+    @Permissions(PERMISSIONS.PURCHASE_ORDERS.DELETE)
     @ApiOperation({ summary: 'Delete purchase order by ID' })
     remove(@Param('id') id: string): Promise<void> {
       return this.purchaseOrdersService.removePurchaseOrder(id);
@@ -82,6 +90,7 @@ import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
   
     
     @Post(':poId/lines')
+    @Permissions(PERMISSIONS.PURCHASE_ORDERS.ADD_LINE)
     @ApiOperation({ summary: 'Create a new line in a given purchase order' })
     createLine(
       @Param('poId') poId: string,
@@ -92,6 +101,7 @@ import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
   
     
     @Get(':poId/lines/:lineId')
+    @Permissions(PERMISSIONS.PURCHASE_ORDERS.GET_LINE)
     @ApiOperation({ summary: 'Get a specific line from the purchase order (by line ID)' })
     async findLine(@Param('lineId') lineId: string): Promise<PurchaseOrderLine> {
       // We don't necessarily need poId in service call if line ID is unique
@@ -102,6 +112,7 @@ import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
   
     
     @Patch(':poId/lines/:lineId')
+    @Permissions(PERMISSIONS.PURCHASE_ORDERS.UPDATE_LINE)
     @ApiOperation({ summary: 'Update a purchase order line by ID' })
     updateLine(
       @Param('lineId') lineId: string,
@@ -112,6 +123,7 @@ import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
   
     
     @Delete(':poId/lines/:lineId')
+    @Permissions(PERMISSIONS.PURCHASE_ORDERS.DELETE_LINE)
     @ApiOperation({ summary: 'Delete a purchase order line by ID' })
     removeLine(@Param('lineId') lineId: string): Promise<void> {
       return this.purchaseOrdersService.removeLine(lineId);

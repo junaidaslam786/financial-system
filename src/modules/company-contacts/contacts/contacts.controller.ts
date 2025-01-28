@@ -18,21 +18,27 @@ import {
   import { RolesGuard } from 'src/common/guards/roles.guard';
   import { Roles } from 'src/common/decorators/roles.decorator';
   import { Role } from 'src/modules/auth/interfaces/role.enum';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { PERMISSIONS } from 'src/common/constants/permissions';
   
   @ApiTags('Contacts')
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
   @Controller('contacts')
+  @Roles(Role.Owner, Role.Admin)
   export class ContactsController {
     constructor(private readonly contactsService: ContactsService) {}
   
-    @Roles(Role.Owner, Role.Admin)
+    
     @Post()
+    @Permissions(PERMISSIONS.CONTACTS.CREATE)
     async create(@Body() dto: CreateContactDto) {
       return this.contactsService.create(dto);
     }
   
     @Get('company/:companyId')
+    @Permissions(PERMISSIONS.CONTACTS.READ)
     async findAll(@Param('companyId', ParseUUIDPipe) companyId: string) {
       if (!companyId) {
         throw new BadRequestException('companyId param is required');
@@ -41,18 +47,21 @@ import {
     }
   
     @Get(':id')
+    @Permissions(PERMISSIONS.CONTACTS.READ)
     async findOne(@Param('id', ParseUUIDPipe) id: string) {
       return this.contactsService.findOne(id);
     }
   
-    @Roles(Role.Owner, Role.Admin)
+    
     @Patch(':id')
+    @Permissions(PERMISSIONS.CONTACTS.UPDATE)
     async update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateContactDto) {
       return this.contactsService.update(id, dto);
     }
   
-    @Roles(Role.Owner, Role.Admin)
+    
     @Delete(':id')
+    @Permissions(PERMISSIONS.CONTACTS.DELETE)
     async remove(@Param('id', ParseUUIDPipe) id: string) {
       return this.contactsService.remove(id);
     }

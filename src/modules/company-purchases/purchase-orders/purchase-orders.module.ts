@@ -9,6 +9,7 @@ import { SupplierEntity } from 'src/modules/company-contacts/suppliers/entities/
 import { BrokerEntity } from 'src/modules/company-contacts/brokers/entities/broker.entity';
 import { ProductEntity } from 'src/modules/product-and-inventory/products/entities/product.entity';
 import { InvoicesModule } from 'src/modules/sales-and-invoicing/invoices/invoices.module';
+import { UsersModule } from 'src/modules/users/users.module';
 
 
 @Module({
@@ -20,7 +21,9 @@ import { InvoicesModule } from 'src/modules/sales-and-invoicing/invoices/invoice
       SupplierEntity,
       BrokerEntity,
       ProductEntity,
+      
     ]),
+    UsersModule,
     InvoicesModule
   ],
   controllers: [PurchaseOrdersController],

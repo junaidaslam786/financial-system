@@ -12,16 +12,20 @@ import {
   import { Role } from 'src/modules/auth/interfaces/role.enum';
   import { Roles } from 'src/common/decorators/roles.decorator';
   import { DayBookResponseDto } from './dtos/day-book-response.dto';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { PERMISSIONS } from 'src/common/constants/permissions';
   
   @ApiBearerAuth()
   @ApiTags('DayBook')
   @Controller('daybook')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
   @Roles(Role.Owner, Role.Admin)
   export class DayBookController {
     constructor(private readonly dayBookService: DayBookService) {}
   
     @Get()
+    @Permissions(PERMISSIONS.DAY_BOOK.READ)
     @ApiOperation({ summary: 'Get day book entries (with optional date range)' })
     async getDayBook(
       @Query() query: DayBookQueryDto,

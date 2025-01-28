@@ -8,6 +8,7 @@ import { JournalLine } from '../journal/entities/journal-line.entity';
 // Possibly also need Company, Account if needed
 import { Company } from '../../companies/entities/company.entity';
 import { Account } from '../accounts/entities/account.entity';
+import { UsersModule } from 'src/modules/users/users.module';
 
 @Module({
   imports: [
@@ -17,6 +18,8 @@ import { Account } from '../accounts/entities/account.entity';
       Company,
       Account,
     ]),
+    UsersModule
+
   ],
   controllers: [DayBookController],
   providers: [DayBookService],

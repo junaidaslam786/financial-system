@@ -10,6 +10,7 @@ import { JournalEntry } from 'src/modules/financial/journal/entities/journal-ent
 import { JournalLine } from 'src/modules/financial/journal/entities/journal-line.entity';
 import { Account } from 'src/modules/financial/accounts/entities/account.entity';
 import { ContactLedgerEntry } from 'src/modules/company-contacts/contact-ledger/entities/contact-ledger-entry.entity';
+import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
@@ -19,6 +20,8 @@ import { ContactLedgerEntry } from 'src/modules/company-contacts/contact-ledger/
       Account,
       ContactLedgerEntry,
     ]),
+    UsersModule
+
   ],
   providers: [ReportsService],
   controllers: [ReportsController],

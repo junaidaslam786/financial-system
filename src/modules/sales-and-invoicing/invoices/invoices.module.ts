@@ -14,6 +14,7 @@ import { SupplierEntity } from 'src/modules/company-contacts/suppliers/entities/
 import { ContactLedgerModule } from 'src/modules/company-contacts/contact-ledger/contact-ledger.module';
 import { ContactLedgerEntry } from 'src/modules/company-contacts/contact-ledger/entities/contact-ledger-entry.entity';
 import { ContactLedgerService } from 'src/modules/company-contacts/contact-ledger/contact-ledger.service';
+import { UsersModule } from 'src/modules/users/users.module';
 
 @Module({
   imports: [
@@ -26,8 +27,10 @@ import { ContactLedgerService } from 'src/modules/company-contacts/contact-ledge
       ProductEntity,
       JournalEntry,
       SupplierEntity,
-      ContactLedgerEntry
+      ContactLedgerEntry,
+      
     ]),
+    UsersModule
     
   ],
   controllers: [InvoicesController],

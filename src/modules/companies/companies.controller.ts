@@ -21,6 +21,9 @@ import { Role } from '../auth/interfaces/role.enum';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { User } from '../users/entities/user.entity';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { PERMISSIONS } from 'src/common/constants/permissions';
 // Optional: if you use role-based guard
 // import { RolesGuard } from '../../roles/guards/roles.guard';
 // import { Roles } from '../../roles/decorators/roles.decorator';
@@ -28,13 +31,13 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 @ApiBearerAuth()
 @ApiTags('Companies')
 @Controller('companies')
-@UseGuards(JwtAuthGuard, RolesGuard) 
+@UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard) 
 @Roles(Role.Owner, Role.Admin)
 export class CompaniesController {
   constructor(private readonly companiesService: CompaniesService) {}
 
   @Post()
-  @Roles(Role.Admin, Role.Owner)
+  @Permissions(PERMISSIONS.COMPANIES.CREATE)
   async createCompany(@Req() req, @Body() createCompanyDto: CreateCompanyDto) {
     // The user object is attached by JWT strategy, e.g. req.user
     const user = req.user;
@@ -53,6 +56,7 @@ export class CompaniesController {
   }
 
   @Get()
+  @Permissions(PERMISSIONS.COMPANIES.READ)
   async findAllCompanies(
     @CurrentUser() user: User,
     @Query('page') page: number,
@@ -63,12 +67,13 @@ export class CompaniesController {
   }
 
   @Get(':id')
+  @Permissions(PERMISSIONS.COMPANIES.READ)
   async findOneCompany(@Param('id', ParseUUIDPipe) id: string) {
     return this.companiesService.findOneCompany(id);
   }
 
   @Patch(':id')
-  // @Roles('admin')
+  @Permissions(PERMISSIONS.COMPANIES.UPDATE)
   async updateCompany(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateCompanyDto: UpdateCompanyDto,
@@ -77,7 +82,7 @@ export class CompaniesController {
   }
 
   @Delete(':id')
-  // @Roles('admin')
+  @Permissions(PERMISSIONS.COMPANIES.DELETE)
   async removeCompany(@Param('id', ParseUUIDPipe) id: string) {
     return this.companiesService.removeCompany(id);
   }

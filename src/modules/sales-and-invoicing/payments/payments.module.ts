@@ -9,6 +9,7 @@ import { InvoicesModule } from '../invoices/invoices.module';
 import { CompaniesModule } from 'src/modules/companies/companies.module';
 import { JournalModule } from 'src/modules/financial/journal/journal.module';
 import { ContactLedgerModule } from 'src/modules/company-contacts/contact-ledger/contact-ledger.module';
+import { UsersModule } from 'src/modules/users/users.module';
 
 @Module({
   imports: [
@@ -16,7 +17,8 @@ import { ContactLedgerModule } from 'src/modules/company-contacts/contact-ledger
     CompaniesModule,
     InvoicesModule,
     JournalModule,
-    ContactLedgerModule
+    ContactLedgerModule, 
+    UsersModule
   ],
   providers: [PaymentsService],
   controllers: [PaymentsController],

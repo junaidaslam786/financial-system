@@ -18,36 +18,42 @@ import {
   import { RolesGuard } from 'src/common/guards/roles.guard';
   import { Roles } from 'src/common/decorators/roles.decorator';
   import { Role } from 'src/modules/auth/interfaces/role.enum';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { PERMISSIONS } from 'src/common/constants/permissions';
   
   @ApiTags('Production Order Stages')
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
   @Controller('production-order-stages')
+  @Roles(Role.Owner, Role.Admin)
   export class ProductionOrderStagesController {
     constructor(private readonly posService: ProductionOrderStagesService) {}
   
     @ApiOperation({ summary: 'Create a new production order stage record' })
-    @Roles(Role.Owner, Role.Admin)
     @Post()
+    @Permissions(PERMISSIONS.PRODUCTION_ORDER_STAGES.CREATE)
     async create(@Body() dto: CreateProductionOrderStageDto) {
       return this.posService.create(dto);
     }
   
     @ApiOperation({ summary: 'Get all stages for a given production order' })
     @Get()
+    @Permissions(PERMISSIONS.PRODUCTION_ORDER_STAGES.READ)
     async findAll(@Query('productionOrderId', ParseUUIDPipe) productionOrderId: string) {
       return this.posService.findAllByProductionOrderId(productionOrderId);
     }
   
     @ApiOperation({ summary: 'Get a single production order stage by ID' })
     @Get(':id')
+    @Permissions(PERMISSIONS.PRODUCTION_ORDER_STAGES.READ)
     async findOne(@Param('id', ParseUUIDPipe) id: string) {
       return this.posService.findOne(id);
     }
   
     @ApiOperation({ summary: 'Update a production order stage' })
-    @Roles(Role.Owner, Role.Admin)
     @Patch(':id')
+    @Permissions(PERMISSIONS.PRODUCTION_ORDER_STAGES.UPDATE)
     async update(
       @Param('id', ParseUUIDPipe) id: string,
       @Body() dto: UpdateProductionOrderStageDto,
@@ -56,8 +62,8 @@ import {
     }
   
     @ApiOperation({ summary: 'Delete a production order stage' })
-    @Roles(Role.Owner, Role.Admin)
     @Delete(':id')
+    @Permissions(PERMISSIONS.PRODUCTION_ORDER_STAGES.DELETE)
     async remove(@Param('id', ParseUUIDPipe) id: string) {
       return this.posService.remove(id);
     }

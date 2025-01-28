@@ -19,22 +19,27 @@ import { RolesGuard } from 'src/common/guards/roles.guard';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { Role } from 'src/modules/auth/interfaces/role.enum';
 import { Roles } from 'src/common/decorators/roles.decorator';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { PERMISSIONS } from 'src/common/constants/permissions';
 
 
   @ApiBearerAuth()
   @ApiTags('Exchange Rates')
   @Controller('exchange-rates')
-  @UseGuards(JwtAuthGuard, RolesGuard) 
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard) 
   @Roles(Role.Owner, Role.Admin)
   export class ExchangeRatesController {
     constructor(private readonly exchangeRatesService: ExchangeRatesService) {}
   
     @Post()
+    @Permissions(PERMISSIONS.EXCHANGE_RATES.CREATE)
     async create(@Body() dto: CreateExchangeRateDto): Promise<ExchangeRate> {
       return this.exchangeRatesService.create(dto);
     }
   
     @Get('company/:companyId')
+    @Permissions(PERMISSIONS.EXCHANGE_RATES.READ)
     async findAll(@Param('companyId', ParseUUIDPipe) companyId: string): Promise<ExchangeRate[]> {
       if (!companyId) {
         throw new BadRequestException('companyId param is required');
@@ -43,11 +48,13 @@ import { Roles } from 'src/common/decorators/roles.decorator';
     }
   
     @Get(':id')
+    @Permissions(PERMISSIONS.EXCHANGE_RATES.READ)
     async findOne(@Param('id') id: string): Promise<ExchangeRate> {
       return this.exchangeRatesService.findOne(id);
     }
   
     @Patch(':id')
+    @Permissions(PERMISSIONS.EXCHANGE_RATES.UPDATE)
     async update(
       @Param('id') id: string,
       @Body() dto: UpdateExchangeRateDto,
@@ -56,6 +63,7 @@ import { Roles } from 'src/common/decorators/roles.decorator';
     }
   
     @Delete(':id')
+    @Permissions(PERMISSIONS.EXCHANGE_RATES.DELETE)
     async remove(@Param('id') id: string): Promise<void> {
       return this.exchangeRatesService.remove(id);
     }

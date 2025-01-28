@@ -20,16 +20,20 @@ import { Role } from 'src/modules/auth/interfaces/role.enum';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { Invoice } from './entities/invoice.entity';
 import { InvoiceItem } from './entities/invoice-item.entity';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { PERMISSIONS } from 'src/common/constants/permissions';
 
 @ApiTags('Invoices')
 @ApiBearerAuth()
 @Controller('invoices')
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
 @Roles(Role.Owner, Role.Admin)
 export class InvoicesController {
   constructor(private readonly invoicesService: InvoicesService) {}
 
   @Post()
+  @Permissions(PERMISSIONS.INVOICES.CREATE)
   @ApiOperation({ summary: 'Create a new invoice with line items' })
   async create(
     @Body() createInvoiceDto: CreateInvoiceDto,
@@ -39,6 +43,7 @@ export class InvoicesController {
   }
 
   @Get()
+  @Permissions(PERMISSIONS.INVOICES.READ)
   @ApiOperation({ summary: 'Get all invoices for a given company' })
   async findAll(
     @Query('companyId') companyId: string,
@@ -48,6 +53,7 @@ export class InvoicesController {
   }
 
   @Get(':id')
+  @Permissions(PERMISSIONS.INVOICES.READ)
   @ApiOperation({ summary: 'Get a specific invoice by ID' })
   async findOne(@Param('id') id: string): Promise<InvoiceResponseDto> {
     const invoice = await this.invoicesService.findOne(id);
@@ -55,6 +61,7 @@ export class InvoicesController {
   }
 
   @Patch(':id')
+  @Permissions(PERMISSIONS.INVOICES.UPDATE)
   @ApiOperation({ summary: 'Update an existing invoice' })
   async update(
     @Param('id') id: string,
@@ -65,6 +72,7 @@ export class InvoicesController {
   }
 
   @Delete(':id')
+  @Permissions(PERMISSIONS.INVOICES.DELETE)
   @ApiOperation({ summary: 'Delete an invoice' })
   async remove(@Param('id') id: string): Promise<void> {
     return this.invoicesService.remove(id);

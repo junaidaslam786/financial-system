@@ -27,36 +27,41 @@ import { LinkInvoiceResponseDto } from './dtos/link-invoice.response.dto';
 import { LinkInvoiceDto } from './dtos/link-invoice.dto';
 import { LinkSalesOrderResponseDto } from './dtos/link-sales-order.response.dto';
 import { LinkSalesOrderDto } from './dtos/link-sales-order.dto';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { PERMISSIONS } from 'src/common/constants/permissions';
 
 @ApiTags('Lots')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
 @Controller('lots')
 export class LotsController {
   constructor(private readonly lotsService: LotsService) {}
 
   @ApiOperation({ summary: 'Create a new lot' })
-  @Roles(Role.Owner, Role.Admin)
   @Post()
+  @Permissions(PERMISSIONS.LOTS.CREATE)
   async create(@Body() dto: CreateLotDto) {
     return this.lotsService.create(dto);
   }
 
   @ApiOperation({ summary: 'Get all lots for a company' })
   @Get()
+  @Permissions(PERMISSIONS.LOTS.READ)
   async findAll(@Query('companyId', ParseUUIDPipe) companyId: string) {
     return this.lotsService.findAll(companyId);
   }
 
   @ApiOperation({ summary: 'Get a single lot by ID' })
   @Get(':id')
+  @Permissions(PERMISSIONS.LOTS.READ)
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.lotsService.findOne(id);
   }
 
   @ApiOperation({ summary: 'Update a lot' })
-  @Roles(Role.Owner, Role.Admin)
   @Patch(':id')
+  @Permissions(PERMISSIONS.LOTS.UPDATE)
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateLotDto,
@@ -65,15 +70,15 @@ export class LotsController {
   }
 
   @ApiOperation({ summary: 'Delete a lot' })
-  @Roles(Role.Owner, Role.Admin)
   @Delete(':id')
+  @Permissions(PERMISSIONS.LOTS.DELETE)
   async remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.lotsService.remove(id);
   }
 
   @ApiOperation({ summary: 'Link a purchase order (or specific lines) to this lot' })
-  @Roles(Role.Owner, Role.Admin)
   @Post(':lotId/link-purchase-order')
+  @Permissions(PERMISSIONS.LOTS.LINK_PURCHASE_ORDER)
   @ApiBody({ type: LinkPurchaseOrderDto })
   @ApiCreatedResponse({ type: LinkPurchaseOrderResponseDto })
   async linkPurchaseOrder(
@@ -91,8 +96,8 @@ export class LotsController {
   }
 
   @ApiOperation({ summary: 'Link a sales order (or specific lines) to this lot' })
-  @Roles(Role.Owner, Role.Admin)
   @Post(':lotId/link-sales-order')
+  @Permissions(PERMISSIONS.LOTS.LINK_SALES_ORDER)
   @ApiBody({ type: LinkSalesOrderDto })
   @ApiCreatedResponse({ type: LinkSalesOrderResponseDto })
   async linkSalesOrder(
@@ -110,8 +115,8 @@ export class LotsController {
   }
 
   @ApiOperation({ summary: 'Link an invoice (or specific items) to this lot' })
-  @Roles(Role.Owner, Role.Admin)
   @Post(':lotId/link-invoice')
+  @Permissions(PERMISSIONS.LOTS.LINK_INVOICE)
   @ApiBody({ type: LinkInvoiceDto })
   @ApiCreatedResponse({ type: LinkInvoiceResponseDto })
   async linkInvoice(
@@ -129,8 +134,8 @@ export class LotsController {
   }
 
   @ApiOperation({ summary: 'Link a production order to this lot (only if one-lot-per-order)' })
-  @Roles(Role.Owner, Role.Admin)
   @Post('link-production-order')
+  @Permissions(PERMISSIONS.LOTS.LINK_PRODUCTION_ORDER)
   @ApiBody({ type: LinkProductionOrderDto })
   @ApiCreatedResponse({ type: LinkProductionOrderResponseDto })
   async linkProductionOrder(

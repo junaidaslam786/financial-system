@@ -18,36 +18,42 @@ import {
   import { RolesGuard } from 'src/common/guards/roles.guard';
   import { Roles } from 'src/common/decorators/roles.decorator';
   import { Role } from 'src/modules/auth/interfaces/role.enum';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
+import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { PERMISSIONS } from 'src/common/constants/permissions';
   
   @ApiTags('Inventory Movements')
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
   @Controller('inventory-movements')
+  @Roles(Role.Owner, Role.Admin)
   export class InventoryMovementsController {
     constructor(private readonly movementsService: InventoryMovementsService) {}
   
     @ApiOperation({ summary: 'Create a new inventory movement' })
-    @Roles(Role.Owner, Role.Admin)
     @Post()
+    @Permissions(PERMISSIONS.INVENTORY_MOVEMENTS.CREATE)
     async create(@Body() dto: CreateInventoryMovementDto) {
       return this.movementsService.create(dto);
     }
   
     @ApiOperation({ summary: 'Get all movements for a given company' })
     @Get()
+    @Permissions(PERMISSIONS.INVENTORY_MOVEMENTS.READ)
     async findAll(@Query('companyId', ParseUUIDPipe) companyId: string) {
       return this.movementsService.findAllByCompanyId(companyId);
     }
   
     @ApiOperation({ summary: 'Get a single movement by ID' })
     @Get(':id')
+    @Permissions(PERMISSIONS.INVENTORY_MOVEMENTS.READ)
     async findOne(@Param('id', ParseUUIDPipe) id: string) {
       return this.movementsService.findOne(id);
     }
   
     @ApiOperation({ summary: 'Update an inventory movement' })
-    @Roles(Role.Owner, Role.Admin)
     @Patch(':id')
+    @Permissions(PERMISSIONS.INVENTORY_MOVEMENTS.UPDATE)
     async update(
       @Param('id', ParseUUIDPipe) id: string,
       @Body() dto: UpdateInventoryMovementDto,
@@ -56,8 +62,8 @@ import {
     }
   
     @ApiOperation({ summary: 'Delete an inventory movement' })
-    @Roles(Role.Owner, Role.Admin)
     @Delete(':id')
+    @Permissions(PERMISSIONS.INVENTORY_MOVEMENTS.DELETE)
     async remove(@Param('id', ParseUUIDPipe) id: string) {
       return this.movementsService.remove(id);
     }

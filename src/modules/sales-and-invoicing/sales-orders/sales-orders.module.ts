@@ -9,13 +9,21 @@ import { TraderEntity } from 'src/modules/company-contacts/traders/entities/trad
 import { TradersModule } from 'src/modules/company-contacts/traders/traders.module';
 import { CustomerEntity } from 'src/modules/company-contacts/customers/entities/customer.entity';
 import { InvoicesModule } from '../invoices/invoices.module';
+import { UsersModule } from 'src/modules/users/users.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([SalesOrderEntity, SalesOrderLine, TraderEntity, CustomerEntity]),
-  CustomersModule,
-  TradersModule,
-  InvoicesModule
-],
+  imports: [
+    TypeOrmModule.forFeature([
+      SalesOrderEntity,
+      SalesOrderLine,
+      TraderEntity,
+      CustomerEntity,
+    ]),
+    CustomersModule,
+    TradersModule,
+    InvoicesModule,
+    UsersModule
+  ],
   controllers: [SalesOrdersController],
   providers: [SalesOrdersService],
 })

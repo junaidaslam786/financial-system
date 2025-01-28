@@ -14,6 +14,7 @@ import { User as User } from '../users/entities/user.entity';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 import { RolesService } from '../roles/roles.service';
 import { CompaniesService } from '../companies/companies.service';
+import { PermissionsService } from '../permissions/permissions.service';
 
 @Injectable()
 export class AuthService {
@@ -22,6 +23,7 @@ export class AuthService {
     private readonly companiesService: CompaniesService,
     private readonly rolesService: RolesService,
     private readonly jwtService: JwtService,
+    private readonly permissionsService: PermissionsService,
   ) {}
 
   /**
@@ -93,6 +95,8 @@ export class AuthService {
 
     // 5) Create a default company for that user
     await this.companiesService.createDefaultCompanyForUser(createdUser.id);
+
+    await this.permissionsService.assignAllPermissionsToRole(ownerRole);
 
     return {
       message: 'Registration successful',
