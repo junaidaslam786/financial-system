@@ -21,6 +21,7 @@ import { CreateInvoiceItemDto } from './dtos/create-invoice-item.dto';
 import { ContactLedgerService } from 'src/modules/company-contacts/contact-ledger/contact-ledger.service';
 import { ContactType } from 'src/common/enums/contact-type.enum';
 import { InvoiceLineType } from './enums/invoice-line-type.enum';
+import { EntryType } from 'src/common/enums/entry-type';
 // If you want to link a sales order
 
 @Injectable()
@@ -726,6 +727,7 @@ export class InvoicesService {
         entryDate: inv.invoiceDate,
         reference: `Purchase Invoice #${inv.invoiceNumber}`,
         description: `Auto posted purchase invoice ${inv.id}`,
+        entryType: EntryType.PURCHASE,
         lines,
       });
   
@@ -754,12 +756,13 @@ export class InvoicesService {
       ];
   
       return this.journalService.createInTransaction(manager, {
-        companyId: company.id,
-        entryDate: inv.invoiceDate,
-        reference: `Sales Invoice #${inv.invoiceNumber}`,
-        description: `Auto posted sales invoice ${inv.id}`,
-        lines,
-      });
+              companyId: company.id,
+              entryDate: inv.invoiceDate,
+              reference: `Sales Invoice #${inv.invoiceNumber}`,
+              description: `Auto posted sales invoice ${inv.id}`,
+              entryType: EntryType.SALES,
+              lines,
+            });
     }
   }
   

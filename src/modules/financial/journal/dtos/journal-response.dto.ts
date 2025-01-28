@@ -1,3 +1,4 @@
+import { EntryType } from 'src/common/enums/entry-type';
 import { JournalLineDto } from './journal-line.dto';
 
 export class JournalResponseDto {
@@ -16,6 +17,8 @@ export class JournalResponseDto {
   };
   createdAt: Date;
   updatedAt: Date;
+
+  entryType: EntryType;
 
   lines: {
     id: string;

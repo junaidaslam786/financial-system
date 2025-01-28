@@ -21,6 +21,13 @@ export class LotResponseDto {
     contactInfo: string;
   };
 
+  @ApiProperty({ nullable: true })
+  product?: {
+    id: string;
+    productName: string;
+    productType: string;
+  };
+
   @ApiProperty()
   initialQuantity: number;
 

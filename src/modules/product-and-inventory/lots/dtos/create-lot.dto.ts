@@ -30,4 +30,9 @@ export class CreateLotDto {
   @IsString()
   @IsIn(['Pending','In-Process','Completed'])
   status?: string;
+
+  @ApiPropertyOptional({ description: 'ID of the product linked to this lot' })
+  @IsUUID()
+  @IsOptional()
+  productId?: string;
 }

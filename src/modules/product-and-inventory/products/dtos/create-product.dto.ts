@@ -46,4 +46,9 @@ export class CreateProductDto {
   @ApiPropertyOptional({ example: true })
   @IsOptional()
   isActive?: boolean;
+
+  @ApiPropertyOptional({example:'789e0123-e89b-12d3-a456-426614174999', description: 'lot'})
+  @IsOptional()
+  @IsUUID()
+  lotId?: string;
 }

@@ -41,6 +41,12 @@ export class ProductResponseDto {
   @ApiProperty()
   isActive: boolean;
 
+  @ApiProperty({ nullable: true })
+  lot: {
+    id: string;
+    lotNumber: string;
+  };
+
   @ApiProperty()
   createdAt: Date;
 

@@ -65,6 +65,7 @@ export class LotsService {
       initialQuantity: dto.initialQuantity,
       currentQuantity: dto.currentQuantity,
       status: dto.status ?? 'Pending',
+      productId: dto.productId,
     });
     return this.lotRepo.save(lot);
   }
@@ -79,8 +80,13 @@ export class LotsService {
         'purchaseOrderLines',
         'purchaseOrderLines.purchaseOrder',
         'salesOrderLines',
+        'salesOrderLines.salesOrder.customer',
+        'salesOrderLines.salesOrder.trader',
         'invoiceItems',
-        'productionOrders',
+        'invoiceItems.invoice', // if you want the entire Invoice
+        'productionOrders', //
+        'product',
+
       ],
     });
   }
@@ -102,6 +108,7 @@ export class LotsService {
         'invoiceItems',
         'invoiceItems.invoice', // if you want the entire Invoice
         'productionOrders', // if you want the entire production order(s)
+        'product'
       ],
       // order: {
       //   // optional: specify sorting for lines, e.g.
@@ -145,6 +152,9 @@ export class LotsService {
     }
     if (dto.status !== undefined) {
       lot.status = dto.status;
+    }
+    if (dto.productId !== undefined) {
+      lot.productId = dto.productId;
     }
 
     return this.lotRepo.save(lot);

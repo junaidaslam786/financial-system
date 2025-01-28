@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class DayBookResponseDto {
   @ApiProperty({ description: 'Start date of the daybook query range' })
@@ -26,7 +26,7 @@ export class DayBookEntryDto {
       username: string
     };
     lines: {
-      id: string;
+      accountId: string;
       account: {
         id: string;
         accountName: string;
@@ -49,6 +49,11 @@ export class DayBookEntryDto {
   @ApiProperty({ description: 'Array of lines' })
   lines: {
     accountId: string;
+    account?: { // Optional: Include the full account object
+      id: string;
+      accountName: string;
+      accountType: string;
+    };
     debit: number;
     credit: number;
   }[];
@@ -69,4 +74,12 @@ export class DayBookAggregatedDto {
 
   @ApiProperty({ description: 'Sum of credits for this date+account' })
   totalCredit: number;
+
+  @ApiPropertyOptional({ description: 'The full account object (optional)' })
+  account?: {
+    id: string;
+    accountName: string;
+    accountType: string;
+    // ...
+  };
 }

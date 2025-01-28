@@ -15,6 +15,7 @@ import { ContactLedgerService } from 'src/modules/company-contacts/contact-ledge
 import { ContactType } from 'src/common/enums/contact-type.enum';
 import { JournalEntry } from 'src/modules/financial/journal/entities/journal-entry.entity';
 import { PaymentMethod } from '../payment-methods/entities/payment-methods.entity';
+import { EntryType } from 'src/common/enums/entry-type';
 
 @Injectable()
 export class PaymentsService {
@@ -236,6 +237,7 @@ export class PaymentsService {
         entryDate: payment.paymentDate,
         reference: `Payment #${payment.id}`,
         description: `Received partial/ full payment for invoice ${invoice.id}`,
+        entryType: invoice.invoiceType === 'Sale' ? EntryType.SALES : EntryType.PURCHASE,
         lines,
       });
     } else {
@@ -273,6 +275,7 @@ export class PaymentsService {
         entryDate: payment.paymentDate,
         reference: `Payment #${payment.id}`,
         description: `Paying partial/ full for invoice ${invoice.id}`,
+        entryType: EntryType.PURCHASE,
         lines,
       });
     }

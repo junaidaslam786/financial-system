@@ -15,6 +15,7 @@ import { ProductionOrderEntity } from '../../production-orders/entities/producti
 import { InvoiceItem } from 'src/modules/sales-and-invoicing/invoices/entities/invoice-item.entity';
 import { SalesOrderLine } from 'src/modules/sales-and-invoicing/sales-orders/entities/sales-order-line.entity';
 import { PurchaseOrderLine } from 'src/modules/company-purchases/purchase-orders/entities/purchase-order-line.entity';
+import { ProductEntity } from '../../products/entities/product.entity';
 
 @Entity({ name: 'lots' })
 export class LotEntity {
@@ -65,6 +66,16 @@ export class LotEntity {
   })
   // possible values: 'Pending', 'In-Process', 'Completed'
   status: string;
+
+  @Column({ type: 'uuid', nullable: true })
+  productId?: string;
+
+  @ManyToOne(() => ProductEntity, (product) => product.lots, {
+    onUpdate: 'CASCADE',
+    onDelete: 'SET NULL',
+  })
+  @JoinColumn({ name: 'product_id' })
+  product?: ProductEntity;
 
   @OneToMany(() => PurchaseOrderLine, (poLine) => poLine.lot)
   purchaseOrderLines: PurchaseOrderLine[];

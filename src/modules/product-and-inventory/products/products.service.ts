@@ -40,6 +40,7 @@ export class ProductsService {
       costPrice: dto.costPrice ?? 0,
       sellingPrice: dto.sellingPrice ?? 0,
       isActive: dto.isActive ?? true,
+      lots: dto.lotId ? [{ id: dto.lotId }] : [],
     });
     return this.productRepo.save(product);
   }
@@ -48,7 +49,7 @@ export class ProductsService {
     // Return products for a given company
     return this.productRepo.find({
       where: { companyId },
-      relations: ['category', 'unitOfMeasure'],
+      relations: ['category', 'unitOfMeasure', 'lots'],
       order: { productName: 'ASC' },
     });
   }
@@ -56,7 +57,7 @@ export class ProductsService {
   async findOne(id: string): Promise<ProductEntity> {
     const product = await this.productRepo.findOne({
       where: { id },
-      relations: ['category', 'unitOfMeasure'],
+      relations: ['category', 'unitOfMeasure', 'lots'],
     });
     if (!product) {
       throw new NotFoundException(`Product with ID "${id}" not found`);

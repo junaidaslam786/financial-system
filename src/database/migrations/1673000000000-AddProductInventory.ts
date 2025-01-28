@@ -100,6 +100,7 @@ export class AddProductInventoryTables1673000000000 implements MigrationInterfac
         initial_quantity NUMERIC(15,2) NOT NULL CHECK(initial_quantity >= 0),
         current_quantity NUMERIC(15,2) NOT NULL CHECK(current_quantity >= 0),
         status VARCHAR(50) DEFAULT 'Pending' CHECK(status IN('Pending','In-Process','Completed')),
+        product_id UUID REFERENCES products(id) ON UPDATE CASCADE ON DELETE SET NULL,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       );
@@ -113,7 +114,11 @@ export class AddProductInventoryTables1673000000000 implements MigrationInterfac
       CREATE INDEX idx_lots_source_supplier_id 
       ON lots(source_supplier_id);
     `);
-
+    await queryRunner.query(`
+      CREATE INDEX idx_lots_product_id
+      ON lots(product_id);
+    `);
+    
     // 6) lot_raw_materials
     await queryRunner.query(`
       CREATE TABLE lot_raw_materials (

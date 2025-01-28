@@ -19,7 +19,7 @@ import { PERMISSIONS } from 'src/common/constants/permissions';
   @ApiBearerAuth()
   @ApiTags('DayBook')
   @Controller('daybook')
-  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.Owner, Role.Admin)
   export class DayBookController {
     constructor(private readonly dayBookService: DayBookService) {}

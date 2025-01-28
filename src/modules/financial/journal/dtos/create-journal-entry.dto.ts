@@ -1,7 +1,8 @@
-import { IsString, IsOptional, IsDateString, ValidateNested, ArrayNotEmpty, IsArray, IsDate, IsBoolean } from 'class-validator';
+import { IsString, IsOptional, IsDateString, ValidateNested, ArrayNotEmpty, IsArray, IsDate, IsBoolean, IsEnum } from 'class-validator';
 import { Type } from 'class-transformer';
 import { JournalLineDto } from './journal-line.dto';
 import { ApiProperty } from '@nestjs/swagger';
+import { EntryType } from 'src/common/enums/entry-type';
 
 export class CreateJournalEntryDto {
   @ApiProperty({ example: 'company-id' })
@@ -28,6 +29,10 @@ export class CreateJournalEntryDto {
   @IsOptional()
   @IsString()
   createdBy?: string; 
+
+  @ApiProperty()
+  @IsEnum(EntryType)
+  entryType: EntryType;
 
   @ApiProperty({ example: true })
   @IsOptional()
