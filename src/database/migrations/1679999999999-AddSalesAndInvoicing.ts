@@ -21,7 +21,7 @@ export class AddSalesAndInvoicing1672000000000 implements MigrationInterface {
       CREATE TABLE ${this.TABLE_SALES_ORDERS} (
         id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
         company_id UUID NOT NULL REFERENCES companies(id) ON UPDATE CASCADE ON DELETE CASCADE,
-        customer_id UUID REFERENCES customers(id) ON UPDATE CASCADE ON DELETE SET NULL,
+        // customer_id UUID REFERENCES customers(id) ON UPDATE CASCADE ON DELETE SET NULL,
         trader_id UUID REFERENCES traders(id) ON UPDATE CASCADE ON DELETE SET NULL,
         order_number VARCHAR(100) UNIQUE,
         order_date DATE DEFAULT CURRENT_DATE,
