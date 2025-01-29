@@ -152,7 +152,6 @@ export class CreateInitialTables1669999999999 implements MigrationInterface {
     await queryRunner.query(`DROP INDEX IF EXISTS idx_companies_name;`);
     await queryRunner.query(`DROP TABLE IF EXISTS companies;`);
 
-    await queryRunner.query(`DROP INDEX IF EXISTS idx_users_default_company_id;`);
 
     await queryRunner.query(`DROP INDEX IF EXISTS idx_users_role_id;`);
     await queryRunner.query(`DROP INDEX IF EXISTS idx_users_email;`);
