@@ -27,7 +27,7 @@ export class CreateInitialTables1669999999999 implements MigrationInterface {
         address TEXT,
         contact_info TEXT,
         default_currency VARCHAR(10) DEFAULT 'USD',
-        created_by_user_id UUID REFERENCES users(id) ON UPDATE CASCADE ON DELETE SET NULL,
+        // created_by_user_id UUID REFERENCES users(id) ON UPDATE CASCADE ON DELETE SET NULL,
         default_ar_account_id UUID REFERENCES accounts(id) ON UPDATE CASCADE ON DELETE SET NULL,
         default_ap_account_id UUID REFERENCES accounts(id) ON UPDATE CASCADE ON DELETE SET NULL,
         default_cash_account_id UUID REFERENCES accounts(id) ON UPDATE CASCADE ON DELETE SET NULL,
