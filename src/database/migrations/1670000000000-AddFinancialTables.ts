@@ -145,10 +145,28 @@ export class AddFinancialTables1670000000000 implements MigrationInterface {
     await queryRunner.query(`
       CREATE INDEX idx_price_lists_company_id ON price_lists(company_id);
     `);
+
+    await queryRunner.query(`
+      ALTER TABLE companies
+      ADD COLUMN default_ar_account_id UUID REFERENCES accounts(id) ON UPDATE CASCADE ON DELETE SET NULL,
+      ADD COLUMN default_ap_account_id UUID REFERENCES accounts(id) ON UPDATE CASCADE ON DELETE SET NULL,
+      ADD COLUMN default_cash_account_id UUID REFERENCES accounts(id) ON UPDATE CASCADE ON DELETE SET NULL,
+      ADD COLUMN default_sales_account_id UUID REFERENCES accounts(id) ON UPDATE CASCADE ON DELETE SET NULL,
+      ADD COLUMN default_inventory_account_id UUID REFERENCES accounts(id) ON UPDATE CASCADE ON DELETE SET NULL
+    `);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
     // Drop tables in reverse order
+
+    await queryRunner.query(`
+      ALTER TABLE companies
+      DROP COLUMN IF EXISTS default_ar_account_id,
+      DROP COLUMN IF EXISTS default_ap_account_id,
+      DROP COLUMN IF EXISTS default_cash_account_id,
+      DROP COLUMN IF EXISTS default_sales_account_id,
+      DROP COLUMN IF EXISTS default_inventory_account_id
+    `);
 
     // 6. price_lists
     await queryRunner.query(`DROP INDEX IF EXISTS idx_price_lists_company_id;`);

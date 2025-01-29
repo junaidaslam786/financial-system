@@ -1,6 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddSalesAndInvoicing1672000000000 implements MigrationInterface {
+export class AddSalesAndInvoicing1675500000000 implements MigrationInterface {
   // Constants for table names
   private readonly TABLE_SALES_ORDERS = 'sales_orders';
   private readonly TABLE_SALES_ORDER_LINES = 'sales_order_lines';
@@ -21,11 +21,14 @@ export class AddSalesAndInvoicing1672000000000 implements MigrationInterface {
       CREATE TABLE ${this.TABLE_SALES_ORDERS} (
         id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
         company_id UUID NOT NULL REFERENCES companies(id) ON UPDATE CASCADE ON DELETE CASCADE,
+        customer_id UUID REFERENCES customers(id) ON UPDATE CASCADE ON DELETE SET NULL,
+        trader_id UUID REFERENCES traders(id) ON UPDATE CASCADE ON DELETE SET NULL,
         order_number VARCHAR(100) UNIQUE,
         order_date DATE DEFAULT CURRENT_DATE,
         auto_invoicing BOOLEAN DEFAULT FALSE,
         status VARCHAR(50) DEFAULT 'Pending' CHECK(status IN('Pending', 'Confirmed', 'Shipped', 'Completed', 'Cancelled')),
         total_amount NUMERIC(15, 2),
+        brokerage_id UUID REFERENCES brokers(id) ON UPDATE CASCADE ON DELETE SET NULL,
         notes TEXT,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -35,7 +38,9 @@ export class AddSalesAndInvoicing1672000000000 implements MigrationInterface {
     // Create indexes for `sales_orders`
     await queryRunner.query(`
       CREATE INDEX idx_${this.TABLE_SALES_ORDERS}_company_id ON ${this.TABLE_SALES_ORDERS}(company_id);
-      
+      CREATE INDEX idx_${this.TABLE_SALES_ORDERS}_customer_id ON ${this.TABLE_SALES_ORDERS}(customer_id);
+      CREATE INDEX idx_${this.TABLE_SALES_ORDERS}_trader_id ON ${this.TABLE_SALES_ORDERS}(trader_id);
+      CREATE INDEX idx_${this.TABLE_SALES_ORDERS}_brokerage_id ON ${this.TABLE_SALES_ORDERS}(brokerage_id);
     `);
 
     // 2. Create `sales_order_lines` table
@@ -43,7 +48,7 @@ export class AddSalesAndInvoicing1672000000000 implements MigrationInterface {
       CREATE TABLE ${this.TABLE_SALES_ORDER_LINES} (
         id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
         sales_order_id UUID NOT NULL REFERENCES ${this.TABLE_SALES_ORDERS}(id) ON UPDATE CASCADE ON DELETE CASCADE,
-        
+        lot_id UUID REFERENCES lots(id) ON UPDATE CASCADE ON DELETE SET NULL,
         product_id UUID REFERENCES products(id) ON UPDATE CASCADE ON DELETE SET NULL,
         quantity NUMERIC(12, 2) CHECK(quantity >= 0),
         unit_price NUMERIC(12, 2) CHECK(unit_price >= 0),
@@ -60,6 +65,7 @@ export class AddSalesAndInvoicing1672000000000 implements MigrationInterface {
     await queryRunner.query(`
       CREATE INDEX idx_${this.TABLE_SALES_ORDER_LINES}_sales_order_id ON ${this.TABLE_SALES_ORDER_LINES}(sales_order_id);
       CREATE INDEX idx_${this.TABLE_SALES_ORDER_LINES}_product_id ON ${this.TABLE_SALES_ORDER_LINES}(product_id);
+      CREATE INDEX idx_${this.TABLE_SALES_ORDER_LINES}_lot_id ON ${this.TABLE_SALES_ORDER_LINES}(lot_id);
     `);
 
     // 3. Create `invoices` table
@@ -68,7 +74,9 @@ export class AddSalesAndInvoicing1672000000000 implements MigrationInterface {
         id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
         company_id UUID NOT NULL REFERENCES companies(id) ON UPDATE CASCADE ON DELETE CASCADE,
         invoice_type VARCHAR(20) NOT NULL CHECK (invoice_type IN ('Purchase','Sale')),
-        
+        supplier_id UUID REFERENCES suppliers(id) ON UPDATE CASCADE ON DELETE SET NULL,
+        customer_id UUID REFERENCES customers(id) ON UPDATE CASCADE ON DELETE SET NULL,
+        broker_id UUID REFERENCES brokers(id) ON UPDATE CASCADE ON DELETE SET NULL,
         invoice_number VARCHAR(100) UNIQUE,
         invoice_date DATE DEFAULT CURRENT_DATE,
         due_date DATE,
@@ -88,6 +96,9 @@ export class AddSalesAndInvoicing1672000000000 implements MigrationInterface {
     // Create indexes for `invoices`
     await queryRunner.query(`
       CREATE INDEX idx_${this.TABLE_INVOICES}_company_id ON ${this.TABLE_INVOICES}(company_id);
+      CREATE INDEX idx_${this.TABLE_INVOICES}_supplier_id ON ${this.TABLE_INVOICES}(supplier_id);
+      CREATE INDEX idx_${this.TABLE_INVOICES}_customer_id ON ${this.TABLE_INVOICES}(customer_id);
+      CREATE INDEX idx_${this.TABLE_INVOICES}_broker_id ON ${this.TABLE_INVOICES}(broker_id);
       CREATE INDEX idx_${this.TABLE_INVOICES}_purchase_order_id ON ${this.TABLE_INVOICES}(purchase_order_id);
       CREATE INDEX idx_${this.TABLE_INVOICES}_sales_order_id ON ${this.TABLE_INVOICES}(sales_order_id);
       CREATE INDEX idx_${this.TABLE_INVOICES}_journal_entry_id ON ${this.TABLE_INVOICES}(journal_entry_id);
@@ -98,6 +109,7 @@ export class AddSalesAndInvoicing1672000000000 implements MigrationInterface {
       CREATE TABLE ${this.TABLE_INVOICE_ITEMS} (
         id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
         invoice_id UUID NOT NULL REFERENCES ${this.TABLE_INVOICES}(id) ON UPDATE CASCADE ON DELETE CASCADE,
+        lot_id UUID REFERENCES lots(id) ON UPDATE CASCADE ON DELETE SET NULL,
         product_id UUID REFERENCES products(id) ON UPDATE CASCADE ON DELETE SET NULL,
         description TEXT,
         quantity NUMERIC(12, 2) CHECK(quantity >= 0),
@@ -112,6 +124,7 @@ export class AddSalesAndInvoicing1672000000000 implements MigrationInterface {
     await queryRunner.query(`
       CREATE INDEX idx_${this.TABLE_INVOICE_ITEMS}_invoice_id ON ${this.TABLE_INVOICE_ITEMS}(invoice_id);
       CREATE INDEX idx_${this.TABLE_INVOICE_ITEMS}_product_id ON ${this.TABLE_INVOICE_ITEMS}(product_id);
+      CREATE INDEX idx_${this.TABLE_INVOICE_ITEMS}_lot_id ON ${this.TABLE_INVOICE_ITEMS}(lot_id);
     `);
 
     // 5. Create `credit_notes` table
@@ -156,6 +169,22 @@ export class AddSalesAndInvoicing1672000000000 implements MigrationInterface {
       CREATE INDEX idx_${this.TABLE_DEBIT_NOTES}_invoice_id ON ${this.TABLE_DEBIT_NOTES}(invoice_id);
     `);
 
+    // 8. Create `payment_methods` table
+    await queryRunner.query(`
+      CREATE TABLE ${this.TABLE_PAYMENT_METHODS} (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        company_id UUID NOT NULL REFERENCES companies(id) ON UPDATE CASCADE ON DELETE CASCADE,
+        method_name VARCHAR(100) NOT NULL,
+        details TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      );
+    `);
+
+    // Create indexes for `payment_methods`
+    await queryRunner.query(`
+      CREATE INDEX idx_${this.TABLE_PAYMENT_METHODS}_company_id ON ${this.TABLE_PAYMENT_METHODS}(company_id);
+    `);
+
     // 7. Create `payments` table
     await queryRunner.query(`
       CREATE TABLE ${this.TABLE_PAYMENTS} (
@@ -179,21 +208,7 @@ export class AddSalesAndInvoicing1672000000000 implements MigrationInterface {
       CREATE INDEX idx_${this.TABLE_PAYMENTS}_journal_entry_id ON ${this.TABLE_PAYMENTS}(journal_entry_id);
     `);
 
-    // 8. Create `payment_methods` table
-    await queryRunner.query(`
-      CREATE TABLE ${this.TABLE_PAYMENT_METHODS} (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-        company_id UUID NOT NULL REFERENCES companies(id) ON UPDATE CASCADE ON DELETE CASCADE,
-        method_name VARCHAR(100) NOT NULL,
-        details TEXT,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-      );
-    `);
-
-    // Create indexes for `payment_methods`
-    await queryRunner.query(`
-      CREATE INDEX idx_${this.TABLE_PAYMENT_METHODS}_company_id ON ${this.TABLE_PAYMENT_METHODS}(company_id);
-    `);
+    
 
     // 9. Create `transactions_payments` table
     await queryRunner.query(`
@@ -235,12 +250,15 @@ export class AddSalesAndInvoicing1672000000000 implements MigrationInterface {
     await queryRunner.query(
       `DROP INDEX IF EXISTS idx_invoice_items_invoice_id;`,
     );
+    await queryRunner.query(`DROP INDEX IF EXISTS idx_invoice_items_lot_id;`);
     await queryRunner.query(`DROP TABLE IF EXISTS ${this.TABLE_INVOICE_ITEMS}`);
     // drop invoices
     await queryRunner.query(
       `DROP INDEX IF EXISTS idx_invoices_journal_entry_id;`,
     );
-    
+    await queryRunner.query(`DROP INDEX IF EXISTS idx_invoices_broker_id;`);
+    await queryRunner.query(`DROP INDEX IF EXISTS idx_invoices_customer_id;`);
+    await queryRunner.query(`DROP INDEX IF EXISTS idx_invoices_supplier_id;`);
     await queryRunner.query(`DROP INDEX IF EXISTS idx_invoices_company_id;`);
     await queryRunner.query(`DROP TABLE IF EXISTS ${this.TABLE_INVOICES}`);
     await queryRunner.query(
