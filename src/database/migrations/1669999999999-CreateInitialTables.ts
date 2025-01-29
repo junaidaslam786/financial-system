@@ -37,9 +37,7 @@ export class CreateInitialTables1669999999999 implements MigrationInterface {
     await queryRunner.query(`CREATE INDEX idx_users_email ON users(email);`);
     await queryRunner.query(`CREATE INDEX idx_users_role_id ON users(role_id);`);
 
-    await queryRunner.query(`
-      CREATE INDEX idx_users_default_company_id ON users(default_company_id);
-    `);
+    
 
     // Create companies table
     await queryRunner.query(`
