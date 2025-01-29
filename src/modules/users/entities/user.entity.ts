@@ -5,6 +5,7 @@ import {
   ManyToOne,
   CreateDateColumn,
   UpdateDateColumn,
+  JoinColumn,
 } from 'typeorm';
 import { RoleEntity } from '../../roles/entities/role.entity';
 
@@ -22,7 +23,7 @@ export class User {
   @Column({ name: 'password_hash', type: 'text' })
   passwordHash: string;
 
-  @Column({ type: 'uuid', nullable: true })
+  @Column({ name: 'default_company_id', type: 'uuid', nullable: true })
   defaultCompanyId?: string;
 
   @ManyToOne(() => RoleEntity, (role) => role.users, {
@@ -30,6 +31,7 @@ export class User {
     onDelete: 'SET NULL',
     nullable: true,
   })
+  @JoinColumn({ name: 'role_id' })
   role?: RoleEntity;
 
   @Column({ name: 'two_factor_enabled', default: false })

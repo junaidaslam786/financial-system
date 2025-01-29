@@ -29,7 +29,7 @@ import { BalanceType } from 'src/common/enums/balace-type';
     @Column({ name: 'parent_account_id', nullable: true })
     parentAccountId?: string;
   
-    @Column({ nullable: true, length: 10 })
+    @Column({ nullable: true, length: 10, name: 'currency' })
     currency?: string;
 
     @Column({
@@ -49,10 +49,10 @@ import { BalanceType } from 'src/common/enums/balace-type';
     })
     initialBalanceType?: BalanceType;
   
-    @CreateDateColumn({ type: 'timestamptz' })
+    @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
     createdAt: Date;
   
-    @UpdateDateColumn({ type: 'timestamptz' })
+    @UpdateDateColumn({ type: 'timestamptz', name: 'updated_at' })
     updatedAt: Date;
   }
   

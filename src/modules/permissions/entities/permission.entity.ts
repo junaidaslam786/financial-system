@@ -5,6 +5,7 @@ import {
     CreateDateColumn,
     UpdateDateColumn,
     OneToMany,
+    JoinColumn,
   } from 'typeorm';
   import { RolePermission } from './role-permission.entity';
   import { ApiProperty } from '@nestjs/swagger';
