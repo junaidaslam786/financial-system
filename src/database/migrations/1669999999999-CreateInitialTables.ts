@@ -17,6 +17,29 @@ export class CreateInitialTables1669999999999 implements MigrationInterface {
       CREATE INDEX idx_roles_rolename ON roles(role_name);
     `);
 
+    // Create companies table
+    await queryRunner.query(`
+      CREATE TABLE companies (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        name VARCHAR(255) NOT NULL,
+        registration_number VARCHAR(100),
+        legal_structure VARCHAR(100),
+        address TEXT,
+        contact_info TEXT,
+        default_currency VARCHAR(10) DEFAULT 'USD',
+        created_by_user_id UUID REFERENCES users(id) ON UPDATE CASCADE ON DELETE SET NULL,
+        default_ar_account_id UUID REFERENCES accounts(id) ON UPDATE CASCADE ON DELETE SET NULL,
+        default_ap_account_id UUID REFERENCES accounts(id) ON UPDATE CASCADE ON DELETE SET NULL,
+        default_cash_account_id UUID REFERENCES accounts(id) ON UPDATE CASCADE ON DELETE SET NULL,
+        default_sales_account_id UUID REFERENCES accounts(id) ON UPDATE CASCADE ON DELETE SET NULL,
+        default_inventory_account_id UUID REFERENCES accounts(id) ON UPDATE CASCADE ON DELETE SET NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      );
+    `);
+
+    await queryRunner.query(`CREATE INDEX idx_companies_name ON companies(name);`);
+
     // Create users table
     await queryRunner.query(`
       CREATE TABLE users (
@@ -41,28 +64,7 @@ export class CreateInitialTables1669999999999 implements MigrationInterface {
       CREATE INDEX idx_users_default_company_id ON users(default_company_id);
     `);
 
-    // Create companies table
-    await queryRunner.query(`
-      CREATE TABLE companies (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-        name VARCHAR(255) NOT NULL,
-        registration_number VARCHAR(100),
-        legal_structure VARCHAR(100),
-        address TEXT,
-        contact_info TEXT,
-        default_currency VARCHAR(10) DEFAULT 'USD',
-        created_by_user_id UUID REFERENCES users(id) ON UPDATE CASCADE ON DELETE SET NULL,
-        default_ar_account_id UUID REFERENCES accounts(id) ON UPDATE CASCADE ON DELETE SET NULL,
-        default_ap_account_id UUID REFERENCES accounts(id) ON UPDATE CASCADE ON DELETE SET NULL,
-        default_cash_account_id UUID REFERENCES accounts(id) ON UPDATE CASCADE ON DELETE SET NULL,
-        default_sales_account_id UUID REFERENCES accounts(id) ON UPDATE CASCADE ON DELETE SET NULL,
-        default_inventory_account_id UUID REFERENCES accounts(id) ON UPDATE CASCADE ON DELETE SET NULL,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-      );
-    `);
-
-    await queryRunner.query(`CREATE INDEX idx_companies_name ON companies(name);`);
+    
 
     // Create company_owners table
     await queryRunner.query(`

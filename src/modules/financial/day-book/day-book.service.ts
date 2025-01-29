@@ -55,7 +55,7 @@ export class DayBookService {
         company: { id: query.companyId },
         entryDate: Between(startDateTime, endDateTime),
       },
-      relations: ['lines', 'lines.account', 'createdBy'],
+      relations: ['lines', 'lines.account', 'createdBy', 'lines.journalEntry'],
       order: { entryDate: 'ASC' },
     });
     // 3) Decide if we want aggregated or detailed
@@ -165,7 +165,7 @@ export class DayBookService {
           aggregationMap[dateStr][acctId] = {
             debit: 0,
             credit: 0,
-            account: line.account, // store the entire account object
+            account: line.account, 
           };
         }
         aggregationMap[dateStr][acctId].debit += Number(line.debit);
