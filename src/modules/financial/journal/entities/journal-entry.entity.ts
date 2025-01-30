@@ -36,6 +36,7 @@ export class JournalEntry {
   createdBy?: User;
 
   @Column({
+    name: 'entry_type',
     type: 'enum',
     enum: EntryType,
     default: EntryType.GENERAL,

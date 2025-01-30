@@ -18,7 +18,9 @@ export class AddAuditAndWorkflows1677000000000 implements MigrationInterface {
         "entity_id" UUID,
         "action_timestamp" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
         "ip_address" INET,
-        "details" JSONB
+        "details" JSONB,
+        "created_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       );
     `);
 
@@ -43,7 +45,9 @@ export class AddAuditAndWorkflows1677000000000 implements MigrationInterface {
         "document_type" VARCHAR(50),
         "state_name" VARCHAR(50),
         "is_initial" BOOLEAN DEFAULT FALSE,
-        "is_final" BOOLEAN DEFAULT FALSE
+        "is_final" BOOLEAN DEFAULT FALSE,
+        "created_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       );
     `);
 
@@ -67,7 +71,9 @@ export class AddAuditAndWorkflows1677000000000 implements MigrationInterface {
           ON DELETE CASCADE,
         "from_state" VARCHAR(50),
         "to_state" VARCHAR(50),
-        "transition_name" VARCHAR(100)
+        "transition_name" VARCHAR(100),
+        "created_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       );
     `);
 
@@ -81,16 +87,22 @@ export class AddAuditAndWorkflows1677000000000 implements MigrationInterface {
     // Drop in reverse order to avoid FK constraint errors
 
     // 3) workflow_transitions
-    await queryRunner.query(`DROP INDEX IF EXISTS "idx_workflow_transitions_workflow_id";`);
+    await queryRunner.query(
+      `DROP INDEX IF EXISTS "idx_workflow_transitions_workflow_id";`,
+    );
     await queryRunner.query(`DROP TABLE IF EXISTS "workflow_transitions";`);
 
     // 2) workflows
-    await queryRunner.query(`DROP INDEX IF EXISTS "idx_workflows_document_type";`);
+    await queryRunner.query(
+      `DROP INDEX IF EXISTS "idx_workflows_document_type";`,
+    );
     await queryRunner.query(`DROP INDEX IF EXISTS "idx_workflows_company_id";`);
     await queryRunner.query(`DROP TABLE IF EXISTS "workflows";`);
 
     // 1) audit_trails
-    await queryRunner.query(`DROP INDEX IF EXISTS "idx_audit_trails_entity_name_id";`);
+    await queryRunner.query(
+      `DROP INDEX IF EXISTS "idx_audit_trails_entity_name_id";`,
+    );
     await queryRunner.query(`DROP INDEX IF EXISTS "idx_audit_trails_user_id";`);
     await queryRunner.query(`DROP TABLE IF EXISTS "audit_trails";`);
   }

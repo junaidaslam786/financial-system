@@ -4,6 +4,8 @@ import {
   Column,
   ManyToOne,
   JoinColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { SalesOrderEntity } from './sales-order.entity';
 import { ProductEntity } from './../../../product-and-inventory/products/entities/product.entity';
@@ -73,4 +75,10 @@ export class SalesOrderLine {
     asExpression: `(quantity * unit_price) - discount + ((quantity * unit_price - discount) * (tax_rate / 100))`,
   })
   totalLineAmount: number;
+
+  @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
+  updatedAt: Date;
 }

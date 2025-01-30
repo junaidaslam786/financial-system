@@ -29,10 +29,10 @@ import {
     @Column({ type: 'numeric', precision: 15, scale: 2, default: 0 })
     credit: number;
   
-    @CreateDateColumn({ type: 'timestamptz' })
+    @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
     createdAt: Date;
   
-    @UpdateDateColumn({ type: 'timestamptz' })
+    @UpdateDateColumn({ name: "updated_at", type: 'timestamptz' })
     updatedAt: Date;
   }
   

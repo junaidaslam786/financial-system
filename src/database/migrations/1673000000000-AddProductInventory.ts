@@ -60,7 +60,9 @@ export class AddProductInventoryTables1673000000000 implements MigrationInterfac
         id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
         price_list_id UUID NOT NULL REFERENCES price_lists(id) ON UPDATE CASCADE ON DELETE CASCADE,
         product_id UUID NOT NULL REFERENCES products(id) ON UPDATE CASCADE ON DELETE CASCADE,
-        price NUMERIC(12,2) CHECK(price >= 0)
+        price NUMERIC(12,2) CHECK(price >= 0),
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       );
     `);
 
@@ -144,7 +146,9 @@ export class AddProductInventoryTables1673000000000 implements MigrationInterfac
         id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
         company_id UUID NOT NULL REFERENCES companies(id) ON UPDATE CASCADE ON DELETE CASCADE,
         stage_name VARCHAR(100) NOT NULL,
-        description TEXT
+        description TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       );
     `);
 

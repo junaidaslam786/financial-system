@@ -57,7 +57,9 @@ export class AddSalesAndInvoicing1675500000000 implements MigrationInterface {
         total_line_amount NUMERIC(12, 2) GENERATED ALWAYS AS (
           (quantity * unit_price) - discount +
           ((quantity * unit_price - discount) * (tax_rate / 100))
-        ) STORED
+        ) STORED,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       );
     `);
 
@@ -210,8 +212,6 @@ export class AddSalesAndInvoicing1675500000000 implements MigrationInterface {
       CREATE INDEX idx_${this.TABLE_PAYMENTS}_payment_method_id ON ${this.TABLE_PAYMENTS}(payment_method_id);
       CREATE INDEX idx_${this.TABLE_PAYMENTS}_journal_entry_id ON ${this.TABLE_PAYMENTS}(journal_entry_id);
     `);
-
-    
 
     // 9. Create `transactions_payments` table
     await queryRunner.query(`
