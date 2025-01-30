@@ -117,7 +117,9 @@ export class AddSalesAndInvoicing1675500000000 implements MigrationInterface {
         unit_price NUMERIC(12, 2) CHECK(unit_price >= 0),
         discount NUMERIC(12, 2) DEFAULT 0.00 CHECK(discount >= 0),
         tax_rate NUMERIC(5, 2) DEFAULT 0.00 CHECK(tax_rate >= 0),
-        total_price NUMERIC(12, 2)
+        total_price NUMERIC(12, 2),
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       );
     `);
 
