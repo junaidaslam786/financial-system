@@ -131,6 +131,7 @@ export class AddContactsWithAccounts1672000000000 implements MigrationInterface 
     await queryRunner.query(`
       CREATE TABLE contacts (
           id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+          company_id UUID REFERENCES companies(id) ON UPDATE CASCADE ON DELETE CASCADE,
           entity_type VARCHAR(50) CHECK(entity_type IN('Customer','Supplier','Trader','Broker','Partner')),
           entity_id UUID NOT NULL,
           contact_name VARCHAR(255),
@@ -146,6 +147,8 @@ export class AddContactsWithAccounts1672000000000 implements MigrationInterface 
     await queryRunner.query(`
       CREATE INDEX idx_contacts_entity_type_id 
       ON contacts(entity_type, entity_id);
+      CREATE INDEX idx_contacts_company_id
+      ON contacts(company_id);
     `);
   }
 
