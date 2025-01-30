@@ -7,6 +7,7 @@ import {
     CreateDateColumn,
     UpdateDateColumn,
     Index,
+    JoinColumn,
   } from 'typeorm';
   import { Company } from '../../companies/entities/company.entity';
   
@@ -19,28 +20,29 @@ import {
       onUpdate: 'CASCADE',
       onDelete: 'CASCADE',
     })
+    @JoinColumn({ name: 'company_id' })
     @Index('idx_employees_company_id')
     company: Company;
   
-    @Column({ length: 255 })
+    @Column({ name: 'employee_name', length: 255 })
     employeeName: string;
   
-    @Column({ length: 255, nullable: true })
+    @Column({ name: 'job_title', length: 255, nullable: true })
     jobTitle?: string;
   
-    @Column({ length: 255, nullable: true })
+    @Column({ name: 'department', length: 255, nullable: true })
     department?: string;
   
     @Column({ type: 'numeric', precision: 12, scale: 2, default: 0.0 })
     salary?: number;
   
-    @Column({ length: 100, nullable: true })
+    @Column({ name:'payment_schedule', length: 100, nullable: true })
     paymentSchedule?: string;
   
-    @Column({ length: 100, nullable: true })
+    @Column({ name: 'national_id', length: 100, nullable: true })
     nationalId?: string;
   
-    @Column({ type: 'text', nullable: true })
+    @Column({ name: 'contact_info', type: 'text', nullable: true })
     contactInfo?: string;
   
     @CreateDateColumn({ name: 'created_at', type: 'timestamp with time zone' })

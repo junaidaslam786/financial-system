@@ -27,7 +27,7 @@ export class CreateInitialTables1669999999999 implements MigrationInterface {
         address TEXT,
         contact_info TEXT,
         default_currency VARCHAR(10) DEFAULT 'USD',
-        created_by_user_id UUID, -- define column only
+        created_by_user_id UUID,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       );
@@ -44,7 +44,7 @@ export class CreateInitialTables1669999999999 implements MigrationInterface {
         username VARCHAR(100) UNIQUE NOT NULL,
         email VARCHAR(150) UNIQUE NOT NULL,
         password_hash TEXT NOT NULL,
-        default_company_id UUID, -- define column only, no FK yet
+        default_company_id UUID, 
         role_id UUID REFERENCES roles(id) ON UPDATE CASCADE ON DELETE SET NULL,
         two_factor_enabled BOOLEAN DEFAULT FALSE,
         two_factor_authentication_secret VARCHAR,

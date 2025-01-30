@@ -22,7 +22,7 @@ export class JournalEntry {
   @JoinColumn({ name: 'company_id' })
   company: Company;
 
-  @Column({ type: 'date', default: () => 'CURRENT_TIMESTAMP' })
+  @Column({ name: 'entry_date', type: 'date', default: () => 'CURRENT_TIMESTAMP' })
   entryDate: Date;
 
   @Column({ length: 100, nullable: true })
@@ -51,9 +51,9 @@ export class JournalEntry {
   })
   lines: JournalLine[];
 
-  @CreateDateColumn({ type: 'timestamptz' })
+  @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 
-  @UpdateDateColumn({ type: 'timestamptz' })
+  @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
   updatedAt: Date;
 }
