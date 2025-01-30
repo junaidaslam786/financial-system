@@ -104,12 +104,6 @@ export class CompaniesService {
       where: { createdByUserId: userId },
       relations: [
         'companyOwners',
-        'employees',
-        'partners',
-        'contacts',
-      
-
-        // ... other relations ...
       ],
     });
   }
@@ -119,10 +113,6 @@ export class CompaniesService {
       where: { id },
       relations: [
         'companyOwners',
-        'employees',
-        'partners',
-        'contacts',
-        
       ],
     });
     if (!company) {

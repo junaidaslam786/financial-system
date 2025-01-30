@@ -61,12 +61,9 @@ export class Company {
   companyOwners: CompanyOwnerEntity[];
 
   @OneToMany(() => EmployeeEntity, (emp) => emp.company)
-  @Index('idx_employees_company_id')
   employees: EmployeeEntity[];
 
   @OneToMany(() => PartnerEntity, (partner) => partner.company)
-  @Index('idx_partners_company_id')
-  @JoinColumn({ name: 'company_id' })
   partners: PartnerEntity[];
 
   @OneToMany(() => ContactEntity, (contact) => contact.company)
