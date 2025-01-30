@@ -67,7 +67,7 @@ export class LotEntity {
   // possible values: 'Pending', 'In-Process', 'Completed'
   status: string;
 
-  @Column({ type: 'uuid', nullable: true })
+  @Column({ name: 'product_id', type: 'uuid', nullable: true })
   productId?: string;
 
   @ManyToOne(() => ProductEntity, (product) => product.lots, {
