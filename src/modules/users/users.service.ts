@@ -44,7 +44,6 @@ export class UsersService {
       ],
     });
   
-    console.log('DB User with Role and Permissions:', JSON.stringify(user, null, 2));
   
     return user;
   }

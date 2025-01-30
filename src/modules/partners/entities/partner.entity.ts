@@ -7,6 +7,7 @@ import {
     CreateDateColumn,
     UpdateDateColumn,
     Index,
+    JoinColumn,
   } from 'typeorm';
   import { Company } from '../../companies/entities/company.entity';
   
@@ -19,6 +20,7 @@ import {
       onUpdate: 'CASCADE',
       onDelete: 'CASCADE',
     })
+    @JoinColumn({ name: 'company_id' })
     @Index('idx_partners_company_id')
     company: Company;
   
@@ -31,7 +33,7 @@ import {
     @Column({ type: 'numeric', precision: 12, scale: 2, nullable: true })
     shares?: number;
   
-    @Column({ length: 50, nullable: true })
+    @Column({ name: 'partner_type', length: 50, nullable: true })
     partnerType?: string;
   
     @CreateDateColumn({ name: 'created_at', type: 'timestamp with time zone' })

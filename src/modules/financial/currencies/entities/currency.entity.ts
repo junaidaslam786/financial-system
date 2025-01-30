@@ -19,6 +19,6 @@ export class Currency {
   @Column({ nullable: true, length: 10 })
   symbol?: string;
 
-  @Column({ default: 2 })
+  @Column({ name: 'decimal_places', default: 2 })
   decimalPlaces: number;
 }

@@ -23,7 +23,7 @@ export class CustomerEntity {
   @Column({ name: 'customer_name', length: 255 })
   customerName: string;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ name: 'contact_info', type: 'text', nullable: true })
   contactInfo?: string;
 
   @Column({ name: 'customer_type', length: 100, nullable: true })

@@ -25,7 +25,7 @@ export class SupplierEntity {
   @Column({ name: 'supplier_name', length: 255 })
   supplierName: string;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ name: 'contact_info', type: 'text', nullable: true })
   contactInfo?: string;
 
   @Column({ name: 'payment_terms', length: 100, nullable: true })

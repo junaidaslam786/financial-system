@@ -52,7 +52,7 @@ export class PurchaseOrder {
   status: string;
 
   @ApiProperty({ example: 'false' })
-  @Column({ type: 'boolean', default: true })
+  @Column({ name: 'auto_invoicing', type: 'boolean', default: true })
   autoInvoicing: boolean;
 
   @OneToMany(() => PurchaseOrderLine, (line) => line.purchaseOrder, {

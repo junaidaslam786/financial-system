@@ -19,6 +19,6 @@ export class ExchangeRate {
   @Column({ type: 'numeric', precision: 18, scale: 6 })
   rate: number;
 
-  @Column({ type: 'date', default: () => 'CURRENT_DATE' })
+  @Column({name: 'effective_date', type: 'date', default: () => 'CURRENT_DATE' })
   effectiveDate: Date;
 }

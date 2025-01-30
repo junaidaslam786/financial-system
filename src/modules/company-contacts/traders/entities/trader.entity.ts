@@ -22,7 +22,7 @@ export class TraderEntity {
   @Column({ name: 'trader_name', length: 255 })
   traderName: string;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ name: 'contact_info', type: 'text', nullable: true })
   contactInfo?: string;
 
   @Column({
