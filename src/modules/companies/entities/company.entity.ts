@@ -10,6 +10,7 @@ import {
   UpdateDateColumn,
   Index,
   OneToMany,
+  JoinColumn,
 } from 'typeorm';
 
 @Entity({ name: 'companies' })
@@ -64,6 +65,8 @@ export class Company {
   employees: EmployeeEntity[];
 
   @OneToMany(() => PartnerEntity, (partner) => partner.company)
+  @Index('idx_partners_company_id')
+  @JoinColumn({ name: 'company_id' })
   partners: PartnerEntity[];
 
   @OneToMany(() => ContactEntity, (contact) => contact.company)
