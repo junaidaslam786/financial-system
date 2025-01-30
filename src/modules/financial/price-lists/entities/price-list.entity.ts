@@ -24,7 +24,7 @@ import {
     @Column({ length: 10, nullable: true })
     currency?: string;
   
-    @Column({ default: false })
+    @Column({name: 'is_default', default: false })
     isDefault: boolean;
   
     @CreateDateColumn({ type: 'timestamptz' })
