@@ -51,7 +51,7 @@ export class SalesOrderEntity {
   status: string;
 
   @ApiProperty({ example: 'false' })
-  @Column({ type: 'boolean', default: true })
+  @Column({ name: 'auto_invoicing', type: 'boolean', default: true })
   autoInvoicing: boolean;
 
   @ApiProperty({ example: 1000.0 })

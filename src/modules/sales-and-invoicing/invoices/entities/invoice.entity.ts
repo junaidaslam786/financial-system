@@ -86,7 +86,7 @@ export class Invoice {
   })
   status: string;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ name: 'terms_and_conditions', type: 'text', nullable: true })
   termsAndConditions?: string;
 
   @Column({ type: 'text', nullable: true })

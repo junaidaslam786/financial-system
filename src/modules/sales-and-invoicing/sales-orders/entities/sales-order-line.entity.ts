@@ -65,6 +65,7 @@ export class SalesOrderLine {
 
   @ApiProperty({ example: 100.0 })
   @Column({
+    name: 'total_line_amount',
     type: 'numeric',
     precision: 12,
     scale: 2,
