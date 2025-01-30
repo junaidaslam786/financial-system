@@ -21,7 +21,6 @@ import {
       onDelete: 'CASCADE',
     })
     @JoinColumn({ name: 'company_id' })
-    @Index('idx_employees_company_id')
     company: Company;
   
     @Column({ name: 'employee_name', length: 255 })

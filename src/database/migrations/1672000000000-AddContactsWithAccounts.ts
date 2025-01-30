@@ -138,6 +138,8 @@ export class AddContactsWithAccounts1672000000000 implements MigrationInterface 
           email VARCHAR(150),
           address TEXT,
           is_primary BOOLEAN DEFAULT FALSE
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+          updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       );
     `);
 
