@@ -101,6 +101,10 @@ export class SeedPermissions1699999999998 implements MigrationInterface {
         actions: ['create', 'read', 'update', 'delete'],
       },
       {
+        feature: 'invoices',
+        actions: ['create', 'read', 'update', 'delete'],
+      },
+      {
         feature: 'lots',
         actions: [
           'create',
