@@ -13,7 +13,7 @@ const AppDataSource = new DataSource({
   password: process.env.DATABASE_PASSWORD,
   database: process.env.DATABASE_NAME,
   synchronize: false, // Always false for migrations
-  logging: process.env.DATABASE_LOGGING === 'true',
+  logging: process.env.DATABASE_LOGGING === 'false',
   entities: [join(__dirname, '**', '*.entity.{js,ts}')],
   migrations: [join(__dirname, 'database/migrations/*{.js,.ts}')],
 });

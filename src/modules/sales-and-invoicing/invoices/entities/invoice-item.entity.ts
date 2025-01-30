@@ -33,6 +33,7 @@ export class InvoiceItem {
   lotId?: string;
 
   @Column({
+    name: 'line_type',
     type: 'enum',
     enum: InvoiceLineType,
     default: InvoiceLineType.PRODUCT,
@@ -45,16 +46,16 @@ export class InvoiceItem {
   @Column({ type: 'numeric', precision: 12, scale: 2, default: 0 })
   quantity: number;
 
-  @Column({ type: 'numeric', precision: 12, scale: 2, default: 0 })
+  @Column({ name: 'unit_price', type: 'numeric', precision: 12, scale: 2, default: 0 })
   unitPrice: number;
 
   @Column({ type: 'numeric', precision: 12, scale: 2, default: 0 })
   discount: number;
 
-  @Column({ type: 'numeric', precision: 5, scale: 2, default: 0 })
+  @Column({ name: 'tax_rate', type: 'numeric', precision: 5, scale: 2, default: 0 })
   taxRate: number;
 
-  @Column({ type: 'numeric', precision: 12, scale: 2, default: 0 })
+  @Column({ name: 'total_price',type: 'numeric', precision: 12, scale: 2, default: 0 })
   totalPrice: number;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
