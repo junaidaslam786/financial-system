@@ -290,5 +290,9 @@ export const PERMISSIONS = {
     READ: 'permissions.read',
     UPDATE: 'permissions.update',
     DELETE: 'permissions.delete',
+    ASSIGN: 'permissions.assign',
+    UNASSIGN: 'permissions.unassign',
+    ASSIGN_ALL: 'permissions.assignAll',
+    REPLACE: 'permissions.replace',
   },
 };
