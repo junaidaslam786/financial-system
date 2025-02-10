@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
@@ -16,22 +17,32 @@ export class UsersService {
   async createUser(createUserDto: CreateUserDto): Promise<User> {
     let role = null;
     if (createUserDto.roleId) {
-      // fetch role if needed
+      // Fetch the role if needed.
       role = await this.rolesService.findById(createUserDto.roleId);
     }
-  
-    // Create a single user object
+
+    // Hash the plain-text password from the DTO.
+    // Assumes createUserDto contains a "password" field.
+    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+
+    // Create a new user object.
+    // Spread the DTO and override the password field by using the hashed version.
     const user = this.userRepository.create({
       ...createUserDto,
+      // Remove the plain password if needed and set the passwordHash.
+      passwordHash: hashedPassword,
       role: role ?? undefined,
     });
-  
-    // Save and return the single created entity
+
+    // Save and return the newly created user.
     return this.userRepository.save(user);
   }
 
-  async findAll() {
-    return this.userRepository.find({ relations: ['role'] });
+  async findAll(companyId: string): Promise<User[]> {
+    return this.userRepository.find({
+      where: { defaultCompanyId: companyId },
+      relations: ['role'],
+    });
   }
 
   async findByIdWithRolePermissions(userId: string) {

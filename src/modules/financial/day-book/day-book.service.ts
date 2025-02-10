@@ -5,7 +5,8 @@ import { JournalEntry } from '../journal/entities/journal-entry.entity';
 import { JournalLine } from '../journal/entities/journal-line.entity';
 import { DayBookQueryDto } from './dtos/day-book-query.dto';
 import {
-  DayBookResponseDto,
+  DayBookDetailedResponseDto,
+  DayBookAggregatedResponseDto,
   DayBookEntryDto,
   DayBookAggregatedDto,
 } from './dtos/day-book-response.dto';
@@ -22,7 +23,7 @@ export class DayBookService {
   /**
    * Retrieves a day book for the given date or date range.
    */
-  async getDayBook(query: DayBookQueryDto): Promise<DayBookResponseDto> {
+  async getDayBook(query: DayBookQueryDto): Promise<DayBookDetailedResponseDto | DayBookAggregatedResponseDto> {
     // 1) Resolve date range
     const start = query.startDate || this.today();
     const end = query.endDate || start;
@@ -58,7 +59,8 @@ export class DayBookService {
       relations: ['lines', 'lines.account', 'createdBy', 'lines.journalEntry'],
       order: { entryDate: 'ASC' },
     });
-    // 3) Decide if we want aggregated or detailed
+
+    // 3) Decide if we want aggregated or detailed response
     if (query.aggregated) {
       return this.buildAggregatedResponse(
         start.toString(),
@@ -75,13 +77,13 @@ export class DayBookService {
   }
 
   /**
-   * Build a detailed daybook response, listing each journal entry & lines
+   * Build a detailed daybook response, listing each journal entry & lines.
    */
   private buildDetailedResponse(
     start: string,
     end: string,
     entries: JournalEntry[],
-  ): DayBookResponseDto {
+  ): DayBookDetailedResponseDto {
     const data: DayBookEntryDto[] = entries.map((entry) => ({
       journalEntry: {
         id: entry.id,
@@ -94,8 +96,8 @@ export class DayBookService {
           username: entry.createdBy.username,
         },
         lines: entry.lines.map((l) => ({
-          id: l.id,
-          accountId: l.id,
+          // Fixed: Use the account's ID here instead of the line's ID
+          accountId: l.account.id,
           account: {
             id: l.account.id,
             accountName: l.account.accountName,
@@ -109,7 +111,8 @@ export class DayBookService {
       description: entry.description,
       entryDate: entry.entryDate.toISOString().split('T')[0],
       lines: entry.lines.map((l) => ({
-        accountId: l.id,
+        // Fixed: Use the account's ID here instead of the line's ID
+        accountId: l.account.id,
         account: {
           id: l.account.id,
           accountName: l.account.accountName,
@@ -117,8 +120,6 @@ export class DayBookService {
         },
         debit: Number(l.debit),
         credit: Number(l.credit),
-
-        // Optional convenience: a "lineType" field:
         lineType: Number(l.debit) > 0 ? 'DEBIT' : 'CREDIT',
       })),
     }));
@@ -131,14 +132,14 @@ export class DayBookService {
   }
 
   /**
-   * Summarize daybook by date + account, summing debits & credits
+   * Summarize daybook by date + account, summing debits & credits.
    */
   private buildAggregatedResponse(
     start: string,
     end: string,
     entries: JournalEntry[],
-  ): DayBookResponseDto {
-    // { date: { acctId: { debit: number, credit: number, account: AccountEntity } } }
+  ): DayBookAggregatedResponseDto {
+    // aggregationMap: { date: { accountId: { debit, credit, account } } }
     const aggregationMap: Record<
       string,
       Record<
@@ -146,15 +147,16 @@ export class DayBookService {
         {
           debit: number;
           credit: number;
-          account?: any; // or an Account type
+          account?: any;
         }
       >
     > = {};
 
     for (const entry of entries) {
-      const dateStr = typeof entry.entryDate === 'string'
-      ? entry.entryDate
-      : (entry.entryDate as Date).toISOString().split('T')[0];
+      const dateStr =
+        typeof entry.entryDate === 'string'
+          ? entry.entryDate
+          : (entry.entryDate as Date).toISOString().split('T')[0];
       if (!aggregationMap[dateStr]) {
         aggregationMap[dateStr] = {};
       }
@@ -165,7 +167,7 @@ export class DayBookService {
           aggregationMap[dateStr][acctId] = {
             debit: 0,
             credit: 0,
-            account: line.account, 
+            account: line.account,
           };
         }
         aggregationMap[dateStr][acctId].debit += Number(line.debit);
@@ -184,11 +186,13 @@ export class DayBookService {
           totalDebit: debit,
           totalCredit: credit,
           // Optionally embed the account object:
-          account: {
-            id: account?.id,
-            accountName: account?.accountName,
-            accountType: account?.accountType,
-          },
+          account: account
+            ? {
+                id: account.id,
+                accountName: account.accountName,
+                accountType: account.accountType,
+              }
+            : undefined,
         });
       }
     }

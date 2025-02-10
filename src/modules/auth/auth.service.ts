@@ -136,6 +136,7 @@ export class AuthService {
       email: user.email,
       sub: user.id,
       role: user.role?.roleName, 
+      roleId: user.role?.id,
       companyId: user.defaultCompanyId,
     };
     return this.jwtService.sign(payload, { expiresIn });

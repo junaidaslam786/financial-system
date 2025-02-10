@@ -9,6 +9,7 @@ import {
   UseGuards,
   ParseUUIDPipe,
   Query,
+  BadRequestException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto, UpdateUserDto } from './dtos';
@@ -22,9 +23,9 @@ import { Permissions } from 'src/common/decorators/permissions.decorator';
 import { PERMISSIONS } from 'src/common/constants/permissions';
 
 @ApiBearerAuth()
-@ApiTags('Users') 
+@ApiTags('Users')
 @Controller('users')
-@UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard) 
+@UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
 @Roles(Role.Owner, Role.Admin)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
@@ -33,7 +34,7 @@ export class UsersController {
    * Create a user
    * Restricted to "admin" role as an example
    */
-  
+
   @Post()
   @Permissions(PERMISSIONS.USERS.CREATE)
   async create(@Body() createUserDto: CreateUserDto) {
@@ -41,15 +42,22 @@ export class UsersController {
   }
 
   /**
-   * Retrieve all users (for demonstration) 
+   * Retrieve all users (for demonstration)
    * Possibly restricted to "admin" only
    */
-  
+
   @Get()
   @Permissions(PERMISSIONS.USERS.READ)
-  async findAll(@Query('page') page: number, @Query('limit') limit: number) {
-    // You can implement pagination in your service if needed
-    return this.usersService.findAll();
+  async findAll(
+    @Query('companyId') companyId: string,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ) {
+    if (!companyId) {
+      throw new BadRequestException('companyId query parameter is required');
+    }
+    // You can later add pagination logic using the page and limit parameters.
+    return this.usersService.findAll(companyId);
   }
 
   /**
@@ -66,7 +74,7 @@ export class UsersController {
    * Update a user by ID (change email, username, role, etc.)
    * Typically "admin" role or the user themself if you add checks
    */
-  
+
   @Patch(':id')
   @Permissions(PERMISSIONS.USERS.UPDATE)
   async update(
@@ -77,10 +85,10 @@ export class UsersController {
   }
 
   /**
-   * Delete a user 
+   * Delete a user
    * Typically "admin" only
    */
-  
+
   @Delete(':id')
   @Permissions(PERMISSIONS.USERS.DELETE)
   async remove(@Param('id', ParseUUIDPipe) id: string) {
