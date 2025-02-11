@@ -7,15 +7,8 @@ export class CreateUserDto {
   @IsEmail()
   email: string;
 
-  @IsOptional()
   @IsString()
-  passwordHash?: string;
-
-  // The plain password provided by the client. It is optional here if you want to support
-  // scenarios where a hashed password might be passed (rarely) or leave it required if needed.
-  @IsOptional()
-  @IsString()
-  password?: string;
+  password: string;
 
   @IsOptional()
   @IsUUID()

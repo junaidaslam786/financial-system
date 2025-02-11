@@ -28,10 +28,13 @@ export class UsersService {
     // Create a new user object.
     // Spread the DTO and override the password field by using the hashed version.
     const user = this.userRepository.create({
-      ...createUserDto,
-      // Remove the plain password if needed and set the passwordHash.
+      username: createUserDto.username,
+      email: createUserDto.email,
+      // Store the hashed password on the entity.
       passwordHash: hashedPassword,
       role: role ?? undefined,
+      twoFactorEnabled: createUserDto.twoFactorEnabled,
+      twoFactorAuthenticationSecret: createUserDto.twoFactorAuthenticationSecret,
     });
 
     // Save and return the newly created user.

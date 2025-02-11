@@ -77,7 +77,6 @@ export class AuthService {
     }
 
     // 2) Hash password
-    const hashedPassword = await bcrypt.hash(registerDto.password, 10);
 
     // 3) Force the role to 'owner' (or find the role from DB)
     const ownerRole = await this.rolesService.findByName('owner');
@@ -89,7 +88,7 @@ export class AuthService {
     const createdUser = await this.usersService.createUser({
       username: registerDto.username,
       email: registerDto.email,
-      passwordHash: hashedPassword,
+      password: registerDto.password,
       roleId: ownerRole.id, // assign 'owner' role
     });
 

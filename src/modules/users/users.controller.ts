@@ -50,8 +50,6 @@ export class UsersController {
   @Permissions(PERMISSIONS.USERS.READ)
   async findAll(
     @Query('companyId') companyId: string,
-    @Query('page') page?: number,
-    @Query('limit') limit?: number,
   ) {
     if (!companyId) {
       throw new BadRequestException('companyId query parameter is required');
