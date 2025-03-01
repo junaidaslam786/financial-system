@@ -113,7 +113,7 @@ export class AddSalesAndInvoicing1675500000000 implements MigrationInterface {
         invoice_id UUID NOT NULL REFERENCES ${this.TABLE_INVOICES}(id) ON UPDATE CASCADE ON DELETE CASCADE,
         lot_id UUID REFERENCES lots(id) ON UPDATE CASCADE ON DELETE SET NULL,
         product_id UUID REFERENCES products(id) ON UPDATE CASCADE ON DELETE SET NULL,
-        line_type VARCHAR(20) NOT NULL CHECK (line_type IN ('Product','Services', 'Expense')),
+        line_type VARCHAR(20) NOT NULL CHECK (line_type IN ('PRODUCT','SERVICES', 'CHARGES')),
         description TEXT,
         quantity NUMERIC(12, 2) CHECK(quantity >= 0),
         unit_price NUMERIC(12, 2) CHECK(unit_price >= 0),

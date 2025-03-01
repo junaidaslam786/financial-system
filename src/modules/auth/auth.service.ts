@@ -75,9 +75,7 @@ export class AuthService {
     if (existingByUsername) {
       throw new BadRequestException('Username already taken');
     }
-
-    // 2) Hash password
-
+    
     // 3) Force the role to 'owner' (or find the role from DB)
     const ownerRole = await this.rolesService.findByName('owner');
     if (!ownerRole) {

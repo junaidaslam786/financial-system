@@ -35,11 +35,12 @@ export class LotRawMaterialsService {
     return this.rawMatRepo.find({
       where: { lotId },
       order: { productId: 'ASC' },
+      relations: ['lot', 'product'],
     });
   }
 
   async findOne(id: string): Promise<LotRawMaterialEntity> {
-    const record = await this.rawMatRepo.findOne({ where: { id } });
+    const record = await this.rawMatRepo.findOne({ where: { id }, relations: ['lot', 'product'] });
     if (!record) {
       throw new NotFoundException(`Lot raw material with ID "${id}" not found`);
     }

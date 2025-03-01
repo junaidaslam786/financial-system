@@ -54,124 +54,7 @@ export class InvoicesService {
     private readonly contactLedgerService: ContactLedgerService,
   ) {}
 
-  // async create(dto: CreateInvoiceDto): Promise<Invoice> {
-  //   // Use the transaction manager
-  //   return this.dataSource.manager.transaction(async (manager) => {
-  //     //
-  //     // 1) Validate references
-  //     //
-  //     const company = await this.validateCompany(dto.companyId, manager);
-
-  //     if (!['Purchase', 'Sale'].includes(dto.invoiceType)) {
-  //       throw new BadRequestException(
-  //         `invoiceType must be 'Purchase' or 'Sale'`,
-  //       );
-  //     }
-
-  //     let customer: CustomerEntity | null = null;
-  //     if (dto.customerId) {
-  //       customer = await this.validateCustomer(dto.customerId, manager);
-  //     }
-
-  //     let supplier: SupplierEntity | null = null;
-  //     if (dto.supplierId) {
-  //       supplier = await this.validateSupplier(dto.supplierId, manager);
-  //     }
-
-  //     let broker: BrokerEntity | null = null;
-  //     if (dto.brokerId) {
-  //       broker = await this.validateBroker(dto.brokerId, manager);
-  //     }
-
-  //     //
-  //     // 2) Build the invoice
-  //     //
-  //     const invoiceRepoTx = manager.getRepository(Invoice); // transaction-bound repo
-  //     const invoice = invoiceRepoTx.create({
-  //       company,
-  //       invoiceType: dto.invoiceType,
-  //       customer,
-  //       supplier,
-  //       broker,
-  //       invoiceNumber: dto.invoiceNumber,
-  //       invoiceDate: dto.invoiceDate ? new Date(dto.invoiceDate) : new Date(),
-  //       dueDate: dto.dueDate ? new Date(dto.dueDate) : null,
-  //       termsAndConditions: dto.termsAndConditions,
-  //       notes: dto.notes,
-  //       status: 'Unpaid',
-  //     });
-
-  //     if (dto.salesOrderId) {
-  //       invoice.salesOrder = { id: dto.salesOrderId } as SalesOrderEntity;
-  //     }
-  //     if (dto.purchaseOrderId) {
-  //       invoice.purchaseOrder = { id: dto.purchaseOrderId } as PurchaseOrder;
-  //     }
-
-  //     //
-  //     // 3) Build items (if any)
-  //     //
-  //     if (dto.items?.length) {
-  //       const invoiceItemRepoTx = manager.getRepository(InvoiceItem);
-
-  //       invoice.items = await Promise.all(
-  //         dto.items.map((itemDto) =>
-  //           this.buildInvoiceItem(itemDto, manager),
-  //         ),
-  //       );
-  //     } else {
-  //       invoice.items = [];
-  //     }
-
-  //     // Recalculate total
-  //     const total = invoice.items.reduce((sum, i) => sum + i.totalPrice, 0);
-  //     invoice.totalAmount = total;
-
-  //     // Save invoice (still no journal linked)
-  //     const savedInvoice = await invoiceRepoTx.save(invoice);
-
-  //     //
-  //     // 4) Auto-create the journal entry in the same transaction
-  //     //
-  //     const journalEntry = await this.createInvoiceJournal(savedInvoice, manager);
-
-  //     // Link the newly created journal entry
-  //     savedInvoice.journalEntry = journalEntry;
-  //     await invoiceRepoTx.save(savedInvoice);
-
-  //     // 5) Post to contact ledger
-  //     // Purchase => credit the supplier ledger
-  //     if (savedInvoice.invoiceType === 'Purchase' && savedInvoice.supplier) {
-  //       await this.contactLedgerService.addCredit(
-  //         company.id,
-  //         ContactType.SUPPLIER,
-  //         savedInvoice.supplier.id,
-  //         savedInvoice.totalAmount,
-  //         'INVOICE',
-  //         savedInvoice.id,
-  //         `Purchase Invoice #${savedInvoice.invoiceNumber}`,
-  //         manager,
-  //       );
-  //     }
-
-  //     // Sale => debit the customer ledger
-  //     if (savedInvoice.invoiceType === 'Sale' && savedInvoice.customer) {
-  //       await this.contactLedgerService.addDebit(
-  //         company.id,
-  //         ContactType.CUSTOMER,
-  //         savedInvoice.customer.id,
-  //         savedInvoice.totalAmount,
-  //         'INVOICE',
-  //         savedInvoice.id,
-  //         `Sales Invoice #${savedInvoice.invoiceNumber}`,
-  //         manager,
-  //       );
-  //     }
-
-  //     return savedInvoice;
-  //   });
-  // }
-
+ 
   async create(
     dto: CreateInvoiceDto,
     manager?: EntityManager,
@@ -589,10 +472,11 @@ export class InvoicesService {
   const base = dto.quantity * dto.unitPrice - (dto.discount || 0);
   const totalPrice = base + (base * (dto.taxRate || 0)) / 100;
 
+  const lineType = dto.lineType || InvoiceLineType.PRODUCT;
   // Create the invoice item
   return manager.getRepository(InvoiceItem).create({
     product,
-    lineType: dto.lineType,
+    lineType,
     description: dto.description,
     quantity: dto.quantity,
     unitPrice: dto.unitPrice,

@@ -104,6 +104,7 @@ export class CompaniesService {
       where: { createdByUserId: userId },
       relations: [
         'companyOwners',
+        'employees'
       ],
     });
   }

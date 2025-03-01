@@ -70,51 +70,7 @@ export class AccountsService {
     await this.accountRepo.remove(account);
   }
 
-  // async createMinimalChartOfAccounts(companyId: string): Promise<{
-  //   arAccount: Account;
-  //   apAccount: Account;
-  //   cashAccount: Account;
-  //   salesAccount: Account;
-  // }> {
-  //   // Typically you want: ASSET accounts like "Cash", "Accounts Receivable"
-  //   // a liability account "Accounts Payable", a revenue account "Sales," etc.
-
-  //   const arAccount = this.accountRepo.create({
-  //     company: { id: companyId } as any,
-  //     accountName: 'Accounts Receivable',
-  //     accountType: 'ASSET',
-  //   });
-  //   const apAccount = this.accountRepo.create({
-  //     company: { id: companyId } as any,
-  //     accountName: 'Accounts Payable',
-  //     accountType: 'LIABILITY',
-  //   });
-  //   const cashAccount = this.accountRepo.create({
-  //     company: { id: companyId } as any,
-  //     accountName: 'Cash on Hand',
-  //     accountType: 'ASSET',
-  //   });
-  //   const salesAccount = this.accountRepo.create({
-  //     company: { id: companyId } as any,
-  //     accountName: 'Sales Revenue',
-  //     accountType: 'REVENUE',
-  //   });
-
-  //   // Save them all
-  //   const [savedAr, savedAp, savedCash, savedSales] = await Promise.all([
-  //     this.accountRepo.save(arAccount),
-  //     this.accountRepo.save(apAccount),
-  //     this.accountRepo.save(cashAccount),
-  //     this.accountRepo.save(salesAccount),
-  //   ]);
-
-  //   return {
-  //     arAccount: savedAr,
-  //     apAccount: savedAp,
-  //     cashAccount: savedCash,
-  //     salesAccount: savedSales,
-  //   };
-  // }
+ 
   /**
    * Example of a more comprehensive default chart of accounts for each company.
    * You create additional asset, liability, equity, revenue, expense accounts as needed.

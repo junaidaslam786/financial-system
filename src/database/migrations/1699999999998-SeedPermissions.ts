@@ -219,7 +219,16 @@ export class SeedPermissions1699999999998 implements MigrationInterface {
       },
       {
         feature: 'permissions',
-        actions: ['create', 'read', 'update', 'delete'],
+        actions: [
+          'create',
+          'read',
+          'update',
+          'delete',
+          'assign',
+          'unassign',
+          'assignAll',
+          'replace',
+        ],
       },
     ];
 
@@ -251,7 +260,6 @@ export class SeedPermissions1699999999998 implements MigrationInterface {
       throw error;
     }
   }
-
 
   public async down(queryRunner: QueryRunner): Promise<void> {
     // Optionally remove ONLY the seeded permissions (if you want a complete rollback).
@@ -469,7 +477,16 @@ export class SeedPermissions1699999999998 implements MigrationInterface {
       },
       {
         feature: 'permissions',
-        actions: ['create', 'read', 'update', 'delete'],
+        actions: [
+          'create',
+          'read',
+          'update',
+          'delete',
+          'assign',
+          'unassign',
+          'assignAll',
+          'replace',
+        ],
       },
     ];
 

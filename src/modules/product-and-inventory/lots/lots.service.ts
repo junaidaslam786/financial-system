@@ -86,7 +86,6 @@ export class LotsService {
         'invoiceItems.invoice', // if you want the entire Invoice
         'productionOrders', //
         'product',
-
       ],
     });
   }
