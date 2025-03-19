@@ -13,10 +13,10 @@ export class AppController {
   }
 
   // Catch-all route: anything not matched above returns the frontend index.html
-  @Get('*')
-  serveFrontend(@Res() res: Response) {
-    return res.sendFile(
-      join(__dirname, '..', '..', 'frontend', 'dist', 'index.html')
-    );
-  }
+  // @Get('*')
+  // serveFrontend(@Res() res: Response) {
+  //   return res.sendFile(
+  //     join(__dirname, '..', '..', 'frontend', 'dist', 'index.html')
+  //   );
+  // }
 }

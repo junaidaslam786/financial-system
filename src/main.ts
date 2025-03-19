@@ -25,6 +25,7 @@ async function bootstrap() {
     origin: allowedOrigins, // array of allowed origins
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
+    allowedHeaders: 'Content-Type, Authorization, X-Requested-With'
   });
 
   // Set up Swagger
